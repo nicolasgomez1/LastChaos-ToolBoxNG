@@ -264,10 +264,10 @@ namespace LastChaos_ToolBoxNG
 			btnNPCID.FlatStyle = FlatStyle.Flat;
 			btnNPCID.ForeColor = Color.FromArgb(208, 203, 148);
 			btnNPCID.ImageAlign = ContentAlignment.MiddleLeft;
-			btnNPCID.Location = new Point(34, 55);
+			btnNPCID.Location = new Point(47, 55);
 			btnNPCID.Margin = new Padding(4, 3, 4, 3);
 			btnNPCID.Name = "btnNPCID";
-			btnNPCID.Size = new Size(320, 27);
+			btnNPCID.Size = new Size(307, 27);
 			btnNPCID.TabIndex = 1059;
 			btnNPCID.UseVisualStyleBackColor = false;
 			btnNPCID.Click += btnNPCID_Click;
@@ -499,11 +499,12 @@ namespace LastChaos_ToolBoxNG
 			// 
 			// lRequiredQuest
 			// 
+			lRequiredQuest.AutoSize = true;
 			lRequiredQuest.ForeColor = Color.FromArgb(208, 203, 148);
 			lRequiredQuest.Location = new Point(8, 123);
 			lRequiredQuest.Margin = new Padding(4, 0, 4, 0);
 			lRequiredQuest.Name = "lRequiredQuest";
-			lRequiredQuest.Size = new Size(94, 15);
+			lRequiredQuest.Size = new Size(88, 15);
 			lRequiredQuest.TabIndex = 1048;
 			lRequiredQuest.Text = "Required Quest";
 			lRequiredQuest.TextAlign = ContentAlignment.MiddleRight;
@@ -518,10 +519,10 @@ namespace LastChaos_ToolBoxNG
 			btnRequiredQuest.FlatStyle = FlatStyle.Flat;
 			btnRequiredQuest.ForeColor = Color.FromArgb(208, 203, 148);
 			btnRequiredQuest.ImageAlign = ContentAlignment.MiddleLeft;
-			btnRequiredQuest.Location = new Point(110, 117);
+			btnRequiredQuest.Location = new Point(104, 117);
 			btnRequiredQuest.Margin = new Padding(4, 3, 4, 3);
 			btnRequiredQuest.Name = "btnRequiredQuest";
-			btnRequiredQuest.Size = new Size(244, 27);
+			btnRequiredQuest.Size = new Size(250, 27);
 			btnRequiredQuest.TabIndex = 1047;
 			btnRequiredQuest.UseVisualStyleBackColor = false;
 			btnRequiredQuest.Visible = false;
@@ -553,9 +554,9 @@ namespace LastChaos_ToolBoxNG
 			label1.Location = new Point(8, 61);
 			label1.Margin = new Padding(4, 0, 4, 0);
 			label1.Name = "label1";
-			label1.Size = new Size(18, 15);
+			label1.Size = new Size(31, 15);
 			label1.TabIndex = 1;
-			label1.Text = "ID";
+			label1.Text = "NPC";
 			label1.TextAlign = ContentAlignment.MiddleRight;
 			// 
 			// btnCopy

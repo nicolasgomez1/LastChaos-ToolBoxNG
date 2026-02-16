@@ -137,13 +137,12 @@
 
 			for( int i = 0; i < Defs.SSKILL_MAX_LEVEL; i++ )
 			{
-				listQueryCompose.AddRange(new List<string>
-				{
+				listQueryCompose.AddRange(
 					"a_level" + i + "_need_level",
 					"a_level" + i + "_need_sp",
 					"a_level" + i + "_num0", "a_level" + i + "_num1", "a_level" + i + "_num2", "a_level" + i + "_num3", "a_level" + i + "_num4",
 					"a_level" + i + "_num5", "a_level" + i + "_num6", "a_level" + i + "_num7", "a_level" + i + "_num8", "a_level" + i + "_num9"
-				});
+				);
 			}
 
 			if (pMain.pTables.SpecialSkillTable == null)

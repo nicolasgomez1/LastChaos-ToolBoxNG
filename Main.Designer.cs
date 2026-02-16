@@ -222,12 +222,12 @@ namespace LastChaos_ToolBoxNG
 			rtbConsole.BackColor = Color.FromArgb(28, 30, 31);
 			rtbConsole.BorderStyle = BorderStyle.None;
 			rtbConsole.Font = new Font("Consolas", 9.75F, FontStyle.Bold, GraphicsUnit.Point, 0);
-			rtbConsole.Location = new Point(0, 243);
+			rtbConsole.Location = new Point(0, 256);
 			rtbConsole.Margin = new Padding(4, 3, 4, 3);
 			rtbConsole.Name = "rtbConsole";
 			rtbConsole.ReadOnly = true;
 			rtbConsole.ScrollBars = RichTextBoxScrollBars.ForcedVertical;
-			rtbConsole.Size = new Size(1008, 272);
+			rtbConsole.Size = new Size(1008, 259);
 			rtbConsole.TabIndex = 2;
 			rtbConsole.Text = "";
 			rtbConsole.KeyDown += rtbConsole_KeyDown;
@@ -273,7 +273,7 @@ namespace LastChaos_ToolBoxNG
 			lbEditors.Location = new Point(0, 0);
 			lbEditors.Margin = new Padding(4, 3, 4, 3);
 			lbEditors.Name = "lbEditors";
-			lbEditors.Size = new Size(250, 243);
+			lbEditors.Size = new Size(250, 256);
 			lbEditors.TabIndex = 1;
 			lbEditors.KeyDown += lbEditors_KeyDown;
 			lbEditors.MouseUp += lbEditors_MouseUp;

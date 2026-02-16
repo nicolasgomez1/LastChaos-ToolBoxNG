@@ -220,7 +220,7 @@ namespace LastChaos_ToolBoxNG
 
 				for (int i = 0; i < Defs.DEF_RAREOPTION_MAX; i++)
 				{
-					cbObj = (ComboBox)this.Controls.Find("cbOptionID" + i, true)[0];
+					cbObj = (ComboBox)Controls.Find("cbOptionID" + i, true)[0];
 					cbObj.Enabled = false;
 
 					cbObj.BeginUpdate();
@@ -244,10 +244,10 @@ namespace LastChaos_ToolBoxNG
 
 					cbObj.EndUpdate();
 
-					cbObj = (ComboBox)this.Controls.Find("cbOptionLevel" + i, true)[0];
+					cbObj = (ComboBox)Controls.Find("cbOptionLevel" + i, true)[0];
 					cbObj.Enabled = false;
 
-					tbProb = (TextBox)this.Controls.Find("tbOptionProb" + i, true)[0];
+					tbProb = (TextBox)Controls.Find("tbOptionProb" + i, true)[0];
 					tbProb.Enabled = false;
 				}
 			}
@@ -340,7 +340,7 @@ namespace LastChaos_ToolBoxNG
 
 			for (int i = 0; i < Defs.DEF_RAREOPTION_MAX; i++)
 			{
-				cbObj = (ComboBox)this.Controls.Find("cbOptionID" + i, true)[0];
+				cbObj = (ComboBox)Controls.Find("cbOptionID" + i, true)[0];
 				
 				cbObj.Enabled = true;
 
@@ -354,7 +354,7 @@ namespace LastChaos_ToolBoxNG
 					}
 				}
 
-				tbProb = (TextBox)this.Controls.Find("tbOptionProb" + i, true)[0];
+				tbProb = (TextBox)Controls.Find("tbOptionProb" + i, true)[0];
 
 				tbProb.Text = pTempRareOptionRow["a_option_prob" + i].ToString();
 			}
@@ -789,13 +789,13 @@ namespace LastChaos_ToolBoxNG
 		/****************************************/
 		private void OptionSelectAction(int nNumber)
 		{
-			ComboBox cbObj = (ComboBox)this.Controls.Find("cbOptionID" + nNumber, true)[0];
+			ComboBox cbObj = (ComboBox)Controls.Find("cbOptionID" + nNumber, true)[0];
 			int nType = cbObj.SelectedIndex;
 
 			if (nType != -1)
 			{
-				ComboBox cbLevel = (ComboBox)this.Controls.Find("cbOptionLevel" + nNumber, true)[0];
-				TextBox tbObj = (TextBox)this.Controls.Find("tbOptionProb" + nNumber, true)[0];
+				ComboBox cbLevel = (ComboBox)Controls.Find("cbOptionLevel" + nNumber, true)[0];
+				TextBox tbObj = (TextBox)Controls.Find("tbOptionProb" + nNumber, true)[0];
 				int nOptionID = Convert.ToInt32(((Main.ComboBoxItem)cbObj.SelectedItem).Value);
 
 				if (nType > 0)
@@ -866,7 +866,7 @@ namespace LastChaos_ToolBoxNG
 		{
 			if (bUserAction)
 			{
-				ComboBox cbObj = (ComboBox)this.Controls.Find("cbOptionLevel" + nNumber, true)[0];
+				ComboBox cbObj = (ComboBox)Controls.Find("cbOptionLevel" + nNumber, true)[0];
 				int nLevel = cbObj.SelectedIndex;
 
 				if (nLevel != -1)
@@ -891,7 +891,7 @@ namespace LastChaos_ToolBoxNG
 		/****************************************/
 		private void OptionProbAction(int nNumber)
 		{
-			TextBox cbObj = (TextBox)this.Controls.Find("tbOptionProb" + nNumber, true)[0];
+			TextBox cbObj = (TextBox)Controls.Find("tbOptionProb" + nNumber, true)[0];
 			int nValue;
 
 			if (cbObj.Text != null && int.TryParse(cbObj.Text, out nValue))
@@ -903,7 +903,7 @@ namespace LastChaos_ToolBoxNG
 					bUnsavedChanges = true;
 				}
 
-				((Label)this.Controls.Find("lOptionProbPercentage" + nNumber, true)[0]).Text = ((nValue * 100.0f) / 10000.0f) + "%";
+				((Label)Controls.Find("lOptionProbPercentage" + nNumber, true)[0]).Text = ((nValue * 100.0f) / 10000.0f) + "%";
 			}
 		}
 

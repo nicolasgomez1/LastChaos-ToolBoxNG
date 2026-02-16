@@ -246,7 +246,7 @@ namespace LastChaos_ToolBoxNG
 
 			foreach (string strParamName in strParamsNames)
 			{
-				pObj = (ComboBox)this.Controls.Find("cb" + strParamName, true)[0];
+				pObj = (ComboBox)Controls.Find("cb" + strParamName, true)[0];
 
 				pObj.Items.Clear();
 				pObj.BeginUpdate();
@@ -329,7 +329,7 @@ namespace LastChaos_ToolBoxNG
 			cbHitTypeSelector.SelectedIndex = -1;
 
 			foreach (string strParamName in strParamsNames)
-				((ComboBox)this.Controls.Find("cb" + strParamName, true)[0]).SelectedIndex = -1;
+				((ComboBox)Controls.Find("cb" + strParamName, true)[0]).SelectedIndex = -1;
 
 			gridLevels.Rows.Clear();
 			/****************************************/
@@ -391,7 +391,7 @@ namespace LastChaos_ToolBoxNG
 				if (nParamValue < 0 || nParamValue >= Defs.MagicParamTypes.Length)
 					pMain.Logger(LogTypes.Error, $"Magic Editor > Magic: {nMagicID} Error: a_{strParamName} out of range.");
 				else
-					((ComboBox)this.Controls.Find("cb" + strParamName, true)[0]).SelectedIndex = nParamValue;
+					((ComboBox)Controls.Find("cb" + strParamName, true)[0]).SelectedIndex = nParamValue;
 			}
 			/****************************************/
 			LoadLevelData(nMagicID);
@@ -661,7 +661,7 @@ namespace LastChaos_ToolBoxNG
 
 				strbuilderQuery.Append($"DELETE FROM {pMain.pSettings.DBData}.t_magic WHERE a_index={nMagicID};\n");
 
-				strbuilderQuery.Append("DELETE FROM {pMain.pSettings.DBData}.t_magiclevel WHERE a_index={nMagicID};\n");
+				strbuilderQuery.Append($"DELETE FROM {pMain.pSettings.DBData}.t_magiclevel WHERE a_index={nMagicID};\n");
 
 				if (!(bSuccess = pMain.QueryUpdateInsertDelete(pMain.pSettings.DBCharset, strbuilderQuery.Append("COMMIT;").ToString(), out long _)))
 				{
@@ -929,7 +929,7 @@ namespace LastChaos_ToolBoxNG
 					};
 
 					cmLevels = new ContextMenuStrip();
-					cmLevels.Items.AddRange(new ToolStripItem[] { addItem, deleteItem });
+					cmLevels.Items.AddRange(addItem, deleteItem);
 					cmLevels.Show(Cursor.Position);
 				}
 			}

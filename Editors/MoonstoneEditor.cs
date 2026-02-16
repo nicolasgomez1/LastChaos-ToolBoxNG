@@ -16,12 +16,12 @@
 			pMain = mainForm;
 			/****************************************/
 			gridRewards.TopLeftHeaderCell.Value = "N°";
-			gridRewards.TopLeftHeaderCell.ToolTipText = "Collapse/Expand All";
+			gridRewards.TopLeftHeaderCell.ToolTipText = "Collapse / Expand All";
 			/****************************************/
 			cbChangesAppliedNotification.Checked = pMain.pSettings.ChangesAppliedNotification[this.Name];
 		}
 
-		private async Task LoadMoonstoneRewardAsync()
+		private async Task LoadMoonstoneRewardDataAsync()
 		{
 			bool bRequestNeeded = false;
 			List<string> listQueryCompose = new List<string> { "a_type", "a_giftindex", "a_giftcount", "a_giftprob", "a_giftflag" };
@@ -63,7 +63,7 @@
 			Stopwatch stopwatch = Stopwatch.StartNew();
 #endif
 			await Task.WhenAll(
-				LoadMoonstoneRewardAsync(),
+				LoadMoonstoneRewardDataAsync(),
 				pMain.GenericLoadItemDataAsync()
 			);
 #if DEBUG
@@ -91,14 +91,13 @@
 					pIcon = null;
 
 				gridRewards.Rows.Add(CreateGroupRow(pIcon, MoonstoneData.Value, $"{MoonstoneData.Key} ({MoonstoneData.Value})"));
-				/****************************************/
+
 				// Rewards of the Group/Moonstone Type
-				int nRewardCount = 1, nGroupIndex = gridRewards.Rows.Count - 1;
 				DataRow[] pTempMoonstoneRewardsRows = pMain.pTables.MoonstoneRewardTable.AsEnumerable().Where(row => Convert.ToInt32(row["a_type"]) == MoonstoneData.Value).ToArray();
 
 				if (pTempMoonstoneRewardsRows.Length > 0)
 				{
-					int nRewardID, nGroupRowIndex = nGroupIndex + 1;
+					int nRewardCount = 1, nRewardID, nGroupRowIndex = gridRewards.Rows.Count;
 					string strRewardItemName;
 					StringBuilder strTooltip = new();
 
@@ -179,7 +178,7 @@
 			}
 		}
 
-		DataGridViewRow CreateGroupRow(Image Image, int nMoonstoneID, string strText) // NOTE: Cell 0 indicates Row is type Group. Cell 1 Indicates if Group Childs are Visible or Not.
+		DataGridViewRow CreateGroupRow(Image pImage, int nMoonstoneID, string strText) // NOTE: Cell 0 indicates Row is type Group. Cell 1 Indicates if Group Childs are Visible or Not.
 		{
 			DataGridViewRow pRow = new();
 
@@ -199,7 +198,7 @@
 				pRow.Cells[i].Style.SelectionBackColor = Color.FromArgb(91, 85, 76);
 				pRow.Cells[i].Style.Font = new Font(gridRewards.Font, FontStyle.Bold);
 				pRow.Cells[i].Style.Alignment = DataGridViewContentAlignment.MiddleLeft;
-				pRow.Cells[i].Value = (i == 0) ? Image : ((i == 1) ? strText : null);
+				pRow.Cells[i].Value = (i == 0) ? pImage : ((i == 1) ? strText : null);
 				pRow.Cells[i].ToolTipText = "Collapse/Expand Group";
 			}
 
@@ -512,7 +511,7 @@
 			{
 				if (e.Button == MouseButtons.Left)
 				{
-					if (e.RowIndex == -1 && e.ColumnIndex == -1)    // Collapse/Expand All
+					if (e.RowIndex == -1 && e.ColumnIndex == -1)    // Collapse / Expand All
 					{
 						gridRewards.SuspendLayout();
 
@@ -556,10 +555,8 @@
 						{
 							bUserAction = false;
 
-							Bitmap pBitmapItemIcon = new(pMain.GetIcon("ItemBtn", pItemSelector.ReturnValues[3].ToString(), Convert.ToInt32(pItemSelector.ReturnValues[4]), Convert.ToInt32(pItemSelector.ReturnValues[5])), new Size(24, 24));
-
-							gridRewards.Rows[e.RowIndex].Cells["itemIcon"].Value = pBitmapItemIcon;
-							gridRewards.Rows[e.RowIndex].Cells["item"].Value = nItemID + " - " + pItemSelector.ReturnValues[1].ToString();
+							gridRewards.Rows[e.RowIndex].Cells["itemIcon"].Value = new Bitmap(pMain.GetIcon("ItemBtn", pItemSelector.ReturnValues[3].ToString(), Convert.ToInt32(pItemSelector.ReturnValues[4]), Convert.ToInt32(pItemSelector.ReturnValues[5])), new Size(24, 24));
+							gridRewards.Rows[e.RowIndex].Cells["item"].Value = $"{nItemID} - {pItemSelector.ReturnValues[1]}";
 							gridRewards.Rows[e.RowIndex].Cells["item"].Tag = nItemID;
 
 							if (nItemID == Defs.NAS_ITEM_DB_INDEX)
@@ -703,6 +700,7 @@
 							while (nGroupRowIndex + i < gridRewards.Rows.Count && gridRewards.Rows[nGroupRowIndex + i].Cells[0].Tag?.ToString() != "GROUP")
 							{
 								gridRewards.Rows[nGroupRowIndex + i].HeaderCell.Value = i.ToString();
+								
 								i++;
 							}
 
@@ -744,7 +742,7 @@
 					};
 
 					cmRewards = new ContextMenuStrip();
-					cmRewards.Items.AddRange(new ToolStripItem[] { addItem, deleteItem, deleteAllItems });
+					cmRewards.Items.AddRange(addItem, deleteItem, deleteAllItems);
 					cmRewards.Show(Cursor.Position);
 				}
 			}

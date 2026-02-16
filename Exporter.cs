@@ -294,7 +294,7 @@ namespace LastChaos_ToolBoxNG
 		/****************************************/
 		private void CheckUnCheckAll(string strObject, bool bChecked)
 		{
-			CheckedListBox Obj = (CheckedListBox)this.Controls.Find(strObject, true)[0];
+			CheckedListBox Obj = (CheckedListBox)Controls.Find(strObject, true)[0];
 
 			for (int i = 0; i < Obj.Items.Count; ++i)
 				Obj.SetItemChecked(i, bChecked);

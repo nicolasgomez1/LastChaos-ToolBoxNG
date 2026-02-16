@@ -1667,8 +1667,10 @@ namespace LastChaos_ToolBoxNG
 			Controls.Add(btnAddNew);
 			Controls.Add(btnReload);
 			Controls.Add(groupBox1);
+			FormBorderStyle = FormBorderStyle.FixedSingle;
 			Icon = Properties.Resources.NG;
 			Margin = new Padding(4, 3, 4, 3);
+			MaximizeBox = false;
 			MinimumSize = new Size(1360, 585);
 			Name = "ItemSetEditor";
 			StartPosition = FormStartPosition.CenterScreen;

@@ -293,7 +293,7 @@ namespace LastChaos_ToolBoxNG
 
 				for (int i = 0; i < Defs.MAX_TITLE_OPTION; i++)
 				{
-					cbObj = (ComboBox)this.Controls.Find("cbOptionID" + i, true)[0];
+					cbObj = (ComboBox)Controls.Find("cbOptionID" + i, true)[0];
 
 					cbObj.BeginUpdate();
 
@@ -316,7 +316,7 @@ namespace LastChaos_ToolBoxNG
 
 					cbObj.EndUpdate();
 
-					cbObj = (ComboBox)this.Controls.Find("cbOptionLevel" + i, true)[0];
+					cbObj = (ComboBox)Controls.Find("cbOptionLevel" + i, true)[0];
 					cbObj.Enabled = false;
 				}
 			}
@@ -325,11 +325,20 @@ namespace LastChaos_ToolBoxNG
 			{
 				MainList.BeginUpdate();
 
+				int nClaimItemID;
+				string strClaimItemName = "NOT FOUND";
+
 				foreach (DataRow pRow in pMain.pTables.TitleTable.Rows)
 				{
-					DataRow? pItemRow = pMain.pTables.ItemTable.Select($"a_index={pRow["a_item_index"]}").FirstOrDefault();
+					nClaimItemID = Convert.ToInt32(pRow["a_item_index"]);
+
+					DataRow? pItemRow = pMain.pTables.ItemTable.AsEnumerable().Where(row => Convert.ToInt32(row["a_index"]) == nClaimItemID).FirstOrDefault();
 					if (pItemRow != null)
-						AddToList(Convert.ToInt32(pRow["a_index"]), pItemRow["a_name_" + pMain.pSettings.WorkLocale].ToString() ?? string.Empty, false);
+						strClaimItemName = pItemRow["a_name_" + pMain.pSettings.WorkLocale].ToString();
+					else
+						pMain.Logger(LogTypes.Error, $"Title Editor > Title: {pRow["a_index"]} Error: a_item_index: {nClaimItemID} not exist in t_item.");
+
+					AddToList(Convert.ToInt32(pRow["a_index"]), strClaimItemName, false);
 				}
 
 				MainList.SelectedIndex = 0;
@@ -490,7 +499,7 @@ namespace LastChaos_ToolBoxNG
 
 			for (int i = 0; i < Defs.MAX_TITLE_OPTION; i++)
 			{
-				cbObj = (ComboBox)this.Controls.Find("cbOptionID" + i, true)[0];
+				cbObj = (ComboBox)Controls.Find("cbOptionID" + i, true)[0];
 
 				cbObj.Enabled = true;
 
@@ -915,7 +924,7 @@ namespace LastChaos_ToolBoxNG
 
 				if (nClaimItemID > 0)
 				{
-					strItemName = pItemSelector.ReturnValues[1].ToString() ?? string.Empty;
+					strItemName += $" - {pItemSelector.ReturnValues[1]}";
 
 					btnClaimItem.Image = new Bitmap(pMain.GetIcon("ItemBtn", pItemSelector.ReturnValues[3].ToString(), Convert.ToInt32(pItemSelector.ReturnValues[4]), Convert.ToInt32(pItemSelector.ReturnValues[5])), new Size(24, 24));
 				}
@@ -924,7 +933,7 @@ namespace LastChaos_ToolBoxNG
 					btnClaimItem.Image = null;
 				}
 
-				btnClaimItem.Text = $"{nClaimItemID} - {strItemName}";
+				btnClaimItem.Text = strItemName;
 
 				pTempTitleRow["a_item_index"] = nClaimItemID;
 
@@ -1097,12 +1106,12 @@ namespace LastChaos_ToolBoxNG
 		/****************************************/
 		private void OptionSelectAction(int nNumber)
 		{
-			ComboBox cbObj = (ComboBox)this.Controls.Find("cbOptionID" + nNumber, true)[0];
+			ComboBox cbObj = (ComboBox)Controls.Find("cbOptionID" + nNumber, true)[0];
 			int nType = cbObj.SelectedIndex;
 
 			if (nType != -1)
 			{
-				ComboBox cbLevel = (ComboBox)this.Controls.Find("cbOptionLevel" + nNumber, true)[0];
+				ComboBox cbLevel = (ComboBox)Controls.Find("cbOptionLevel" + nNumber, true)[0];
 				int nOptionID = Convert.ToInt32(((Main.ComboBoxItem)cbObj.SelectedItem).Value);
 
 				if (nType > 0)
@@ -1164,7 +1173,7 @@ namespace LastChaos_ToolBoxNG
 		{
 			if (bUserAction)
 			{
-				ComboBox cbObj = (ComboBox)this.Controls.Find("cbOptionLevel" + nNumber, true)[0];
+				ComboBox cbObj = (ComboBox)Controls.Find("cbOptionLevel" + nNumber, true)[0];
 				int nLevel = cbObj.SelectedIndex;
 
 				if (nLevel != -1)
@@ -1311,7 +1320,6 @@ namespace LastChaos_ToolBoxNG
 								if (pItemRow != null)
 								{
 									btnClaimItem.Image = new Bitmap(pMain.GetIcon("ItemBtn", pItemRow["a_texture_id"].ToString(), Convert.ToInt32(pItemRow["a_texture_row"]), Convert.ToInt32(pItemRow["a_texture_col"])), new Size(24, 24));
-
 									btnClaimItem.Text = $"{nClaimItemID} - {lbTitleViewer.Text}";
 								}
 							}

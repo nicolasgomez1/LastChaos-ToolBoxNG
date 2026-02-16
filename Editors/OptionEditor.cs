@@ -762,7 +762,7 @@
 					};
 
 					cmLevels = new ContextMenuStrip();
-					cmLevels.Items.AddRange(new ToolStripItem[] { addItem, deleteItem });
+					cmLevels.Items.AddRange(addItem, deleteItem);
 					cmLevels.Show(Cursor.Position);
 				}
 			}

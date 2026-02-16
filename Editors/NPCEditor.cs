@@ -206,7 +206,7 @@ namespace LastChaos_ToolBoxNG
 			};
 
 			foreach (string strNation in pMain.pSettings.NationSupported)
-				listQueryCompose.AddRange(new List<string> { "a_name_" + strNation.ToLower(), "a_descr_" + strNation.ToLower() });
+				listQueryCompose.AddRange("a_name_" + strNation.ToLower(), "a_descr_" + strNation.ToLower());
 
 			if (pMain.pTables.NPCTable == null)
 			{
@@ -398,9 +398,9 @@ namespace LastChaos_ToolBoxNG
 					string strItemID = nItemID.ToString();
 					int nItemProb = Convert.ToInt32(pTempDropJobRow[$"a_{strDBClass}_item_prob"]);
 					
-					btnObj = (Button)this.Controls.Find($"btnDropJob{strClass}ID", true)[0];
-					tbObj = (TextBox)this.Controls.Find($"tbDropJob{strClass}Prob", true)[0];
-					lObj = (Label)this.Controls.Find($"lDropJob{strClass}ProbPercentage", true)[0];
+					btnObj = (Button)Controls.Find($"btnDropJob{strClass}ID", true)[0];
+					tbObj = (TextBox)Controls.Find($"tbDropJob{strClass}Prob", true)[0];
+					lObj = (Label)Controls.Find($"lDropJob{strClass}ProbPercentage", true)[0];
 
 					pItemRow = pMain.pTables.ItemTable.AsEnumerable().Where(row => Convert.ToInt32(row["a_index"]) == nItemID).FirstOrDefault();
 					if (pItemRow != null)
@@ -488,9 +488,9 @@ namespace LastChaos_ToolBoxNG
 					int nItemProb = Convert.ToInt32(pRow["a_prob"]);
 					string strItemID = nItemID.ToString();
 
-					btnObj = (Button)this.Controls.Find("btnDropAll" + i, true)[0];
-					tbObj = (TextBox)this.Controls.Find($"tbDropAll{i}Prob", true)[0];
-					lObj = (Label)this.Controls.Find("lDropAllProbPercentage" + i, true)[0];
+					btnObj = (Button)Controls.Find("btnDropAll" + i, true)[0];
+					tbObj = (TextBox)Controls.Find($"tbDropAll{i}Prob", true)[0];
+					lObj = (Label)Controls.Find("lDropAllProbPercentage" + i, true)[0];
 
 					pItemRow = pMain.pTables.ItemTable.AsEnumerable().Where(row => Convert.ToInt32(row["a_index"]) == nItemID).FirstOrDefault();
 					if (pItemRow != null)
@@ -940,9 +940,9 @@ namespace LastChaos_ToolBoxNG
 
 			for (i = 0; i < Defs.MAX_NPC_SKILL_SERVER; i++)
 			{
-				btnObj = (Button)this.Controls.Find($"btnSkill{i}ID", true)[0];
-				cbObj = (ComboBox)this.Controls.Find("cbSkillLevel" + i, true)[0];
-				tbObj = (TextBox)this.Controls.Find("tbSkillProb" + i, true)[0];
+				btnObj = (Button)Controls.Find($"btnSkill{i}ID", true)[0];
+				cbObj = (ComboBox)Controls.Find("cbSkillLevel" + i, true)[0];
+				tbObj = (TextBox)Controls.Find("tbSkillProb" + i, true)[0];
 
 				btnObj.Image = null;
 				btnObj.Text = "-1";
@@ -955,13 +955,13 @@ namespace LastChaos_ToolBoxNG
 			}
 
 			for (i = 0; i < Defs.MAX_NPC_PRODUCT; i++)
-				((Button)this.Controls.Find("btnProduct" + i, true)[0]).Image = null;
+				((Button)Controls.Find("btnProduct" + i, true)[0]).Image = null;
 
 			for (i = 0; i < Defs.MAX_NPC_DROPITEM; i++)
-				((Button)this.Controls.Find("btnItemDrop" + i, true)[0]).Image = null;
+				((Button)Controls.Find("btnItemDrop" + i, true)[0]).Image = null;
 
 			for (i = 0; i < Defs.MAX_NPC_DROPJEWEL; i++)
-				((Button)this.Controls.Find("btnJewelDrop" + i, true)[0]).Image = null;
+				((Button)Controls.Find("btnJewelDrop" + i, true)[0]).Image = null;
 
 			// Drop Job
 			foreach (var ClassData in Defs.CharactersClassNJobsTypes)
@@ -969,33 +969,33 @@ namespace LastChaos_ToolBoxNG
 				string strClass = ClassData.Value[0].Substring(4);
 				strClass = strClass == "Ex-Rogue" ? "ExRogue" : strClass;
 
-				btnObj = (Button)this.Controls.Find($"btnDropJob{strClass}ID", true)[0];
+				btnObj = (Button)Controls.Find($"btnDropJob{strClass}ID", true)[0];
 
 				btnObj.Image = null;
 				btnObj.Text = "-1";
 
-				tbObj = (TextBox)this.Controls.Find($"tbDropJob{strClass}Prob", true)[0];
+				tbObj = (TextBox)Controls.Find($"tbDropJob{strClass}Prob", true)[0];
 
 				tbObj.Text = "0";
 				tbObj.Enabled = false;
 
-				((Label)this.Controls.Find($"lDropJob{strClass}ProbPercentage", true)[0]).Text = "0%";
+				((Label)Controls.Find($"lDropJob{strClass}ProbPercentage", true)[0]).Text = "0%";
 			}
 
 			// Drop All
 			for (i = 0; i < Defs.MAX_NPC_DROPITEM; i++)
 			{
-				btnObj = (Button)this.Controls.Find("btnDropAll" + i, true)[0];
+				btnObj = (Button)Controls.Find("btnDropAll" + i, true)[0];
 
 				btnObj.Image = null;
 				btnObj.Text = "-1";
 
-				tbObj = (TextBox)this.Controls.Find($"tbDropAll{i}Prob", true)[0];
+				tbObj = (TextBox)Controls.Find($"tbDropAll{i}Prob", true)[0];
 
 				tbObj.Text = "0";
 				tbObj.Enabled = false;
 
-				((Label)this.Controls.Find("lDropAllProbPercentage" + i, true)[0]).Text = "0%";
+				((Label)Controls.Find("lDropAllProbPercentage" + i, true)[0]).Text = "0%";
 			}
 
 			cbWorldRatioSelector.SelectedIndex = 0;
@@ -1284,9 +1284,9 @@ namespace LastChaos_ToolBoxNG
 					int nSkillProb = Convert.ToInt32(strSkillsData[2]);
 					string strSkillName = nSkillID.ToString();
 					pTempDataRow = pMain.pTables.SkillTable.Select($"a_index={nSkillID}").FirstOrDefault();
-					btnObj = (Button)this.Controls.Find($"btnSkill{i}ID", true)[0];
-					cbObj = (ComboBox)this.Controls.Find("cbSkillLevel" + i, true)[0];
-					tbObj = (TextBox)this.Controls.Find("tbSkillProb" + i, true)[0];
+					btnObj = (Button)Controls.Find($"btnSkill{i}ID", true)[0];
+					cbObj = (ComboBox)Controls.Find("cbSkillLevel" + i, true)[0];
+					tbObj = (TextBox)Controls.Find("tbSkillProb" + i, true)[0];
 
 					if (pTempDataRow != null)
 					{
@@ -1325,7 +1325,7 @@ namespace LastChaos_ToolBoxNG
 					tbObj.Text = nSkillProb.ToString();
 					tbObj.Enabled = true;
 
-					((Label)this.Controls.Find("lSkillProbPercentage" + i, true)[0]).Text = ((nSkillProb * 100.0f) / 10000.0f) + "%";
+					((Label)Controls.Find("lSkillProbPercentage" + i, true)[0]).Text = ((nSkillProb * 100.0f) / 10000.0f) + "%";
 				}
 				else if (strSkillsData[0] == "")
 				{
@@ -1436,7 +1436,7 @@ namespace LastChaos_ToolBoxNG
 			{
 				int nProductItemID = Convert.ToInt32(pTempNPCRow["a_product" + i]);
 				string strProductID = nProductItemID.ToString();
-				btnObj = (Button)this.Controls.Find("btnProduct" + i, true)[0];
+				btnObj = (Button)Controls.Find("btnProduct" + i, true)[0];
 
 				pTempDataRow = pMain.pTables.ItemTable.AsEnumerable().Where(row => Convert.ToInt32(row["a_index"]) == nProductItemID).FirstOrDefault();
 				if (pTempDataRow != null)
@@ -1470,21 +1470,21 @@ namespace LastChaos_ToolBoxNG
 			tbFireDelayCount.Text = pTempNPCRow["a_fireDelayCount"].ToString();
 
 			for (i = 0; i < Defs.DEF_MAX_NPC_FIRE_DELAY; i++)
-				((TextBox)this.Controls.Find("tbFireDelay" + i, true)[0]).Text = Convert.ToString(pTempNPCRow["a_fireDelay" + i], CultureInfo.InvariantCulture);
+				((TextBox)Controls.Find("tbFireDelay" + i, true)[0]).Text = Convert.ToString(pTempNPCRow["a_fireDelay" + i], CultureInfo.InvariantCulture);
 
 			tbFireObject.Text = pTempNPCRow["a_fireObject"].ToString();
 			tbFireSpeed.Text = Convert.ToString(pTempNPCRow["a_fireSpeed"], CultureInfo.InvariantCulture);
 
 			for (i = 0; i < Defs.DEF_MOB_FIRE_EFFECT; i++)
-				((TextBox)this.Controls.Find("tbFireEffect" + i, true)[0]).Text = pTempNPCRow["a_fireEffect" + i].ToString();
+				((TextBox)Controls.Find("tbFireEffect" + i, true)[0]).Text = pTempNPCRow["a_fireEffect" + i].ToString();
 			/****************************************/
 			for (i = 0; i < Defs.MAX_NPC_DROPITEM; i++)
 			{
 				int nItemID = Convert.ToInt32(pTempNPCRow["a_item_" + i]);
 				int nItemProb = Convert.ToInt32(pTempNPCRow["a_item_percent_" + i]);
 				string strItemID = nItemID.ToString();
-				btnObj = (Button)this.Controls.Find("btnItemDrop" + i, true)[0];
-				tbObj = (TextBox)this.Controls.Find($"tbItemDrop{i}Prob", true)[0];
+				btnObj = (Button)Controls.Find("btnItemDrop" + i, true)[0];
+				tbObj = (TextBox)Controls.Find($"tbItemDrop{i}Prob", true)[0];
 
 				pTempDataRow = pMain.pTables.ItemTable.AsEnumerable().Where(row => Convert.ToInt32(row["a_index"]) == nItemID).FirstOrDefault();
 				if (pTempDataRow != null)
@@ -1507,7 +1507,7 @@ namespace LastChaos_ToolBoxNG
 
 				tbObj.Text = nItemProb.ToString();
 
-				((Label)this.Controls.Find("lItemDropProbPercentage" + i, true)[0]).Text = ((nItemProb * 100.0f) / 10000.0f) + "%";
+				((Label)Controls.Find("lItemDropProbPercentage" + i, true)[0]).Text = ((nItemProb * 100.0f) / 10000.0f) + "%";
 			}
 			/****************************************/
 			for (i = 0; i < Defs.MAX_NPC_DROPJEWEL; i++)
@@ -1515,8 +1515,8 @@ namespace LastChaos_ToolBoxNG
 				int nItemID = Convert.ToInt32(pTempNPCRow["a_jewel_" + i]);
 				int nItemProb = Convert.ToInt32(pTempNPCRow["a_jewel_percent_" + i]);
 				string strItemID = nItemID.ToString();
-				btnObj = (Button)this.Controls.Find("btnJewelDrop" + i, true)[0];
-				tbObj = (TextBox)this.Controls.Find($"tbJewelDrop{i}Prob", true)[0];
+				btnObj = (Button)Controls.Find("btnJewelDrop" + i, true)[0];
+				tbObj = (TextBox)Controls.Find($"tbJewelDrop{i}Prob", true)[0];
 
 				pTempDataRow = pMain.pTables.ItemTable.AsEnumerable().Where(row => Convert.ToInt32(row["a_index"]) == nItemID).FirstOrDefault();
 				if (pTempDataRow != null)
@@ -1539,7 +1539,7 @@ namespace LastChaos_ToolBoxNG
 
 				tbObj.Text = nItemProb.ToString();
 
-				((Label)this.Controls.Find("lJewelDropProbPercentage" + i, true)[0]).Text = ((nItemProb * 100.0f) / 10000.0f) + "%";
+				((Label)Controls.Find("lJewelDropProbPercentage" + i, true)[0]).Text = ((nItemProb * 100.0f) / 10000.0f) + "%";
 			}
 			/****************************************/
 			if (bLoadFrompNPCTable)
@@ -1807,13 +1807,7 @@ namespace LastChaos_ToolBoxNG
 				};
 
 				foreach (string strNation in pMain.pSettings.NationSupported)
-				{
-					listVarcharColumns.AddRange(new List<string>
-					{
-						"a_name_" + strNation.ToLower(),
-						"a_descr_" + strNation.ToLower()
-					});
-				}
+					listVarcharColumns.AddRange("a_name_" + strNation.ToLower(), "a_descr_" + strNation.ToLower());
 
 				List<string> listBigIntColumns = new List<string>	// Here add all bigint columns.
 				{
@@ -2049,16 +2043,9 @@ namespace LastChaos_ToolBoxNG
 				};
 
 				foreach (string strNation in pMain.pSettings.NationSupported)
-				{
-					listDefaultValue.AddRange(new List<string>
-					{
-						"New NPC",
-						"Created with NicolasG LastChaos ToolBox"
-					});
-				}
+					listDefaultValue.AddRange("New NPC", "Created with NicolasG LastChaos ToolBox");
 
-				listDefaultValue.AddRange(new List<object>
-				{
+				listDefaultValue.AddRange(
 					0,	// a_flag
 					0,	// a_zone_flag
 					0,	// a_extra_flag
@@ -2076,7 +2063,7 @@ namespace LastChaos_ToolBoxNG
 					0,	// a_fireDelay3
 					0,	// a_fireSpeed
 					0	// a_bound
-				});
+				);
 
 				i = 0;
 
@@ -3035,13 +3022,13 @@ namespace LastChaos_ToolBoxNG
 		/****************************************/
 		private void ChangeSkillLevelAndProb(int nNumber)
 		{
-			int nSkillProb = Convert.ToInt32(((TextBox)this.Controls.Find("tbSkillProb" + nNumber, true)[0]).Text);
+			int nSkillProb = Convert.ToInt32(((TextBox)Controls.Find("tbSkillProb" + nNumber, true)[0]).Text);
 
-			((Label)this.Controls.Find("lSkillProbPercentage" + nNumber, true)[0]).Text = ((nSkillProb * 100.0f) / 10000.0f) + "%";
+			((Label)Controls.Find("lSkillProbPercentage" + nNumber, true)[0]).Text = ((nSkillProb * 100.0f) / 10000.0f) + "%";
 
 			if (bUserAction)
 			{
-				int nSkillLevel = ((ComboBox)this.Controls.Find("cbSkillLevel" + nNumber, true)[0]).SelectedIndex;
+				int nSkillLevel = ((ComboBox)Controls.Find("cbSkillLevel" + nNumber, true)[0]).SelectedIndex;
 
 				if (nSkillLevel != -1)
 					nSkillLevel++;
@@ -3058,7 +3045,7 @@ namespace LastChaos_ToolBoxNG
 		{
 			if (bUserAction)
 			{
-				int nSkillLevel = ((ComboBox)this.Controls.Find("cbSkillLevel" + nNumber, true)[0]).SelectedIndex;
+				int nSkillLevel = ((ComboBox)Controls.Find("cbSkillLevel" + nNumber, true)[0]).SelectedIndex;
 
 				if (nSkillLevel != -1)
 					nSkillLevel++;
@@ -3072,9 +3059,9 @@ namespace LastChaos_ToolBoxNG
 				int nSkillID = Convert.ToInt32(pSkillSelector.ReturnValues[0]);
 				nSkillLevel = Convert.ToInt32(pSkillSelector.ReturnValues[1]);
 				string strItemName = nSkillID.ToString();
-				Button btnObj = (Button)this.Controls.Find($"btnSkill{nNumber}ID", true)[0];
-				ComboBox cbObj = (ComboBox)this.Controls.Find("cbSkillLevel" + nNumber, true)[0];
-				TextBox tbObj = (TextBox)this.Controls.Find("tbSkillProb" + nNumber, true)[0];
+				Button btnObj = (Button)Controls.Find($"btnSkill{nNumber}ID", true)[0];
+				ComboBox cbObj = (ComboBox)Controls.Find("cbSkillLevel" + nNumber, true)[0];
+				TextBox tbObj = (TextBox)Controls.Find("tbSkillProb" + nNumber, true)[0];
 
 				if (nSkillID > 0)
 				{
@@ -3114,7 +3101,7 @@ namespace LastChaos_ToolBoxNG
 					tbObj.Text = "0";
 					tbObj.Enabled = false;
 
-					((Label)this.Controls.Find("lSkillProbPercentage" + nNumber, true)[0]).Text = "0%";
+					((Label)Controls.Find("lSkillProbPercentage" + nNumber, true)[0]).Text = "0%";
 				}
 
 				btnObj.Text = strItemName;
@@ -3245,7 +3232,7 @@ namespace LastChaos_ToolBoxNG
 			if (bUserAction)
 			{
 				string strItemIDColumn = "a_product" + nNumber;
-				Button btnObj = (Button)this.Controls.Find("btnProduct" + nNumber, true)[0];
+				Button btnObj = (Button)Controls.Find("btnProduct" + nNumber, true)[0];
 
 				ItemPicker pItemSelector = new(pMain, this, Convert.ToInt32(pTempNPCRow[strItemIDColumn]));
 				if (pItemSelector.ShowDialog() != DialogResult.OK)
@@ -3258,7 +3245,7 @@ namespace LastChaos_ToolBoxNG
 				{
 					btnObj.Image = new Bitmap(pMain.GetIcon("ItemBtn", pItemSelector.ReturnValues[3].ToString(), Convert.ToInt32(pItemSelector.ReturnValues[4]), Convert.ToInt32(pItemSelector.ReturnValues[5])), new Size(24, 24));
 
-					strItemName += " - " + pItemSelector.ReturnValues[1].ToString();
+					strItemName += $" - {pItemSelector.ReturnValues[1]}";
 				}
 				else
 				{
@@ -3393,7 +3380,7 @@ namespace LastChaos_ToolBoxNG
 		{
 			if (bUserAction)
 			{
-				pTempNPCRow["a_fireDelay" + nNumber] = ((TextBox)this.Controls.Find("tbFireDelay" + nNumber, true)[0]).Text;
+				pTempNPCRow["a_fireDelay" + nNumber] = ((TextBox)Controls.Find("tbFireDelay" + nNumber, true)[0]).Text;
 
 				bUnsavedChanges = true;
 			}
@@ -3438,7 +3425,7 @@ namespace LastChaos_ToolBoxNG
 		{
 			if (bUserAction)
 			{
-				pTempNPCRow["a_fireEffect" + nNumber] = ((TextBox)this.Controls.Find("tbFireEffect" + nNumber, true)[0]).Text;
+				pTempNPCRow["a_fireEffect" + nNumber] = ((TextBox)Controls.Find("tbFireEffect" + nNumber, true)[0]).Text;
 
 				bUnsavedChanges = true;
 			}
@@ -3453,8 +3440,8 @@ namespace LastChaos_ToolBoxNG
 			if (bUserAction)
 			{
 				string strItemIDColumn = "a_item_" + nNumber;
-				Button btnObj = (Button)this.Controls.Find("btnItemDrop" + nNumber, true)[0];
-				TextBox tbObj = (TextBox)this.Controls.Find($"tbItemDrop{nNumber}Prob", true)[0];
+				Button btnObj = (Button)Controls.Find("btnItemDrop" + nNumber, true)[0];
+				TextBox tbObj = (TextBox)Controls.Find($"tbItemDrop{nNumber}Prob", true)[0];
 
 				ItemPicker pItemSelector = new(pMain, this, Convert.ToInt32(pTempNPCRow[strItemIDColumn]));
 				if (pItemSelector.ShowDialog() != DialogResult.OK)
@@ -3469,7 +3456,7 @@ namespace LastChaos_ToolBoxNG
 
 					tbObj.Enabled = true;
 
-					strItemName += " - " + pItemSelector.ReturnValues[1].ToString();
+					strItemName += $" - {pItemSelector.ReturnValues[1]}";
 				}
 				else
 				{
@@ -3478,7 +3465,7 @@ namespace LastChaos_ToolBoxNG
 					tbObj.Text = "0";
 					tbObj.Enabled = false;
 
-					((Label)this.Controls.Find("lItemDropProbPercentage" + nNumber, true)[0]).Text = "0%";
+					((Label)Controls.Find("lItemDropProbPercentage" + nNumber, true)[0]).Text = "0%";
 				}
 
 				btnObj.Text = strItemName;
@@ -3516,9 +3503,9 @@ namespace LastChaos_ToolBoxNG
 		{
 			if (bUserAction)
 			{
-				int nItemProb = Convert.ToInt32(((TextBox)this.Controls.Find($"tbItemDrop{nNumber}Prob", true)[0]).Text);
+				int nItemProb = Convert.ToInt32(((TextBox)Controls.Find($"tbItemDrop{nNumber}Prob", true)[0]).Text);
 
-				((Label)this.Controls.Find("lItemDropProbPercentage" + nNumber, true)[0]).Text = ((nItemProb * 100.0f) / 10000.0f) + "%";
+				((Label)Controls.Find("lItemDropProbPercentage" + nNumber, true)[0]).Text = ((nItemProb * 100.0f) / 10000.0f) + "%";
 
 				pTempNPCRow["a_item_percent_" + nNumber] = nItemProb;
 
@@ -3552,8 +3539,8 @@ namespace LastChaos_ToolBoxNG
 			if (bUserAction)
 			{
 				string strItemIDColumn = "a_jewel_" + nNumber;
-				Button btnObj = (Button)this.Controls.Find("btnJewelDrop" + nNumber, true)[0];
-				TextBox tbObj = (TextBox)this.Controls.Find($"tbJewelDrop{nNumber}Prob", true)[0];
+				Button btnObj = (Button)Controls.Find("btnJewelDrop" + nNumber, true)[0];
+				TextBox tbObj = (TextBox)Controls.Find($"tbJewelDrop{nNumber}Prob", true)[0];
 
 				ItemPicker pItemSelector = new(pMain, this, Convert.ToInt32(pTempNPCRow[strItemIDColumn]));
 				if (pItemSelector.ShowDialog() != DialogResult.OK)
@@ -3568,7 +3555,7 @@ namespace LastChaos_ToolBoxNG
 
 					tbObj.Enabled = true;
 
-					strItemName += " - " + pItemSelector.ReturnValues[1].ToString();
+					strItemName += $" - {pItemSelector.ReturnValues[1]}";
 				}
 				else
 				{
@@ -3577,7 +3564,7 @@ namespace LastChaos_ToolBoxNG
 					tbObj.Text = "0";
 					tbObj.Enabled = false;
 
-					((Label)this.Controls.Find("lJewelDropProbPercentage" + nNumber, true)[0]).Text = "0%";
+					((Label)Controls.Find("lJewelDropProbPercentage" + nNumber, true)[0]).Text = "0%";
 				}
 
 				btnObj.Text = strItemName;
@@ -3615,9 +3602,9 @@ namespace LastChaos_ToolBoxNG
 		{
 			if (bUserAction)
 			{
-				int nItemProb = Convert.ToInt32(((TextBox)this.Controls.Find($"tbJewelDrop{nNumber}Prob", true)[0]).Text);
+				int nItemProb = Convert.ToInt32(((TextBox)Controls.Find($"tbJewelDrop{nNumber}Prob", true)[0]).Text);
 
-				((Label)this.Controls.Find("lJewelDropProbPercentage" + nNumber, true)[0]).Text = ((nItemProb * 100.0f) / 10000.0f) + "%";
+				((Label)Controls.Find("lJewelDropProbPercentage" + nNumber, true)[0]).Text = ((nItemProb * 100.0f) / 10000.0f) + "%";
 
 				pTempNPCRow["a_jewel_percent_" + nNumber] = nItemProb;
 
@@ -3691,8 +3678,8 @@ namespace LastChaos_ToolBoxNG
 
 				int nItemID = Convert.ToInt32(pItemSelector.ReturnValues[0]);
 				string strItemName = nItemID.ToString();
-				Button btnObj = (Button)this.Controls.Find($"btnDropJob{strClass}ID", true)[0];
-				TextBox tbObj = (TextBox)this.Controls.Find($"tbDropJob{strClass}Prob", true)[0];
+				Button btnObj = (Button)Controls.Find($"btnDropJob{strClass}ID", true)[0];
+				TextBox tbObj = (TextBox)Controls.Find($"tbDropJob{strClass}Prob", true)[0];
 
 				if (nItemID > 0)
 				{
@@ -3700,7 +3687,7 @@ namespace LastChaos_ToolBoxNG
 
 					tbObj.Enabled = true;
 
-					strItemName += " - " + pItemSelector.ReturnValues[1].ToString();
+					strItemName += $" - {pItemSelector.ReturnValues[1]}";
 				}
 				else
 				{
@@ -3709,7 +3696,7 @@ namespace LastChaos_ToolBoxNG
 					tbObj.Text = "0";
 					tbObj.Enabled = false;
 
-					((Label)this.Controls.Find($"lDropJob{strClass}ProbPercentage", true)[0]).Text = "0%";
+					((Label)Controls.Find($"lDropJob{strClass}ProbPercentage", true)[0]).Text = "0%";
 				}
 
 				btnObj.Text = strItemName;
@@ -3740,9 +3727,9 @@ namespace LastChaos_ToolBoxNG
 
 				string strDBClass = strClass == "ArchMage" ? "ExMage" : strClass;
 				strDBClass = $"a_{strDBClass}_item_prob".ToLower();
-				int nItemProb = Convert.ToInt32(((TextBox)this.Controls.Find($"tbDropJob{strClass}Prob", true)[0]).Text);
+				int nItemProb = Convert.ToInt32(((TextBox)Controls.Find($"tbDropJob{strClass}Prob", true)[0]).Text);
 
-				((Label)this.Controls.Find($"lDropJob{strClass}ProbPercentage", true)[0]).Text = ((nItemProb * 100.0f) / 10000.0f) + "%";
+				((Label)Controls.Find($"lDropJob{strClass}ProbPercentage", true)[0]).Text = ((nItemProb * 100.0f) / 10000.0f) + "%";
 
 				pTempDropJobRow[strDBClass] = nItemProb;
 
@@ -3772,8 +3759,8 @@ namespace LastChaos_ToolBoxNG
 
 				int nItemID = Convert.ToInt32(pItemSelector.ReturnValues[0]);
 				string strItemName = nItemID.ToString();
-				Button btnObj = (Button)this.Controls.Find("btnDropAll" + nNumber, true)[0];
-				TextBox tbObj = (TextBox)this.Controls.Find($"tbDropAll{nNumber}Prob", true)[0];
+				Button btnObj = (Button)Controls.Find("btnDropAll" + nNumber, true)[0];
+				TextBox tbObj = (TextBox)Controls.Find($"tbDropAll{nNumber}Prob", true)[0];
 
 				if (nItemID > 0)
 				{
@@ -3781,7 +3768,7 @@ namespace LastChaos_ToolBoxNG
 
 					tbObj.Enabled = true;
 
-					strItemName += " - " + pItemSelector.ReturnValues[1].ToString();
+					strItemName += $" - {pItemSelector.ReturnValues[1]}";
 				}
 				else
 				{
@@ -3790,7 +3777,7 @@ namespace LastChaos_ToolBoxNG
 					tbObj.Text = "0";
 					tbObj.Enabled = false;
 
-					((Label)this.Controls.Find("lDropAllProbPercentage" + nNumber, true)[0]).Text = "0%";
+					((Label)Controls.Find("lDropAllProbPercentage" + nNumber, true)[0]).Text = "0%";
 				}
 
 				btnObj.Text = strItemName;
@@ -3828,10 +3815,10 @@ namespace LastChaos_ToolBoxNG
 		{
 			if (bUserAction)
 			{
-				TextBox tbObj = (TextBox)this.Controls.Find($"tbDropAll{nNumber}Prob", true)[0];
+				TextBox tbObj = (TextBox)Controls.Find($"tbDropAll{nNumber}Prob", true)[0];
 				int nItemProb = Convert.ToInt32(tbObj.Text);
 
-				((Label)this.Controls.Find("lDropAllProbPercentage" + nNumber, true)[0]).Text = ((nItemProb * 100.0f) / 10000.0f) + "%";
+				((Label)Controls.Find("lDropAllProbPercentage" + nNumber, true)[0]).Text = ((nItemProb * 100.0f) / 10000.0f) + "%";
 
 				pTempDropAllRows[nNumber]["a_prob"] = nItemProb;
 
@@ -3915,16 +3902,8 @@ namespace LastChaos_ToolBoxNG
 						return;
 
 					nItemID = Convert.ToInt32(pItemSelector.ReturnValues[0]);
-
-					Bitmap pBitmapItemIcon = new(1, 1);
-					string strItemName = nItemID.ToString();
-
 					if (nItemID > 0)
 					{
-						pBitmapItemIcon = new Bitmap(pMain.GetIcon("ItemBtn", pItemSelector.ReturnValues[3].ToString(), Convert.ToInt32(pItemSelector.ReturnValues[4]), Convert.ToInt32(pItemSelector.ReturnValues[5])), new Size(24, 24));
-
-						strItemName += " - " + pItemSelector.ReturnValues[1].ToString();
-
 						if (nItemID == Defs.NAS_ITEM_DB_INDEX)
 						{
 							gridDropRaid.Rows[e.RowIndex].Cells["count"].Style.ForeColor = pMain.GetGoldColor(Convert.ToInt64(gridDropRaid.Rows[e.RowIndex].Cells["count"].Value));
@@ -3935,13 +3914,13 @@ namespace LastChaos_ToolBoxNG
 							gridDropRaid.Rows[e.RowIndex].Cells["count"].Style.ForeColor = Color.FromArgb(208, 203, 148);
 							gridDropRaid.Rows[e.RowIndex].Cells["count"].Style.BackColor = Color.FromArgb(40, 40, 40);
 						}
+
+						gridDropRaid.Rows[e.RowIndex].Cells[strCellIconName].Value = new Bitmap(pMain.GetIcon("ItemBtn", pItemSelector.ReturnValues[3].ToString(), Convert.ToInt32(pItemSelector.ReturnValues[4]), Convert.ToInt32(pItemSelector.ReturnValues[5])), new Size(24, 24));
+						gridDropRaid.Rows[e.RowIndex].Cells[strCellItemID].Value = $"{nItemID} - {pItemSelector.ReturnValues[1]}";
+						gridDropRaid.Rows[e.RowIndex].Cells[strCellItemID].Tag = nItemID;
+
+						bUnsavedChanges = true;
 					}
-
-					gridDropRaid.Rows[e.RowIndex].Cells[strCellIconName].Value = pBitmapItemIcon;
-					gridDropRaid.Rows[e.RowIndex].Cells[strCellItemID].Value = strItemName;
-					gridDropRaid.Rows[e.RowIndex].Cells[strCellItemID].Tag = nItemID;
-
-					bUnsavedChanges = true;
 				}
 				else if (e.Button == MouseButtons.Left && e.ColumnIndex == 4 && e.RowIndex >= 0) // Flag Selector
 				{
@@ -4091,7 +4070,7 @@ namespace LastChaos_ToolBoxNG
 					};
 
 					cmDropRaid = new ContextMenuStrip();
-					cmDropRaid.Items.AddRange(new ToolStripItem[] { addItem, deleteItem });
+					cmDropRaid.Items.AddRange(addItem, deleteItem);
 					cmDropRaid.Show(Cursor.Position);
 				}
 			}
@@ -4132,7 +4111,7 @@ namespace LastChaos_ToolBoxNG
 					pTempRegenRows = pNewTempRegenRows.ToArray();
 				}
 
-				pItem.Text = $"{pItem.ID} - {pMain.pTables.ZoneTable.Rows[pItem.ID]["a_name"].ToString()} {(nGridRows > 0 ? "\t*" : "")}";
+				pItem.Text = $"{pItem.ID} - {pMain.pTables.ZoneTable.Rows[pItem.ID]["a_name"]} {(nGridRows > 0 ? "\t*" : "")}";
 				
 				lbRegenZones.SelectedIndexChanged -= lbRegenZones_SelectedIndexChanged;
 				lbRegenZones.Items[nItemID] = pItem;

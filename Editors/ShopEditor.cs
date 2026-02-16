@@ -274,7 +274,7 @@ namespace LastChaos_ToolBoxNG
 				MainList.BeginUpdate();
 
 				int nNPCID;
-				string strNPCName;
+				string strNPCName = "NPC NOT FOUND";
 
 				foreach (DataRow pRow in pMain.pTables.ShopTable.Rows)
 				{
@@ -282,15 +282,9 @@ namespace LastChaos_ToolBoxNG
 					
 					DataRow? pNPCRow = pMain.pTables.NPCTable.AsEnumerable().Where(row => Convert.ToInt32(row["a_index"]) == nNPCID).FirstOrDefault();
 					if (pNPCRow != null)
-					{
 						strNPCName = pNPCRow["a_name_" + pMain.pSettings.WorkLocale].ToString();
-					}
 					else
-					{
-						strNPCName = "NPC NOT FOUND";
-
 						pMain.Logger(LogTypes.Error, $"Shop Editor > Shop: {pRow["a_keeper_idx"]} Error: a_keeper_idx: {nNPCID} not exist in t_npc.");
-					}
 
 					AddToList(nNPCID, strNPCName ?? string.Empty, false);
 				}
@@ -1062,7 +1056,7 @@ namespace LastChaos_ToolBoxNG
 					};
 
 					cmLevels = new ContextMenuStrip();
-					cmLevels.Items.AddRange(new ToolStripItem[] { addItem, deleteItem });
+					cmLevels.Items.AddRange(addItem, deleteItem);
 					cmLevels.Show(Cursor.Position);
 				}
 				else if (e.Button == MouseButtons.Left && e.ColumnIndex == 1 && e.RowIndex >= 0)    // Item Selector
@@ -1076,10 +1070,8 @@ namespace LastChaos_ToolBoxNG
 					nItemID = Convert.ToInt32(pItemSelector.ReturnValues[0]);
 					if (nItemID > 0)
 					{
-						Bitmap pBitmapItemIcon = new(pMain.GetIcon("ItemBtn", pItemSelector.ReturnValues[3].ToString(), Convert.ToInt32(pItemSelector.ReturnValues[4]), Convert.ToInt32(pItemSelector.ReturnValues[5])), new Size(24, 24));
-
-						gridSaleItems.Rows[e.RowIndex].Cells["itemIcon"].Value = pBitmapItemIcon;
-						gridSaleItems.Rows[e.RowIndex].Cells["item"].Value = nItemID + " - " + pItemSelector.ReturnValues[1].ToString();
+						gridSaleItems.Rows[e.RowIndex].Cells["itemIcon"].Value = new Bitmap(pMain.GetIcon("ItemBtn", pItemSelector.ReturnValues[3].ToString(), Convert.ToInt32(pItemSelector.ReturnValues[4]), Convert.ToInt32(pItemSelector.ReturnValues[5])), new Size(24, 24));
+						gridSaleItems.Rows[e.RowIndex].Cells["item"].Value = $"{nItemID} - {pItemSelector.ReturnValues[1]}";
 						gridSaleItems.Rows[e.RowIndex].Cells["item"].Tag = nItemID;
 					}
 				}

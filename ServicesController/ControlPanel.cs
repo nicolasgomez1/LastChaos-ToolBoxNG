@@ -90,16 +90,16 @@
 
 					Invoke((Action)(() =>
 					{
-						((Label)this.Controls.Find($"lb{strService}Status", true)[0]).BackColor = Color.FromArgb(56, 85, 54);
+						((Label)Controls.Find($"lb{strService}Status", true)[0]).BackColor = Color.FromArgb(56, 85, 54);
 
 						if (File.Exists(pMain.pSettings.ServicesData[strService].ConfigPath))
 						{
 							IniData pData = (new FileIniDataParser()).ReadFile(pMain.pSettings.ServicesData[strService].ConfigPath);
 
-							((RichTextBox)this.Controls.Find($"rtb{strService}IPPort", true)[0]).Text = pData["Server"]["IP"] + ":" + pData["Server"]["Port"];
+							((RichTextBox)Controls.Find($"rtb{strService}IPPort", true)[0]).Text = pData["Server"]["IP"] + ":" + pData["Server"]["Port"];
 						}
 
-						((Button)this.Controls.Find($"btn{strService}StartStop", true)[0]).Text = "Stop";
+						((Button)Controls.Find($"btn{strService}StartStop", true)[0]).Text = "Stop";
 
 						btnStartStopAll.Text = pMain.pSettings.Services.Any(strCheckService => pMain.pSettings.ServicesData[strCheckService].ProcessID != -1) ? "Stop All" : "Start All";
 					}));
@@ -174,7 +174,7 @@
 
 								pMain.pSettings.ServicesData[strService].ReUpTrysCount++;
 
-								Invoke((Action)(() => { ((Label)this.Controls.Find($"lb{strService}Status", true)[0]).BackColor = Color.FromArgb(228, 210, 121); }));
+								Invoke((Action)(() => { ((Label)Controls.Find($"lb{strService}Status", true)[0]).BackColor = Color.FromArgb(228, 210, 121); }));
 
 								ServiceRunner(strService, true);
 
@@ -188,9 +188,9 @@
 
 						Invoke((Action)(() =>
 						{
-							((Label)this.Controls.Find($"lb{strService}Status", true)[0]).BackColor = Color.FromArgb(218, 54, 51);
+							((Label)Controls.Find($"lb{strService}Status", true)[0]).BackColor = Color.FromArgb(218, 54, 51);
 
-							((Button)this.Controls.Find($"btn{strService}StartStop", true)[0]).Text = "Start";
+							((Button)Controls.Find($"btn{strService}StartStop", true)[0]).Text = "Start";
 
 							btnStartStopAll.Text = pMain.pSettings.Services.Any(strCheckService => pMain.pSettings.ServicesData[strCheckService].ProcessID != -1) ? "Stop All" : "Start All";
 						}));
@@ -217,7 +217,7 @@
 
 				(ObjSender as Button).Text = "Start";
 
-				((Label)this.Controls.Find($"lb{strService}Status", true)[0]).BackColor = Color.FromArgb(40, 40, 40);
+				((Label)Controls.Find($"lb{strService}Status", true)[0]).BackColor = Color.FromArgb(40, 40, 40);
 
 				btnStartStopAll.Text = pMain.pSettings.Services.Any(strCheckService => pMain.pSettings.ServicesData[strCheckService].ProcessID != -1) ? "Stop All" : "Start All";
 			}
@@ -238,7 +238,7 @@
 			pToolTip.SetToolTip(tbMessengerSubHelperPort, "SubHelper Port inside of Messenger Service it self");
 
 			foreach (string strService in pMain.pSettings.Services)
-				pToolTip.SetToolTip((Button)this.Controls.Find($"btn{strService}Logs", true)[0], "Left Click to Enable/Disable Logs catching. Right Click to see more Options");
+				pToolTip.SetToolTip((Button)Controls.Find($"btn{strService}Logs", true)[0], "Left Click to Enable/Disable Logs catching. Right Click to see more Options");
 
 			Button btnObj;
 
@@ -253,7 +253,7 @@
 
 			foreach (string strService in pMain.pSettings.Services)
 			{
-				((RichTextBox)this.Controls.Find($"rtb{strService}IPPort", true)[0]).SelectionAlignment = HorizontalAlignment.Center;
+				((RichTextBox)Controls.Find($"rtb{strService}IPPort", true)[0]).SelectionAlignment = HorizontalAlignment.Center;
 
 				string[] BinaryFilesFound = Directory.GetFiles(pMain.pSettings.ServerPath, pMain.pSettings.ServicesData[strService].BinaryName, SearchOption.AllDirectories);
 
@@ -342,8 +342,8 @@
 						strIP = pData["Server"]["IP"] ?? "127.0.0.1";
 						strPort = pData["Server"]["Port"] ?? "0";
 
-						((TextBox)this.Controls.Find($"tb{strService}IP", true)[0]).Text = strIP;
-						((TextBox)this.Controls.Find($"tb{strService}Port", true)[0]).Text = strPort;
+						((TextBox)Controls.Find($"tb{strService}IP", true)[0]).Text = strIP;
+						((TextBox)Controls.Find($"tb{strService}Port", true)[0]).Text = strPort;
 
 						if (strService == "Messenger")
 							tbMessengerSubHelperPort.Text = pData["Server"]["SubHelperPort"] ?? "0";
@@ -353,8 +353,8 @@
 
 						if (strService.Contains("GameServer"))
 						{
-							((CheckBox)this.Controls.Find($"cb{strService}PK", true)[0]).Checked = (pData["Server"]["NON_PK"] == "TRUE" ? false : true);
-							((CheckBox)this.Controls.Find($"cb{strService}Speed", true)[0]).Checked = (pData["Server"]["SPEED_SERVER"] == "TRUE" ? true : false);
+							((CheckBox)Controls.Find($"cb{strService}PK", true)[0]).Checked = (pData["Server"]["NON_PK"] == "TRUE" ? false : true);
+							((CheckBox)Controls.Find($"cb{strService}Speed", true)[0]).Checked = (pData["Server"]["SPEED_SERVER"] == "TRUE" ? true : false);
 						}
 					}
 
@@ -362,10 +362,10 @@
 
 					pMain.pSettings.ServicesData[strService].BinaryPath = BinaryFilesFound[0];
 
-					((Button)this.Controls.Find($"btn{strService}StartStop", true)[0]).Enabled = true;
-					((Button)this.Controls.Find($"btn{strService}Settings", true)[0]).Enabled = true;
+					((Button)Controls.Find($"btn{strService}StartStop", true)[0]).Enabled = true;
+					((Button)Controls.Find($"btn{strService}Settings", true)[0]).Enabled = true;
 
-					btnObj = (Button)this.Controls.Find($"btn{strService}Logs", true)[0];
+					btnObj = (Button)Controls.Find($"btn{strService}Logs", true)[0];
 					btnObj.Enabled = true;
 
 					if (pMain.pSettings.ServicesData[strService].CatchLog)
@@ -514,7 +514,7 @@
 				if (strNeeded == "Start" && !pMain.pSettings.StartCashServerOnStartAll && strService == "CashServer")
 					continue;
 
-				btnObj = (Button)this.Controls.Find($"btn{strService}StartStop", true)[0];
+				btnObj = (Button)Controls.Find($"btn{strService}StartStop", true)[0];
 
 				if (btnObj.Text == strNeeded)
 					btnObj.PerformClick();
@@ -552,8 +552,8 @@
 
 		private void btnPanelSettings_Click(object sender, EventArgs e)
 		{
-			GroupBox gbServicesInfo = (GroupBox)this.Controls.Find("gbServicesInfo", true)[0];
-			GroupBox gbServicesSettings = (GroupBox)this.Controls.Find("gbServicesSettings", true)[0];
+			GroupBox gbServicesInfo = (GroupBox)Controls.Find("gbServicesInfo", true)[0];
+			GroupBox gbServicesSettings = (GroupBox)Controls.Find("gbServicesSettings", true)[0];
 
 			if (btnPanelSettings.Text == "Settings")
 				btnPanelSettings.Text = "Control Panel";
@@ -677,14 +677,14 @@
 						menuLogsFiles.DropDownItems.Add(menuLogsFilesSub);
 					}
 
-					pContextMenu.Items.AddRange(new ToolStripItem[] {
+					pContextMenu.Items.AddRange(
 						new ToolStripLabel(strService),
 						menuFiltersManager,
 						new ToolStripSeparator(),
 						menuOpenLogsFolder,
 						menuLogsFiles,
 						new ToolStripSeparator()
-					});
+					);
 
 					IniData pData = (new FileIniDataParser()).ReadFile(pMain.pSettings.SettingsFile);
 
@@ -805,7 +805,7 @@
 				return;
 
 			foreach (string strService in pMain.pSettings.Services)
-				((TextBox)this.Controls.Find($"tb{strService}IP", true)[0]).Text = pInput.strOutput;
+				((TextBox)Controls.Find($"tb{strService}IP", true)[0]).Text = pInput.strOutput;
 		}
 
 		private void btnTestDBConnection_Click(object sender, EventArgs e)
@@ -813,7 +813,7 @@
 			foreach (string strDBName in new string[3] { "Auth", "Data", "User" })
 			{
 				LogTypes ltTypeResult = LogTypes.Message;
-				string strResult = "", strConnect = $"SERVER={tbDBHost.Text};DATABASE={((TextBox)this.Controls.Find("tbDB" + strDBName, true)[0]).Text};UID={tbDBUsername.Text};PASSWORD={tbDBPassword.Text};CHARSET=utf8";
+				string strResult = "", strConnect = $"SERVER={tbDBHost.Text};DATABASE={((TextBox)Controls.Find("tbDB" + strDBName, true)[0]).Text};UID={tbDBUsername.Text};PASSWORD={tbDBPassword.Text};CHARSET=utf8";
 
 				try
 				{
@@ -879,8 +879,8 @@
 							pParser = new FileIniDataParser(new IniDataParser(pParserConfiguration));
 							pData = pParser.ReadFile(pMain.pSettings.ServicesData[strService].ConfigPath);
 
-							pData["Server"]["IP"] = ((TextBox)this.Controls.Find($"tb{strService}IP", true)[0]).Text;
-							pData["Server"]["Port"] = ((TextBox)this.Controls.Find($"tb{strService}Port", true)[0]).Text;
+							pData["Server"]["IP"] = ((TextBox)Controls.Find($"tb{strService}IP", true)[0]).Text;
+							pData["Server"]["Port"] = ((TextBox)Controls.Find($"tb{strService}Port", true)[0]).Text;
 
 							if (strService == "Messenger")
 							{
@@ -933,8 +933,8 @@
 								pData["Server"]["AllowExternalIP"] = cbAllowedExternalIP.Checked ? "TRUE" : "FALSE";
 								//pData["Server"]["IntergrationServer"] = cbIntegrationServer.Checked ? "TRUE" : "FALSE";
 								pData["Server"]["HARDCORE"] = cbHardcore.Checked ? "TRUE" : "FALSE";
-								pData["Server"]["SPEED_SERVER"] = ((CheckBox)this.Controls.Find($"cb{strService}Speed", true)[0]).Checked ? "TRUE" : "FALSE";
-								pData["Server"]["NON_PK"] = ((CheckBox)this.Controls.Find($"cb{strService} PK", true)[0]).Checked ? "FALSE" : "TRUE";
+								pData["Server"]["SPEED_SERVER"] = ((CheckBox)Controls.Find($"cb{strService}Speed", true)[0]).Checked ? "TRUE" : "FALSE";
+								pData["Server"]["NON_PK"] = ((CheckBox)Controls.Find($"cb{strService} PK", true)[0]).Checked ? "FALSE" : "TRUE";
 
 								pData["Connector Server"]["IP"] = tbConnectorIP.Text;
 								pData["Connector Server"]["Port"] = tbConnectorPort.Text;
@@ -967,7 +967,7 @@
 									pData[strKeyName]["IP"] = tbDBHost.Text;
 									pData[strKeyName]["User"] = tbDBUsername.Text;
 									pData[strKeyName]["Password"] = tbDBPassword.Text;
-									pData[strKeyName]["DBName"] = ((TextBox)this.Controls.Find("tbDB" + SectionData.Key, true)[0]).Text;
+									pData[strKeyName]["DBName"] = ((TextBox)Controls.Find("tbDB" + SectionData.Key, true)[0]).Text;
 								}
 							}
 

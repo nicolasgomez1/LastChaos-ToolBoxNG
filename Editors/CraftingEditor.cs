@@ -209,25 +209,19 @@ namespace LastChaos_ToolBoxNG
 				MainList.BeginUpdate();
 
 				int nResultItemID;
-				string strResultItemName;
+				string strResultItemName = "NOT FOUND";
 				
 				foreach (DataRow pRow in pMain.pTables.CraftingTable.Rows)
 				{
 					nResultItemID = Convert.ToInt32(pRow["a_item_idx"]);
+
 					DataRow? pItemRow = pMain.pTables.ItemTable.AsEnumerable().Where(row => Convert.ToInt32(row["a_index"]) == nResultItemID).FirstOrDefault();
-
 					if (pItemRow != null)
-					{
 						strResultItemName = pItemRow["a_name_" + pMain.pSettings.WorkLocale].ToString() ?? string.Empty;
-					}
 					else
-					{
-						strResultItemName = "NONE " + (pRow["a_enable"].ToString() == "0" ? "(Disabled)" : "(Enabled)");
-
 						pMain.Logger(LogTypes.Error, $"Crafting Editor > Craft: {pRow["a_index"]} Error: a_item_idx: {nResultItemID} not exist in t_item.");
-					}
 
-					AddToList(Convert.ToInt32(pRow["a_index"]), strResultItemName ?? string.Empty, false);
+					AddToList(Convert.ToInt32(pRow["a_index"]), strResultItemName, false);
 				}
 
 				MainList.SelectedIndex = 0;
@@ -321,7 +315,7 @@ namespace LastChaos_ToolBoxNG
 #endif
 				}
 			}
-			/****************************************/
+
 			tbResultItemName.Text = strResultItemName;
 
 			btnItemResult.Text = strResultItemName;
@@ -584,11 +578,10 @@ namespace LastChaos_ToolBoxNG
 					nRequiredItemCount[i] = 0;
 				}
 
-				listDefaultValue.AddRange(new List<string>
-				{
+				listDefaultValue.AddRange(
 					string.Join(" ", nRequiredItemID),	// a_stuff
 					string.Join(" ", nRequiredItemCount)	// a_stuff_cnt
-				});
+				);
 
 				i = 0;
 				foreach (string strColumnName in listIntColumns.Concat(listBigIntColumns).Concat(listVarcharColumns))
@@ -882,14 +875,11 @@ namespace LastChaos_ToolBoxNG
 						return;
 
 					int nItemNeededID = Convert.ToInt32(pItemSelector.ReturnValues[0]);
-					string strItemName = nItemNeededID.ToString();
-
 					if (nItemNeededID > 0)
 					{
-						strItemName += " - " + pItemSelector.ReturnValues[1].ToString();
-
 						gridMaterials.Rows[e.RowIndex].Cells["itemIcon"].Value = new Bitmap(pMain.GetIcon("ItemBtn", pItemSelector.ReturnValues[3].ToString(), Convert.ToInt32(pItemSelector.ReturnValues[4]), Convert.ToInt32(pItemSelector.ReturnValues[5])), new Size(24, 24));
-						gridMaterials.Rows[e.RowIndex].Cells["item"].Value = strItemName;
+
+						gridMaterials.Rows[e.RowIndex].Cells["item"].Value = $"{nItemNeededID} - {pItemSelector.ReturnValues[1]}";
 						gridMaterials.Rows[e.RowIndex].Cells["item"].Tag = nItemNeededID;
 
 						if (nItemNeededID == Defs.NAS_ITEM_DB_INDEX)

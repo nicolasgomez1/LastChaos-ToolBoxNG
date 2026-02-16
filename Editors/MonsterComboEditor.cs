@@ -767,7 +767,7 @@
 					};
 
 					cmRegens = new ContextMenuStrip();
-					cmRegens.Items.AddRange(new ToolStripItem[] { addItem, deleteItem });
+					cmRegens.Items.AddRange(addItem, deleteItem);
 					cmRegens.Show(Cursor.Position);
 				}
 				else if (e.Button == MouseButtons.Left && e.ColumnIndex == 0 && e.RowIndex >= 0) // Mob Selector

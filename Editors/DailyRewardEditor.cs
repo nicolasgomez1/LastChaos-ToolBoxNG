@@ -386,7 +386,7 @@
 							gridRewards.Rows[nRow].HeaderCell.Value = (nRow + 1).ToString();
 
 							gridRewards.Rows[nRow].Cells["itemIcon"].Value = new Bitmap(pMain.GetIcon("ItemBtn", pItemSelector.ReturnValues[3].ToString(), Convert.ToInt32(pItemSelector.ReturnValues[4]), Convert.ToInt32(pItemSelector.ReturnValues[5])), new Size(24, 24));
-							gridRewards.Rows[nRow].Cells["item"].Value = $"{nItemID} - {pItemSelector.ReturnValues[1].ToString()}";
+							gridRewards.Rows[nRow].Cells["item"].Value = $"{nItemID} - {pItemSelector.ReturnValues[1]}";
 							gridRewards.Rows[nRow].Cells["item"].Tag = nItemID;
 
 							long lDefaultFlag = 0;
@@ -457,7 +457,7 @@
 					};
 
 					cmRewards = new ContextMenuStrip();
-					cmRewards.Items.AddRange(new ToolStripItem[] { addItem, copyItem });
+					cmRewards.Items.AddRange(addItem, copyItem);
 					cmRewards.Show(Cursor.Position);
 				}
 				else if (e.Button == MouseButtons.Left && e.ColumnIndex == 1 && e.RowIndex >= 0) // Item Selector
@@ -472,8 +472,7 @@
 						bUserAction = false;
 
 						gridRewards.Rows[e.RowIndex].Cells["itemIcon"].Value = new Bitmap(pMain.GetIcon("ItemBtn", pItemSelector.ReturnValues[3].ToString(), Convert.ToInt32(pItemSelector.ReturnValues[4]), Convert.ToInt32(pItemSelector.ReturnValues[5])), new Size(24, 24));
-
-						gridRewards.Rows[e.RowIndex].Cells["item"].Value = nItemID + " - " + pItemSelector.ReturnValues[1].ToString();
+						gridRewards.Rows[e.RowIndex].Cells["item"].Value = $"{nItemID} - {pItemSelector.ReturnValues[1]}";
 						gridRewards.Rows[e.RowIndex].Cells["item"].Tag = nItemID;
 
 						if (nItemID == Defs.NAS_ITEM_DB_INDEX)

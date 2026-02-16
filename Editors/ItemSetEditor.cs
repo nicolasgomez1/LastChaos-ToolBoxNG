@@ -155,7 +155,7 @@ namespace LastChaos_ToolBoxNG
 			cbJobSelector.EndUpdate();
 			/****************************************/
 			for (int i = 0; i < Defs.MAX_SET_ITEM_OPTION; i++)
-				(new ToolTip()).SetToolTip(((Button)this.Controls.Find("btnOption" + i, true)[0]), "Left Click to open Picker for current Type/Right Click to open de opposite Type.");
+				(new ToolTip()).SetToolTip(((Button)Controls.Find("btnOption" + i, true)[0]), "Left Click to open Picker for current Type/Right Click to open de opposite Type.");
 			/****************************************/
 #if DEBUG
 			Stopwatch stopwatch = Stopwatch.StartNew();
@@ -172,7 +172,7 @@ namespace LastChaos_ToolBoxNG
 			pMain.Logger(LogTypes.Message, $"Item Sets, Items, Options & Skills Data load took: {stopwatch.ElapsedMilliseconds}ms.");
 #endif
 			/****************************************/
-			if (pMain.pTables.ItemSetTable != null && pMain.pTables.ItemTable != null)
+			if (pMain.pTables.ItemSetTable != null)
 			{
 				MainList.BeginUpdate();
 
@@ -254,7 +254,7 @@ namespace LastChaos_ToolBoxNG
 			{
 				int nItemID = Convert.ToInt32(strSetParts[i]);
 				string strItemName = nItemID.ToString();
-				btnObj = ((Button)this.Controls.Find("btn" + strWearingPos, true)[0]);
+				btnObj = ((Button)Controls.Find("btn" + strWearingPos, true)[0]);
 
 				if (nItemID > 0)
 				{
@@ -286,15 +286,15 @@ namespace LastChaos_ToolBoxNG
 
 			for (i = 0; i < Defs.MAX_SET_ITEM_OPTION; i++)
 			{
-				((NumericUpDown)this.Controls.Find("nudWearCount" + i, true)[0]).Value = Convert.ToInt32(strWearCount[i]);
+				((NumericUpDown)Controls.Find("nudWearCount" + i, true)[0]).Value = Convert.ToInt32(strWearCount[i]);
 
 				string strType = "Option";
 				string strOptionName = strOptionIDs[i];
 
-				btnObj = ((Button)this.Controls.Find("btnOption" + i, true)[0]);
+				btnObj = ((Button)Controls.Find("btnOption" + i, true)[0]);
 				btnObj.Image = null;
 
-				cbObj = (ComboBox)this.Controls.Find("cbOptionLevel" + i, true)[0];
+				cbObj = (ComboBox)Controls.Find("cbOptionLevel" + i, true)[0];
 				cbObj.Items.Clear();
 				cbObj.SelectedIndex = -1;
 				cbObj.Enabled = false;
@@ -377,7 +377,7 @@ namespace LastChaos_ToolBoxNG
 					}
 				}
 
-				((Label)this.Controls.Find("lbOption" + i, true)[0]).Text = strType;
+				((Label)Controls.Find("lbOption" + i, true)[0]).Text = strType;
 
 				btnObj.Text = strOptionName;
 			}
@@ -731,7 +731,7 @@ namespace LastChaos_ToolBoxNG
 			{
 				string[] strWearCount = (pTempSetRow["a_wear_count"].ToString() ?? string.Empty).Split(' ');
 
-				strWearCount[nPos] = ((NumericUpDown)this.Controls.Find("nudWearCount" + nPos, true)[0]).Value.ToString();
+				strWearCount[nPos] = ((NumericUpDown)Controls.Find("nudWearCount" + nPos, true)[0]).Value.ToString();
 
 				pTempSetRow["a_wear_count"] = string.Join(" ", strWearCount);
 
@@ -756,7 +756,7 @@ namespace LastChaos_ToolBoxNG
 			if (bUserAction)
 			{
 				string[] strSetParts = (pTempSetRow["a_item_idx"].ToString() ?? string.Empty).Split(' ');
-				Button btnObj = (Button)this.Controls.Find("btn" + strItemWearingButtonNames[nPos], true)[0];
+				Button btnObj = (Button)Controls.Find("btn" + strItemWearingButtonNames[nPos], true)[0];
 
 				ItemPicker pItemSelector = new(pMain, this, Convert.ToInt32(strSetParts[nPos]));
 				if (pItemSelector.ShowDialog() != DialogResult.OK)
@@ -767,7 +767,7 @@ namespace LastChaos_ToolBoxNG
 
 				if (nItemID > 0)
 				{
-					strItemName += " - " + pItemSelector.ReturnValues[1].ToString();
+					strItemName += $" - {pItemSelector.ReturnValues[1]}";
 
 					btnObj.Image = new Bitmap(pMain.GetIcon("ItemBtn", pItemSelector.ReturnValues[3].ToString(), Convert.ToInt32(pItemSelector.ReturnValues[4]), Convert.ToInt32(pItemSelector.ReturnValues[5])), new Size(24, 24));
 				}
@@ -806,8 +806,8 @@ namespace LastChaos_ToolBoxNG
 				string[] strOptionTypes = (pTempSetRow["a_option_type"].ToString() ?? string.Empty).Split(' '); // 0 Option, 1 Skill
 				string[] strOptionIDs = (pTempSetRow["a_option_idx"].ToString() ?? string.Empty).Split(' ');
 				string[] strOptionLevels = (pTempSetRow["a_option_level"].ToString() ?? string.Empty).Split(' ');
-				Button btnObj = (Button)this.Controls.Find("btnOption" + nPos, true)[0];
-				ComboBox cbObj = (ComboBox)this.Controls.Find("cbOptionLevel" + nPos, true)[0];
+				Button btnObj = (Button)Controls.Find("btnOption" + nPos, true)[0];
+				ComboBox cbObj = (ComboBox)Controls.Find("cbOptionLevel" + nPos, true)[0];
 
 				void ApplyUpdate(string strOptionType, string strOptionID, string strOptionLevel)
 				{
@@ -825,7 +825,7 @@ namespace LastChaos_ToolBoxNG
 					if (strOptionType == "0" || strOptionID == "-1")
 						strType = "Option";
 
-					((Label)this.Controls.Find("lbOption" + nPos, true)[0]).Text = strType;
+					((Label)Controls.Find("lbOption" + nPos, true)[0]).Text = strType;
 
 					bUnsavedChanges = true;
 				}
@@ -850,7 +850,7 @@ namespace LastChaos_ToolBoxNG
 					{
 						strOptionName += $" - {pOptionSelector.ReturnValues[2]}";
 
-						cbObj = (ComboBox)this.Controls.Find("cbOptionLevel" + nPos, true)[0];
+						cbObj = (ComboBox)Controls.Find("cbOptionLevel" + nPos, true)[0];
 						cbObj.Enabled = true;
 
 						cbObj.BeginUpdate();
@@ -895,7 +895,7 @@ namespace LastChaos_ToolBoxNG
 						strSkillName += $" - {pSkillSelector.ReturnValues[2]}";
 						btnObj.Image = new Bitmap(pMain.GetIcon("SkillBtn", pSkillSelector.ReturnValues[4].ToString(), Convert.ToInt32(pSkillSelector.ReturnValues[5]), Convert.ToInt32(pSkillSelector.ReturnValues[6])), new Size(24, 24));
 
-						cbObj = (ComboBox)this.Controls.Find("cbOptionLevel" + nPos, true)[0];
+						cbObj = (ComboBox)Controls.Find("cbOptionLevel" + nPos, true)[0];
 						cbObj.Enabled = true;
 
 						cbObj.BeginUpdate();
@@ -957,7 +957,7 @@ namespace LastChaos_ToolBoxNG
 			if (bUserAction)
 			{
 				string[] strOptionLevels = (pTempSetRow["a_option_level"].ToString() ?? string.Empty).Split(' ');
-				ComboBox cbObj = (ComboBox)this.Controls.Find("cbOptionLevel" + nPos, true)[0];
+				ComboBox cbObj = (ComboBox)Controls.Find("cbOptionLevel" + nPos, true)[0];
 				int nLevel = cbObj.SelectedIndex;
 
 				if (nLevel != -1)

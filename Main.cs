@@ -55,6 +55,7 @@ namespace LastChaos_ToolBoxNG
 			public DataTable? ItemSetTable;
 			public DataTable? KeyTable;
 			public DataTable? NPCRegenTable;
+			public DataTable? LacaBallTable;
 
 			public void Dispose()
 			{
@@ -225,7 +226,8 @@ namespace LastChaos_ToolBoxNG
 				{ "Moonstone Editor",			() => new MoonstoneEditor(this) },
 				{ "Title Editor",				() => new TitleEditor(this) },
 				{ "Item Set Editor",			() => new ItemSetEditor(this) },
-				{ "Package Item Event Editor",	() => new PackageItemEventEditor(this) }
+				{ "Package Item Event Editor",	() => new PackageItemEventEditor(this) },
+				{ "LacaBall Editor",			() => new LacaBallEditor(this) }
 			};
 
 			lbEditors.DataSource = pEditors.Keys.ToList();
@@ -272,6 +274,9 @@ namespace LastChaos_ToolBoxNG
 
 		private async void btnCheckUpdates_ClickAsync(object sender, EventArgs e)
 		{
+#if DEBUG
+			return; // API rate limit exceeded for 000.000.000.000... :$
+#endif
 			Logger(LogTypes.Message, "Main > Checking version, please wait...");
 
 			using (HttpClient httpClient = new())

@@ -86,13 +86,13 @@ namespace LastChaos_ToolBoxNG
 
 					if (strControlName.Length >= 11 && strControlName.Substring(0, 11) == "tbRareIndex")
 					{
-						tbSecondInputObject = (TextBox)this.Controls.Find("tbRareProb" + strControlName[strControlName.Length - 1], true)[0];
+						tbSecondInputObject = (TextBox)Controls.Find("tbRareProb" + strControlName[strControlName.Length - 1], true)[0];
 						nSkillLevel = Convert.ToInt32(tbSecondInputObject.Text);
 					}
 
 					if (strControlName.Length >= 9 && strControlName == "tbOption0")
 					{
-						tbSecondInputObject = (TextBox)this.Controls.Find("tbOption1", true)[0];
+						tbSecondInputObject = (TextBox)Controls.Find("tbOption1", true)[0];
 						nSkillLevel = Convert.ToInt32(tbSecondInputObject.Text);
 					}
 
@@ -125,7 +125,7 @@ namespace LastChaos_ToolBoxNG
 
 					if (strControlName.Length >= 11 && strControlName.Substring(0, 11) == "tbRareIndex")
 					{
-						tbSecondInputObject = (TextBox)this.Controls.Find("tbRareProb" + strControlName[strControlName.Length - 1], true)[0];
+						tbSecondInputObject = (TextBox)Controls.Find("tbRareProb" + strControlName[strControlName.Length - 1], true)[0];
 						nOptionLevel = Convert.ToInt32(tbSecondInputObject.Text);
 					}
 
@@ -147,13 +147,13 @@ namespace LastChaos_ToolBoxNG
 
 					if (strControlName.Length >= 11 && strControlName.Substring(0, 11) == "tbRareIndex")
 					{
-						tbSecondInputObject = (TextBox)this.Controls.Find("tbRareProb" + strControlName[strControlName.Length - 1], true)[0];
+						tbSecondInputObject = (TextBox)Controls.Find("tbRareProb" + strControlName[strControlName.Length - 1], true)[0];
 						nMagicLevel = Convert.ToInt32(tbSecondInputObject.Text);
 					}
 
 					if (strControlName.Length >= 6 && strControlName == "tbSet0")
 					{
-						tbSecondInputObject = (TextBox)this.Controls.Find("tbSet1", true)[0];
+						tbSecondInputObject = (TextBox)Controls.Find("tbSet1", true)[0];
 						nMagicLevel = Convert.ToInt32(tbSecondInputObject.Text);
 					}
 
@@ -186,13 +186,13 @@ namespace LastChaos_ToolBoxNG
 
 					if (strControlName.Length >= 11 && strControlName.Substring(0, 11) == "tbRareIndex")
 					{
-						tbSecondInputObject = (TextBox)this.Controls.Find("tbRareProb" + strControlName[strControlName.Length - 1], true)[0];
+						tbSecondInputObject = (TextBox)Controls.Find("tbRareProb" + strControlName[strControlName.Length - 1], true)[0];
 						nSkillLevel = Convert.ToInt32(tbSecondInputObject.Text);
 					}
 
 					if (strControlName.Length >= 9 && strControlName == "tbOption0")
 					{
-						tbSecondInputObject = (TextBox)this.Controls.Find("tbOption1", true)[0];
+						tbSecondInputObject = (TextBox)Controls.Find("tbOption1", true)[0];
 						nSkillLevel = Convert.ToInt32(tbSecondInputObject.Text);
 					}
 
@@ -217,7 +217,7 @@ namespace LastChaos_ToolBoxNG
 				};
 
 				cmCommonInput = new ContextMenuStrip();
-				cmCommonInput.Items.AddRange(new ToolStripItem[] {
+				cmCommonInput.Items.AddRange(
 					menuItemPicker,
 					menuZonePicker,
 					menuSkillPicker,
@@ -227,7 +227,7 @@ namespace LastChaos_ToolBoxNG
 					menuGenericTypePicker,
 					menuSpecialSkillPicker,
 					menuTitlePicker
-				});
+				);
 				cmCommonInput.Show(Cursor.Position);
 			}
 		}
@@ -273,7 +273,7 @@ namespace LastChaos_ToolBoxNG
 			}
 
 			for (int i = 0; i < strTexts.Length; i++)
-				((Label)this.Controls.Find("lSet" + i, true)[0]).Text = strTexts[i];
+				((Label)Controls.Find("lSet" + i, true)[0]).Text = strTexts[i];
 		}
 
 		private void SetOptionDataTexts()   // NOTE: Here can set label text for "a_num_X" columns textboxs ↓
@@ -320,7 +320,7 @@ namespace LastChaos_ToolBoxNG
 			}
 
 			for (int i = 0; i < strTexts.Length; i++)
-				((Label)this.Controls.Find("lOption" + i, true)[0]).Text = strTexts[i];
+				((Label)Controls.Find("lOption" + i, true)[0]).Text = strTexts[i];
 		}
 
 		private void AddToList(int nID, string strName, bool bIsTemp)
@@ -446,7 +446,7 @@ namespace LastChaos_ToolBoxNG
 
 			// NOTE: If columns related to locale are required, they must be defined here.
 			foreach (string strNation in pMain.pSettings.NationSupported)
-				listQueryCompose.AddRange(new List<string> { "a_name_" + strNation.ToLower(), "a_descr_" + strNation.ToLower() });
+				listQueryCompose.AddRange("a_name_" + strNation.ToLower(), "a_descr_" + strNation.ToLower());
 
 			if (pMain.pTables.ItemTable == null)    // NOTE: If the global table is empty, directly indicate that a query must be executed requesting all previously defined columns.
 			{
@@ -882,7 +882,7 @@ namespace LastChaos_ToolBoxNG
 			btnSkill2RequiredID.Image = null;
 #endif
 			for (int i = 0; i < Defs.MAX_MAKE_ITEM_MATERIAL; i++)
-				((Button)this.Controls.Find($"btnItem{i}Required", true)[0]).Image = null;
+				((Button)Controls.Find($"btnItem{i}Required", true)[0]).Image = null;
 
 			cbFortuneEnable.Checked = false;
 			cbFortuneProbType.SelectedIndex = -1;
@@ -1112,15 +1112,15 @@ namespace LastChaos_ToolBoxNG
 			tbEffectDamage.Text = pTempItemRow["a_damage_effect_name"].ToString();
 			/****************************************/
 			for (int i = 1; i <= 6; i++)
-				((TextBox)this.Controls.Find("tbVariation" + i, true)[0]).Text = pTempItemRow["a_origin_variation" + i].ToString();
+				((TextBox)Controls.Find("tbVariation" + i, true)[0]).Text = pTempItemRow["a_origin_variation" + i].ToString();
 			/****************************************/
 			SetSetDataTexts();
 
 			for (int i = 0; i <= 4; i++)
-				((TextBox)this.Controls.Find("tbSet" + i, true)[0]).Text = pTempItemRow["a_set_" + i].ToString();
+				((TextBox)Controls.Find("tbSet" + i, true)[0]).Text = pTempItemRow["a_set_" + i].ToString();
 			/****************************************/
 			for (int i = 0; i <= 4; i++)
-				((TextBox)this.Controls.Find("tbOption" + i, true)[0]).Text = pTempItemRow["a_num_" + i].ToString();
+				((TextBox)Controls.Find("tbOption" + i, true)[0]).Text = pTempItemRow["a_num_" + i].ToString();
 
 			// Crafting
 			int nSpecialSkillNeededID = Convert.ToInt32(pTempItemRow["a_need_sskill"]);
@@ -1178,7 +1178,7 @@ namespace LastChaos_ToolBoxNG
 			{
 				int nRequiredItemID = Convert.ToInt32(pTempItemRow["a_need_item" + i]);
 				string strRequiredItemID = nRequiredItemID.ToString();
-				btnObj = (Button)this.Controls.Find($"btnItem{i}Required", true)[0];
+				btnObj = (Button)Controls.Find($"btnItem{i}Required", true)[0];
 
 				if (nRequiredItemID != -1)
 				{
@@ -1197,7 +1197,7 @@ namespace LastChaos_ToolBoxNG
 
 				btnObj.Text = strRequiredItemID;
 
-				((TextBox)this.Controls.Find($"tbItem{i}RequiredAmount", true)[0]).Text = pTempItemRow["a_need_item_count" + i].ToString();
+				((TextBox)Controls.Find($"tbItem{i}RequiredAmount", true)[0]).Text = pTempItemRow["a_need_item_count" + i].ToString();
 			}
 
 			// Rare
@@ -1205,11 +1205,11 @@ namespace LastChaos_ToolBoxNG
 			{
 				int nRareOptionProb = Convert.ToInt32(pTempItemRow["a_rare_prob_" + i]);
 
-				((TextBox)this.Controls.Find("tbRareIndex" + i, true)[0]).Text = pTempItemRow["a_rare_index_" + i].ToString();
+				((TextBox)Controls.Find("tbRareIndex" + i, true)[0]).Text = pTempItemRow["a_rare_index_" + i].ToString();
 
-				((TextBox)this.Controls.Find("tbRareProb" + i, true)[0]).Text = nRareOptionProb.ToString();
+				((TextBox)Controls.Find("tbRareProb" + i, true)[0]).Text = nRareOptionProb.ToString();
 
-				((Label)this.Controls.Find($"lRareProb{i}Percentage", true)[0]).Text = ((nRareOptionProb * 100.0f) / 10000.0f) + "%";
+				((Label)Controls.Find($"lRareProb{i}Percentage", true)[0]).Text = ((nRareOptionProb * 100.0f) / 10000.0f) + "%";
 			}
 
 			// Fortune
@@ -1414,9 +1414,9 @@ namespace LastChaos_ToolBoxNG
 					"a_texture_row",
 					"a_texture_col",
 					"a_wearing",
-					"a_need_sskill_level",
+					"a_need_sskill_level"
 #if ENABLE_SECOND_SKILL_TO_CRAFT
-					"a_need_sskill_level2"
+					, "a_need_sskill_level2"
 #endif
 				};
 
@@ -1429,13 +1429,7 @@ namespace LastChaos_ToolBoxNG
 				};
 
 				foreach (string strNation in pMain.pSettings.NationSupported)
-				{
-					listVarcharColumns.AddRange(new List<string>
-					{
-						"a_name_" + strNation.ToLower(),
-						"a_descr_" + strNation.ToLower()
-					});
-				}
+					listVarcharColumns.AddRange("a_name_" + strNation.ToLower(), "a_descr_" + strNation.ToLower());
 
 				List<string> listBigIntColumns = new List<string>	// Here add all bigint columns.
 				{
@@ -1594,16 +1588,9 @@ namespace LastChaos_ToolBoxNG
 				};
 
 				foreach (string strNation in pMain.pSettings.NationSupported)
-				{
-					listDefaultValue.AddRange(new List<object>
-					{
-						strName,
-						"Created with NicolasG LastChaos ToolBox"
-					});
-				}
+					listDefaultValue.AddRange(strName, "Created with NicolasG LastChaos ToolBox");
 
-				listDefaultValue.AddRange(new List<object>
-				{
+				listDefaultValue.AddRange(
 #if ALLOWED_ZONE_SYSTEM
 					0,  // a_zone_flag
 #endif
@@ -1618,7 +1605,7 @@ namespace LastChaos_ToolBoxNG
 					0,  // a_need_item_count7
 					0,  // a_need_item_count8
 					0   // a_need_item_count9
-				});
+				);
 
 				i = 0;
 				foreach (string strColumnName in listUIntColumns.Concat(listIntColumns).Concat(listUTinyIntColumns).Concat(listTinyIntColumns).Concat(listVarcharColumns).Concat(listBigIntColumns).Concat(listSmallIntColumns))
@@ -2450,7 +2437,7 @@ namespace LastChaos_ToolBoxNG
 		{
 			if (bUserAction)
 			{
-				pTempItemRow["a_origin_variation" + nNumber] = ((TextBox)this.Controls.Find("tbVariation" + nNumber, true)[0]).Text;
+				pTempItemRow["a_origin_variation" + nNumber] = ((TextBox)Controls.Find("tbVariation" + nNumber, true)[0]).Text;
 
 				bUnsavedChanges = true;
 			}
@@ -2467,7 +2454,7 @@ namespace LastChaos_ToolBoxNG
 		{
 			if (bUserAction)
 			{
-				pTempItemRow["a_set_" + nNumber] = ((TextBox)this.Controls.Find("tbSet" + nNumber, true)[0]).Text;
+				pTempItemRow["a_set_" + nNumber] = ((TextBox)Controls.Find("tbSet" + nNumber, true)[0]).Text;
 
 				bUnsavedChanges = true;
 			}
@@ -2483,7 +2470,7 @@ namespace LastChaos_ToolBoxNG
 		{
 			if (bUserAction)
 			{
-				pTempItemRow["a_num_" + nNumber] = ((TextBox)this.Controls.Find("tbOption" + nNumber, true)[0]).Text;
+				pTempItemRow["a_num_" + nNumber] = ((TextBox)Controls.Find("tbOption" + nNumber, true)[0]).Text;
 
 				bUnsavedChanges = true;
 			}
@@ -2598,7 +2585,7 @@ namespace LastChaos_ToolBoxNG
 			if (bUserAction)
 			{
 				string strItemIDColumn = "a_need_item" + nNumber;
-				Button btnObj = (Button)this.Controls.Find($"btnItem{nNumber}Required", true)[0];
+				Button btnObj = (Button)Controls.Find($"btnItem{nNumber}Required", true)[0];
 
 				ItemPicker pItemSelector = new(pMain, this, Convert.ToInt32(pTempItemRow[strItemIDColumn]));
 				if (pItemSelector.ShowDialog() != DialogResult.OK)
@@ -2609,7 +2596,7 @@ namespace LastChaos_ToolBoxNG
 
 				if (nItemNeededID > 0)
 				{
-					strItemName += " - " + pItemSelector.ReturnValues[1].ToString();
+					strItemName += $" - {pItemSelector.ReturnValues[1]}";
 
 					btnObj.Image = new Bitmap(pMain.GetIcon("ItemBtn", pItemSelector.ReturnValues[3].ToString(), Convert.ToInt32(pItemSelector.ReturnValues[4]), Convert.ToInt32(pItemSelector.ReturnValues[5])), new Size(24, 24));
 				}
@@ -2620,7 +2607,7 @@ namespace LastChaos_ToolBoxNG
 
 				btnObj.Text = strItemName;
 
-				((TextBox)this.Controls.Find($"tbItem{nNumber}RequiredAmount", true)[0]).Focus();
+				((TextBox)Controls.Find($"tbItem{nNumber}RequiredAmount", true)[0]).Focus();
 
 				pTempItemRow[strItemIDColumn] = nItemNeededID.ToString();
 
@@ -2643,7 +2630,7 @@ namespace LastChaos_ToolBoxNG
 		{
 			if (bUserAction)
 			{
-				pTempItemRow["a_need_item_count" + nNumber] = ((TextBox)this.Controls.Find($"tbItem{nNumber}RequiredAmount", true)[0]).Text;
+				pTempItemRow["a_need_item_count" + nNumber] = ((TextBox)Controls.Find($"tbItem{nNumber}RequiredAmount", true)[0]).Text;
 
 				bUnsavedChanges = true;
 			}
@@ -2664,7 +2651,7 @@ namespace LastChaos_ToolBoxNG
 		{
 			if (bUserAction)
 			{
-				pTempItemRow["a_rare_index_" + nNumber] = ((TextBox)this.Controls.Find("tbRareIndex" + nNumber, true)[0]).Text;
+				pTempItemRow["a_rare_index_" + nNumber] = ((TextBox)Controls.Find("tbRareIndex" + nNumber, true)[0]).Text;
 
 				bUnsavedChanges = true;
 			}
@@ -2685,9 +2672,9 @@ namespace LastChaos_ToolBoxNG
 		{
 			if (bUserAction)
 			{
-				string strProb = ((TextBox)this.Controls.Find("tbRareProb" + nNumber, true)[0]).Text;
+				string strProb = ((TextBox)Controls.Find("tbRareProb" + nNumber, true)[0]).Text;
 
-				((Label)this.Controls.Find($"lRareProb{nNumber}Percentage", true)[0]).Text = ((Convert.ToInt32(strProb) * 100.0f) / 10000.0f) + "%";
+				((Label)Controls.Find($"lRareProb{nNumber}Percentage", true)[0]).Text = ((Convert.ToInt32(strProb) * 100.0f) / 10000.0f) + "%";
 
 				pTempItemRow["a_rare_prob_" + nNumber] = strProb;
 
@@ -2950,7 +2937,7 @@ namespace LastChaos_ToolBoxNG
 					};
 
 					cmFortune = new ContextMenuStrip();
-					cmFortune.Items.AddRange(new ToolStripItem[] { addItem, deleteItem });
+					cmFortune.Items.AddRange(addItem, deleteItem);
 					cmFortune.Show(Cursor.Position);
 				}
 			}

@@ -77,7 +77,7 @@ namespace LastChaos_ToolBoxNG
 			groupBox1.Margin = new Padding(4, 3, 4, 3);
 			groupBox1.Name = "groupBox1";
 			groupBox1.Padding = new Padding(4, 3, 4, 3);
-			groupBox1.Size = new Size(646, 472);
+			groupBox1.Size = new Size(646, 473);
 			groupBox1.TabIndex = 0;
 			groupBox1.TabStop = false;
 			groupBox1.Text = "Moonstone Rewards Data";
@@ -128,7 +128,7 @@ namespace LastChaos_ToolBoxNG
 			gridRewards.RowHeadersDefaultCellStyle = dataGridViewCellStyle3;
 			gridRewards.RowHeadersWidthSizeMode = DataGridViewRowHeadersWidthSizeMode.AutoSizeToAllHeaders;
 			gridRewards.ScrollBars = ScrollBars.Vertical;
-			gridRewards.Size = new Size(630, 444);
+			gridRewards.Size = new Size(630, 445);
 			gridRewards.TabIndex = 1000;
 			gridRewards.CellMouseClick += gridRewards_CellMouseClick;
 			gridRewards.CellValueChanged += gridRewards_CellValueChanged;
@@ -221,7 +221,7 @@ namespace LastChaos_ToolBoxNG
 			AutoScaleDimensions = new SizeF(7F, 15F);
 			AutoScaleMode = AutoScaleMode.Font;
 			BackColor = Color.FromArgb(40, 40, 40);
-			ClientSize = new Size(672, 525);
+			ClientSize = new Size(672, 526);
 			Controls.Add(cbChangesAppliedNotification);
 			Controls.Add(label1);
 			Controls.Add(tbSearch);
@@ -229,7 +229,7 @@ namespace LastChaos_ToolBoxNG
 			Controls.Add(groupBox1);
 			Icon = Properties.Resources.NG;
 			Margin = new Padding(4, 3, 4, 3);
-			MinimumSize = new Size(688, 564);
+			MinimumSize = new Size(688, 565);
 			Name = "MoonstoneEditor";
 			StartPosition = FormStartPosition.CenterScreen;
 			Text = "Moonstone Editor";

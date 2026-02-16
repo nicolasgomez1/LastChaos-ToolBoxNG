@@ -1580,8 +1580,10 @@ namespace LastChaos_ToolBoxNG
 			Controls.Add(btnReload);
 			Controls.Add(groupBox1);
 			DoubleBuffered = true;
+			FormBorderStyle = FormBorderStyle.FixedSingle;
 			Icon = Properties.Resources.NG;
 			Margin = new Padding(4, 3, 4, 3);
+			MaximizeBox = false;
 			MinimumSize = new Size(1040, 580);
 			Name = "RareOptionEditor";
 			StartPosition = FormStartPosition.CenterScreen;
