@@ -1,4 +1,4 @@
-﻿# LastChaos ToolBox <img align="left" src="https://user-images.githubusercontent.com/5092697/138568453-9cbbedb8-7889-4a9d-ac72-5d2dae9bae9f.png" width="100px">
+# LastChaos ToolBox <img align="left" src="https://user-images.githubusercontent.com/5092697/138568453-9cbbedb8-7889-4a9d-ac72-5d2dae9bae9f.png" width="100px">
 It provides the basics for creating tools to manage Databases and perhaps files related to LastChaos.
 
 # Concept of Global Tables
@@ -62,14 +62,11 @@ It provides the basics for creating tools to manage Databases and perhaps files 
 8) [GenericLoadOptionDataAsync](Main.cs)
 
 # Showcase
-* Item Editor
-
+## Item Editor
 ![1](https://github.com/user-attachments/assets/fc7f7ec9-bc47-421d-ac2a-3ce9972322cb)
 
-* Control Panel
-
+## Control Panel
 ![2](https://github.com/user-attachments/assets/861eb420-034f-4aa9-917e-f5bd76a6b6e7)
 
-* Strings & Lods Expoter
-
+## Strings & Lods Expoter
 ![3](https://github.com/user-attachments/assets/cdcc24ea-4b86-4bc7-8a36-ca8cd1a77a2e)
