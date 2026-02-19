@@ -654,7 +654,7 @@ namespace LastChaos_ToolBoxNG
 					"a_color"
 				};
 
-				if (pMain.pTables.TitleTable == null)	// If is null, create new DataTable and set schema (column name & datatype).
+				if (pMain.pTables.TitleTable == null)
 				{
 					DataTable pTitleTableStruct = new();
 
@@ -681,8 +681,6 @@ namespace LastChaos_ToolBoxNG
 						if ((nNewTitleID = pMain.AskForIndex(this.Text, "a_index")) == -1)	// I don't test it...
 							return;
 					}
-
-					QueryReturn = null;
 				}
 				else
 				{

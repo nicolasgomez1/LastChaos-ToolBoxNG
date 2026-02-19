@@ -200,187 +200,6 @@
 
 			return nCurrentRowID;
 		}
-		// TODO: This needs to be removed.↓
-		private (bool bProceed, long lLastInsertID) DoINSERT(object[] objArray) // Group Row ID, Reward Item ID, Amount, Probability & Item Reward Flag
-		{
-			int nGroupRowID = Convert.ToInt32(objArray[0]);
-			string strGroupName = gridRewards.Rows[nGroupRowID].Cells[1].Value?.ToString() ?? string.Empty;
-			bool bSuccess = true;
-			long lNewLastInsertID = -1;
-			/****************************************/
-			int nMoonstoneID = Convert.ToInt32(gridRewards.Rows[nGroupRowID].HeaderCell.Tag);
-			int nItemID = Convert.ToInt32(objArray[1]);
-			int nAmount = Convert.ToInt32(objArray[2]);
-			float fProb = float.Parse(objArray[3].ToString(), CultureInfo.InvariantCulture);
-			long lFlag = Convert.ToInt64(objArray[4]);
-
-			if (pMain.QueryUpdateInsertDelete(pMain.pSettings.DBCharset, $"INSERT INTO {pMain.pSettings.DBData}.t_moonstone_reward (a_type, a_giftindex, a_giftcount, a_giftprob, a_giftflag) VALUES ({nMoonstoneID}, '{nItemID}', '{nAmount}', '{fProb}', '{lFlag}');", out long lLastInsertID))
-			{
-				try
-				{
-					DataRow? pLacaBallTableRow = pMain.pTables.LacaBallTable?.NewRow();
-					if (pLacaBallTableRow != null)
-					{
-						pLacaBallTableRow["a_index"] = lLastInsertID;
-						pLacaBallTableRow["a_type"] = nMoonstoneID;
-						pLacaBallTableRow["a_giftindex"] = nItemID;
-						pLacaBallTableRow["a_giftcount"] = nAmount;
-						pLacaBallTableRow["a_giftprob"] = fProb;
-						pLacaBallTableRow["a_giftflag"] = lFlag;
-
-						pMain.pTables.LacaBallTable?.Rows.Add(pLacaBallTableRow);
-					}
-
-					lNewLastInsertID = lLastInsertID;
-				}
-				catch (Exception ex)
-				{
-					string strError = $"LacaBall Editor > Reward: {strGroupName}: {lLastInsertID} Changes applied in DataBase, but something got wrong while transferring temp data to main table. Please restart the application ({ex.Message}).";
-
-					pMain.Logger(LogTypes.Error, strError);
-
-					MessageBox.Show(strError, "LacaBall Editor", MessageBoxButtons.OK, MessageBoxIcon.Error);
-
-					bSuccess = false;
-				}
-			}
-			else
-			{
-				string strError = $"LacaBall Editor > Reward: {strGroupName}: {lLastInsertID} Something got wrong while trying to execute the MySQL query. Changes not applied.";
-
-				pMain.Logger(LogTypes.Error, strError);
-
-				MessageBox.Show(strError, "LacaBall Editor", MessageBoxButtons.OK, MessageBoxIcon.Error);
-
-				bSuccess = false;
-			}
-
-			/*if (bSuccess)
-			{
-				if (cbChangesAppliedNotification.Checked)
-					MessageBox.Show("Changes applied successfully!", "LacaBall Editor", MessageBoxButtons.OK);
-				else
-					pMain.Logger(LogTypes.Success, $"LacaBall Editor > Reward: {strGroupName}: {lLastInsertID} Changes applied successfully!");
-			}*/
-
-			return (bSuccess, lNewLastInsertID);
-		}
-		// TODO: This needs to be removed.↓
-		private void DoUPDATE(int nGridRowID)
-		{
-			bool bSuccess = true;
-			int nGroupRowID = GetGroupRowID(nGridRowID);
-			string strGroupName = gridRewards.Rows[nGroupRowID].Cells[1].Value.ToString() ?? string.Empty;
-			int nMoonstoneID = Convert.ToInt32(gridRewards.Rows[nGroupRowID].HeaderCell.Tag);
-			int nRowIndex = Convert.ToInt32(gridRewards.Rows[nGridRowID].HeaderCell.Tag);
-			/****************************************/
-			int nItemID = Convert.ToInt32(gridRewards.Rows[nGridRowID].Cells["item"].Tag);
-			int nAmount = Convert.ToInt32(gridRewards.Rows[nGridRowID].Cells["amount"].Value);
-			float fProb = float.Parse(gridRewards.Rows[nGridRowID].Cells["prob"].Value?.ToString() ?? "0");
-			long lFlag = Convert.ToInt64(gridRewards.Rows[nGridRowID].Cells["flag"].Value);
-
-			if (pMain.QueryUpdateInsertDelete(pMain.pSettings.DBCharset, $"UPDATE {pMain.pSettings.DBData}.t_moonstone_reward SET a_type={nMoonstoneID}, a_giftindex={nItemID}, a_giftcount={nAmount}, a_giftprob='{fProb}', a_giftflag={lFlag} WHERE a_index={nRowIndex};", out long _))
-			{
-				try
-				{
-					DataRow? pLacaBallTableRow = pMain.pTables.LacaBallTable?.Select("a_index=" + nRowIndex).FirstOrDefault();
-					if (pLacaBallTableRow != null)
-					{
-						pLacaBallTableRow["a_type"] = nMoonstoneID;
-						pLacaBallTableRow["a_giftindex"] = nItemID;
-						pLacaBallTableRow["a_giftcount"] = nAmount;
-						pLacaBallTableRow["a_giftprob"] = fProb;
-						pLacaBallTableRow["a_giftflag"] = lFlag;
-					}
-				}
-				catch (Exception ex)
-				{
-					string strError = $"LacaBall Editor > Reward: {strGroupName}: {nRowIndex} Changes applied in DataBase, but something got wrong while transferring temp data to main table. Please restart the application ({ex.Message}).";
-
-					pMain.Logger(LogTypes.Error, strError);
-
-					MessageBox.Show(strError, "LacaBall Editor", MessageBoxButtons.OK, MessageBoxIcon.Error);
-
-					bSuccess = false;
-				}
-			}
-			else
-			{
-				string strError = $"LacaBall Editor > Reward: {strGroupName}: {nRowIndex} Something got wrong while trying to execute the MySQL query. Changes not applied.";
-
-				pMain.Logger(LogTypes.Error, strError);
-
-				MessageBox.Show(strError, "LacaBall Editor", MessageBoxButtons.OK, MessageBoxIcon.Error);
-
-				bSuccess = false;
-			}
-
-			if (bSuccess)
-			{
-				/*if (cbChangesAppliedNotification.Checked)
-					MessageBox.Show("Changes applied successfully!", "LacaBall Editor", MessageBoxButtons.OK);
-				else
-					pMain.Logger(LogTypes.Success, $"LacaBall Editor > Reward: {strGroupName}: {nRowIndex} Changes applied successfully!");
-
-				nLastRowEdited = -1;*/
-			}
-		}
-		// TODO: This needs to be removed.↓
-		private bool DoDELETE(int nGroupRowID, List<int> nRowIDS)
-		{
-			if (nRowIDS == null || nRowIDS.Count <= 0)
-				return false;
-
-			string strGroupName = gridRewards.Rows[nGroupRowID].Cells[1].Value.ToString() ?? string.Empty;
-			string strRowIDS = string.Join(", ", nRowIDS);
-			bool bSuccess = true;
-
-			if (pMain.QueryUpdateInsertDelete(pMain.pSettings.DBCharset, $"DELETE FROM {pMain.pSettings.DBData}.t_moonstone_reward WHERE a_index IN({strRowIDS});", out long _))
-			{
-				try
-				{
-					if (pMain.pTables.LacaBallTable != null)
-					{
-						foreach (int nRowID in nRowIDS)
-						{
-							DataRow? pRow = pMain.pTables.LacaBallTable?.Select("a_index=" + nRowID).FirstOrDefault();
-							if (pRow != null)
-								pMain.pTables.LacaBallTable?.Rows.Remove(pRow);
-						}
-					}
-				}
-				catch (Exception ex)
-				{
-					string strError = $"LacaBall Editor > Reward{((nRowIDS.Count > 1) ? "s" : "")}: {strGroupName}: {strRowIDS} Changes applied in DataBase, but something got wrong while transferring temp data to main table. Please restart the application ({ex.Message}).";
-
-					pMain.Logger(LogTypes.Error, strError);
-
-					MessageBox.Show(strError, "LacaBall Editor", MessageBoxButtons.OK, MessageBoxIcon.Error);
-
-					bSuccess = false;
-				}
-			}
-			else
-			{
-				string strError = $"LacaBall Editor > Reward{((nRowIDS.Count > 1) ? "s" : "")}: {strGroupName}: {strRowIDS} Something got wrong while trying to execute the MySQL query. Changes not applied.";
-
-				pMain.Logger(LogTypes.Error, strError);
-
-				MessageBox.Show(strError, "LacaBall Editor", MessageBoxButtons.OK, MessageBoxIcon.Error);
-
-				bSuccess = false;
-			}
-
-			if (bSuccess)
-			{
-				/*if (cbChangesAppliedNotification.Checked)
-					MessageBox.Show("Changes applied successfully!", "LacaBall Editor", MessageBoxButtons.OK);
-				else
-					pMain.Logger(LogTypes.Success, $"LacaBall Editor > Reward{((nRowIDS.Count > 1) ? "s" : "")}: {strGroupName}: {strRowIDS} Changes applied successfully!");*/
-			}
-
-			return bSuccess;
-		}
 
 		private void LacaBallEditor_FormClosing(object sender, FormClosingEventArgs e)
 		{
@@ -415,7 +234,13 @@
 			btnRequiredItem.Image = null;
 			/****************************************/
 			if (bLoadFrompLacaBallTable && pMain.pTables.LacaBallTable != null)
-				pTempLacaBallTokenRows = pMain.pTables.LacaBallTable?.AsEnumerable().Where(row => Convert.ToInt32(row["a_item_order"]) == nItemOrder).ToArray();
+			{
+				pTempLacaBallTokenRows = pMain.pTables.LacaBallTable.AsEnumerable().Where(row => Convert.ToInt32(row["a_item_order"]) == nItemOrder).Select(row => {
+					DataRow newRow = pMain.pTables.LacaBallTable.NewRow();
+					newRow.ItemArray = (object[])row.ItemArray.Clone();
+					return newRow;
+				}).ToArray();
+			}
 			/****************************************/
 			// General
 			nOriginalTokenID = Convert.ToInt32(pTempLacaBallTokenRows[0]["a_tocken_index"]);
@@ -438,7 +263,6 @@
 
 			btnRequiredItem.Text = strRequiredItemName;
 			/****************************************/
-			// TODO: Eventualmente dependiendo de bLoadFrompLacaBallTable hay que repopular la grilla
 			if (bLoadFrompLacaBallTable)
 			{
 				gridRewards.Rows.Clear();
@@ -476,7 +300,7 @@
 						pItemRow = pMain.pTables.ItemTable?.AsEnumerable().Where(row => Convert.ToInt32(row["a_index"]) == nRewardID).FirstOrDefault();
 						if (pItemRow != null)
 						{
-							strRewardItemName += " - " + pItemRow["a_name_" + pMain.pSettings.WorkLocale].ToString();
+							strRewardItemName += $" - {pItemRow["a_name_" + pMain.pSettings.WorkLocale]}";
 
 							gridRewards.Rows[nGroupRowIndex].Cells["itemIcon"].Value = new Bitmap(pMain.GetIcon("ItemBtn", pItemRow["a_texture_id"].ToString(), Convert.ToInt32(pItemRow["a_texture_row"]), Convert.ToInt32(pItemRow["a_texture_col"])), new Size(24, 24));
 						}
@@ -571,37 +395,175 @@
 			LacaBallEditor_LoadAsync(sender, e);
 		}
 
-		private void btnAddNew_Click(object sender, EventArgs e)
+		private (int nItemID, string strItemName) AskForItemIndex()
 		{
-			// TODO: ...
+			ItemPicker pItemSelector = new(pMain, this, Convert.ToInt32(pTempLacaBallTokenRows[0]["a_tocken_index"]), false);
+			if (pItemSelector.ShowDialog() != DialogResult.OK)
+				return (-1, "NONE");
+
+			int nNewTokenID = Convert.ToInt32(pItemSelector.ReturnValues[0]);
+
+			if (!pMain.pTables.LacaBallTable.AsEnumerable().Any(row => Convert.ToInt32(row["a_tocken_index"]) == nNewTokenID))
+			{
+				return (nNewTokenID, pItemSelector.ReturnValues[1].ToString() ?? string.Empty);
+			}
+			else
+			{
+				pMain.Logger(LogTypes.Error, "LacaBall Editor > Cannot duplicate an Item for a Token.");
+
+				return AskForItemIndex();
+			}
+		}
+
+		private void btnAddNew_Click(object sender, EventArgs e)	// TODO: No se limpia la grilla...
+		{
+			bool bSuccess = true;
+			var (bProceed, bDeleteActual) = CheckUnsavedChanges();
+
+			if (bProceed)
+			{
+				int i, nNewTokenID, nNewTokenItemOrder = 0;
+
+				var (nItemID, strItemName) = AskForItemIndex();
+				if (nItemID == -1)
+					return;
+				else
+					nNewTokenID = nItemID;
+
+				DataRow pNewRow;
+
+				List<string> listIntColumns = new List<string>	// Here add all int columns.
+				{
+					"a_index",
+					"a_item_order",
+					"a_tocken_index",
+					"a_item_index",
+					"a_item_count",
+					"a_item_max",
+					"a_item_remain"
+				};
+
+				List<string> listTinyIntColumns = new List<string>	// Here add all tinyint columns.
+				{
+					"a_course_code",
+					"a_order"
+				};
+
+				if (pMain.pTables.LacaBallTable == null)
+				{
+					DataTable pLacaBallTableStruct = new();
+
+					foreach (string strColumnName in listIntColumns)
+						pLacaBallTableStruct.Columns.Add(strColumnName, typeof(int));
+
+					foreach (string strColumnName in listTinyIntColumns)
+						pLacaBallTableStruct.Columns.Add(strColumnName, typeof(sbyte));
+
+					pNewRow = pLacaBallTableStruct.NewRow();
+
+					pLacaBallTableStruct.Dispose();
+				}
+				else
+				{
+					pNewRow = pMain.pTables.LacaBallTable.NewRow();
+
+					nNewTokenItemOrder = pMain.pTables.LacaBallTable.AsEnumerable().Max(row => Convert.ToInt32(row["a_item_order"])) + 1;
+				}
+
+				List<object> listDefaultValue = new List<object>
+				{
+					0,		// a_index
+					nNewTokenItemOrder,	// a_item_order
+					nNewTokenID,	// a_tocken_index
+					43,	// a_item_index
+					1,	// a_item_count
+					1,	// a_item_max
+					1,	// a_item_remain
+					0,	// a_course_code
+					0	// a_order
+				};
+
+				i = 0;
+				foreach (string strColumnName in listIntColumns.Concat(listTinyIntColumns))
+				{
+					pNewRow[strColumnName] = listDefaultValue[i];
+
+					i++;
+				}
+
+				try
+				{
+					pTempLacaBallTokenRows = Array.Empty<DataRow>();
+
+					pTempLacaBallTokenRows[0] = pNewRow;
+				}
+				catch (Exception ex)
+				{
+					string strError = $"LacaBall Editor > Token: {nNewTokenID} Something got wrong. Please restart the application ({ex.Message}).";
+
+					pMain.Logger(LogTypes.Error, strError);
+
+					MessageBox.Show(strError, "LacaBall Editor", MessageBoxButtons.OK, MessageBoxIcon.Error);
+
+					bSuccess = false;
+				}
+				finally
+				{
+					if (bSuccess)
+					{
+						if (bDeleteActual)
+							MainList.Items.RemoveAt(MainList.SelectedIndex);
+
+						AddToList(nNewTokenItemOrder, strItemName, true);
+					}
+				}
+			}
 		}
 
 		private void btnCopy_Click(object sender, EventArgs e)
 		{
-			// TODO: ...
+			var (bProceed, bDeleteActual) = CheckUnsavedChanges();
+
+			if (bDeleteActual)
+			{
+				MessageBox.Show("You cannot copy this Token. Because it's temporary.", "LacaBall Editor", MessageBoxButtons.YesNo, MessageBoxIcon.Error);
+				return;
+			}
+
+			if (bProceed)
+			{
+				var (nNewTokenID, strItemName) = AskForItemIndex();
+
+				if (nNewTokenID == -1)
+					return;
+
+				int nNewTokenItemOrder = pMain.pTables.LacaBallTable.AsEnumerable().Max(row => Convert.ToInt32(row["a_item_order"])) + 1;
+
+				pTempLacaBallTokenRows = pMain.pTables.LacaBallTable?.AsEnumerable().Where(row => Convert.ToInt32(row["a_tocken_index"]) == nOriginalTokenID).ToArray();
+
+				foreach (DataRow pRow in pTempLacaBallTokenRows)
+				{
+					pRow["a_tocken_index"] = nNewTokenID;
+					pRow["a_item_order"] = nNewTokenItemOrder;
+				}
+
+				AddToList(nNewTokenItemOrder, strItemName, true);
+			}
 		}
 
-		private void btnDelete_Click(object sender, EventArgs e)	// TODO: ...
+		private void btnDelete_Click(object sender, EventArgs e)
 		{
 			bool bSuccess = true;
-			int nTokenID = Convert.ToInt32(pTempLacaBallTokenRows[0]["a_tocken_index"]);
-			DataRow? pMagicRow = pMain.pTables.LacaBallTable?.Select("a_tocken_index=" + nTokenID).FirstOrDefault();
 
-			if (pMagicRow != null)
+			if (pMain.pTables.LacaBallTable?.Select("a_tocken_index=" + nOriginalTokenID).FirstOrDefault() != null)
 			{
-				StringBuilder strbuilderQuery = new();
-
-				strbuilderQuery.Append($"DELETE FROM {pMain.pSettings.DBData}.t_magic WHERE a_index={nTokenID};\n");
-
-				strbuilderQuery.Append($"DELETE FROM {pMain.pSettings.DBData}.t_magiclevel WHERE a_index={nMagicID};\n");
-
-				if (!(bSuccess = pMain.QueryUpdateInsertDelete(pMain.pSettings.DBCharset, strbuilderQuery.Append("COMMIT;").ToString(), out long _)))
+				if (!(bSuccess = pMain.QueryUpdateInsertDelete(pMain.pSettings.DBCharset, $"DELETE FROM {pMain.pSettings.DBData}.t_lacaball WHERE a_tocken_index={nOriginalTokenID};", out long _)))
 				{
-					string strError = $"Magic Editor > Magic: {nTokenID} Something got wrong while trying to execute the MySQL Transaction. Changes not applied.";
+					string strError = $"LacaBall Editor > Token: {nOriginalTokenID} Something got wrong while trying to execute the MySQL Transaction. Changes not applied.";
 
 					pMain.Logger(LogTypes.Error, strError);
 
-					MessageBox.Show(strError, "Magic Editor", MessageBoxButtons.OK, MessageBoxIcon.Error);
+					MessageBox.Show(strError, "LacaBall Editor", MessageBoxButtons.OK, MessageBoxIcon.Error);
 				}
 			}
 
@@ -609,27 +571,24 @@
 			{
 				try
 				{
-					if (pMain.pTables.MagicLevelTable != null)
+					if (pMain.pTables.LacaBallTable != null)
 					{
-						DataRow[] pRows = pMain.pTables.MagicLevelTable.Select("a_index=" + nMagicID);
+						DataRow[] pRows = pMain.pTables.LacaBallTable.Select("a_tocken_index=" + nOriginalTokenID);
 
 						if (pRows.Length > 0)
 						{
 							foreach (DataRow pRow in pRows)
-								pMain.pTables.MagicLevelTable.Rows.Remove(pRow);
+								pMain.pTables.LacaBallTable.Rows.Remove(pRow);
 						}
 					}
-
-					if (pMagicRow != null)
-						pMain.pTables.MagicTable.Rows.Remove(pMagicRow);
 				}
 				catch (Exception ex)
 				{
-					string strError = $"Magic Editor > Magic: {nMagicID} Changes applied in DataBase, but something got wrong while transferring temp data to main tables. Please restart the application ({ex.Message}).";
+					string strError = $"LacaBall Editor > Token: {nOriginalTokenID} Changes applied in DataBase, but something got wrong while transferring temp data to main tables. Please restart the application ({ex.Message}).";
 
 					pMain.Logger(LogTypes.Error, strError);
 
-					MessageBox.Show(strError, "Magic Editor", MessageBoxButtons.OK, MessageBoxIcon.Error);
+					MessageBox.Show(strError, "LacaBall Editor", MessageBoxButtons.OK, MessageBoxIcon.Error);
 
 					bSuccess = false;
 				}
@@ -641,7 +600,7 @@
 
 						MainList.Items.Remove(MainList.SelectedItem);
 
-						MessageBox.Show("Magic Deleted successfully!", "Magic Editor", MessageBoxButtons.OK);
+						MessageBox.Show("Token Deleted successfully!", "LacaBall Editor", MessageBoxButtons.OK);
 
 						MainList.SelectedIndex = nPrevObjectID;
 
@@ -926,7 +885,7 @@
 
 		private void btnUpdate_Click(object sender, EventArgs e)
 		{
-
+			// TODO: ...
 		}
 	}
 }

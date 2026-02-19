@@ -424,7 +424,7 @@
 				foreach (string strNation in pMain.pSettings.NationSupported)
 					listVarcharColumns.Add("a_name_" + strNation.ToLower());
 
-				if (pMain.pTables.OptionTable == null)	// If is null, create new DataTable and set schema (column name & datatype).
+				if (pMain.pTables.OptionTable == null)
 				{
 					DataTable pOptionTableStruct = new();
 
@@ -448,8 +448,6 @@
 						if ((nNewOptionID = pMain.AskForIndex(this.Text, "a_index")) == -1)	// I don't test it...
 							return;
 					}
-
-					QueryReturn = null;
 				}
 				else
 				{

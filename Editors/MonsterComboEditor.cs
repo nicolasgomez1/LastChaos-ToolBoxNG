@@ -447,7 +447,7 @@
 				foreach (string strNation in pMain.pSettings.NationSupported)
 					listVarcharColumns.Add("a_name_" + strNation.ToLower());
 
-				if (pMain.pTables.MissionCaseTable == null) // If is null, create new DataTable and set schema (column name & datatype).
+				if (pMain.pTables.MissionCaseTable == null)
 				{
 					DataTable pMissionCaseTableStruct = new();
 
@@ -471,8 +471,6 @@
 						if ((nNewCaseID = pMain.AskForIndex(this.Text, "a_index")) == -1)   // I don't test it...
 							return;
 					}
-
-					QueryReturn = null;
 				}
 				else
 				{

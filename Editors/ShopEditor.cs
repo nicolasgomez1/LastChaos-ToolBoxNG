@@ -614,7 +614,6 @@ namespace LastChaos_ToolBoxNG
 				int i, nNewShopID;
 
 				var (nNPCID, strNPCName) = AskForNPCIndex();
-
 				if (nNPCID == -1)
 					return;
 				else
@@ -830,7 +829,7 @@ namespace LastChaos_ToolBoxNG
 
 				int nNPCID = Convert.ToInt32(pNPCSelector.ReturnValues[0]);
 
-				btnNPCID.Text = nNPCID + " - " + pNPCSelector.ReturnValues[1].ToString();
+				btnNPCID.Text = $"{nNPCID} - {pNPCSelector.ReturnValues[1]}";
 
 				pTempShopRow["a_keeper_idx"] = nNPCID;
 

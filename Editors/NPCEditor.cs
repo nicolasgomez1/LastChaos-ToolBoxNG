@@ -694,6 +694,8 @@ namespace LastChaos_ToolBoxNG
 
 		private void LoadRegenData(int nNPCID)
 		{
+			lbRegenZones.Items.Clear();
+
 			pTempRegenRows = pMain.pTables.NPCRegenTable.AsEnumerable().Where(row => Convert.ToInt32(row["a_npc_idx"]) == nNPCID).Select(row => {
 				DataRow newRow = pMain.pTables.NPCRegenTable.NewRow();
 				newRow.ItemArray = (object[])row.ItemArray.Clone();
@@ -709,7 +711,7 @@ namespace LastChaos_ToolBoxNG
 					int nZoneID = Convert.ToInt32(pRow["a_zone_index"]);
 					string strZoneName = pRow["a_name"].ToString() ?? string.Empty;
 
-					if (pTempRegenRows.AsEnumerable().Any(row => Convert.ToInt32(row["a_zone_num"]) == nZoneID))
+					if (pTempRegenRows.Length > 0 && pTempRegenRows.AsEnumerable().Any(row => Convert.ToInt32(row["a_zone_num"]) == nZoneID))
 						strZoneName += "\t*";
 
 					lbRegenZones.Items.Add(new Main.ListBoxItem
@@ -999,11 +1001,25 @@ namespace LastChaos_ToolBoxNG
 			}
 
 			cbWorldRatioSelector.SelectedIndex = 0;
-			
-			if (lbRegenZones.SelectedItem != null)
-				nLastSelectedRegenZone = ((Main.ListBoxItem)lbRegenZones.SelectedItem).ID;
 
 			lbRegenZones.Items.Clear();
+
+			lbRegenZones.BeginUpdate();
+
+			foreach (DataRow pRow in pMain.pTables.ZoneTable.Rows)
+			{
+				int nZoneID = Convert.ToInt32(pRow["a_zone_index"]);
+
+				lbRegenZones.Items.Add(new Main.ListBoxItem
+				{
+					ID = nZoneID,
+					Text = $"{nZoneID} - {pRow["a_name"].ToString() ?? string.Empty}"
+				});
+			}
+
+			lbRegenZones.EndUpdate();
+
+			pbWorldMap.Invalidate();
 
 			gridRegenSpots.Rows.Clear();
 
@@ -1874,8 +1890,6 @@ namespace LastChaos_ToolBoxNG
 						if ((nNewNPCID = pMain.AskForIndex(this.Text, "a_index")) == -1)    // I don't test it...
 							return;
 					}
-
-					QueryReturn = null;
 				}
 				else
 				{
@@ -2094,6 +2108,8 @@ namespace LastChaos_ToolBoxNG
 					{
 						if (bDeleteActual)
 							MainList.Items.RemoveAt(MainList.SelectedIndex);
+
+						pTempRegenRows = Array.Empty<DataRow>();
 
 						AddToList(nNewNPCID, "New NPC", true);
 					}

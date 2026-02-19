@@ -518,7 +518,7 @@ namespace LastChaos_ToolBoxNG
 					"a_stuff_cnt"
 				};
 
-				if (pMain.pTables.CraftingTable == null)   // If is null, create new DataTable and set schema (column name & datatype).
+				if (pMain.pTables.CraftingTable == null)
 				{
 					DataTable pCraftingTableStruct = new();
 
@@ -545,8 +545,6 @@ namespace LastChaos_ToolBoxNG
 						if ((nNewCraftID = pMain.AskForIndex(this.Text, "a_index")) == -1)	// I don't test it...
 							return;
 					}
-
-					QueryReturn = null;
 				}
 				else
 				{

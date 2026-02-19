@@ -10,7 +10,7 @@ namespace LastChaos_ToolBoxNG
 	{
 		private readonly Main pMain;
 #if DEBUG
-		long lTotalElapsedTime;
+		private long lTotalElapsedTime;
 #endif
 		private List<Task> ExportTasks = new();
 

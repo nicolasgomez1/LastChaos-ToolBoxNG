@@ -509,7 +509,7 @@ namespace LastChaos_ToolBoxNG
 				foreach (string strNation in pMain.pSettings.NationSupported)
 					listVarcharColumns.Add("a_prefix_" + strNation.ToLower());
 
-				if (pMain.pTables.RareOptionTable == null)	// If is null, create new DataTable and set schema (column name & datatype).
+				if (pMain.pTables.RareOptionTable == null)
 				{
 					DataTable pRareOptionTableStruct = new();
 
@@ -536,8 +536,6 @@ namespace LastChaos_ToolBoxNG
 						if ((nNewRareOptionID = pMain.AskForIndex(this.Text, "a_index")) == -1)	// I don't test it...
 							return;
 					}
-
-					QueryReturn = null;
 				}
 				else
 				{

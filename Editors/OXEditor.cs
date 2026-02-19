@@ -632,8 +632,6 @@
 						if ((nNewQuestionID = pMain.AskForIndex(this.Text, "a_index")) == -1)	// I don't test it...
 							return;
 					}
-
-					QueryReturn = null;
 				}
 				else
 				{

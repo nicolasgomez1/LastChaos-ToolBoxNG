@@ -10,7 +10,7 @@ namespace LastChaos_ToolBoxNG
 		private int nSearchPosition = 0;
 		private Main.ListBoxItem? pLastSelected;
 		private DataRow pTempSetRow;
-		string[] strItemWearingButtonNames =
+		private string[] strItemWearingButtonNames =
 		{
 			// Standards
 			"Helmet",
@@ -509,7 +509,7 @@ namespace LastChaos_ToolBoxNG
 				foreach (string strNation in pMain.pSettings.NationSupported)
 					listVarcharColumns.Add("a_set_name_" + strNation.ToLower());
 
-				if (pMain.pTables.ItemSetTable == null) // If is null, create new DataTable and set schema (column name & datatype).
+				if (pMain.pTables.ItemSetTable == null)
 				{
 					DataTable pItemSetTableStruct = new();
 
@@ -533,8 +533,6 @@ namespace LastChaos_ToolBoxNG
 						if ((nNewSetID = pMain.AskForIndex(this.Text, "a_set_idx")) == -1)  // I don't test it...
 							return;
 					}
-
-					QueryReturn = null;
 				}
 				else
 				{

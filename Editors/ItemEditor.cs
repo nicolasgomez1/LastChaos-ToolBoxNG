@@ -1492,8 +1492,6 @@ namespace LastChaos_ToolBoxNG
 						if ((nNewItemID = pMain.AskForIndex(this.Text, "a_index")) == -1)	// I don't test it...
 							return null;
 					}
-
-					QueryReturn = null;
 				}
 				else
 				{

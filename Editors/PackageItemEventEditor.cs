@@ -393,7 +393,7 @@ namespace LastChaos_ToolBoxNG
 					"a_date_limit"
 				};
 
-				if (pMain.pTables.KeyTable == null) // If is null, create new DataTable and set schema (column name & datatype).
+				if (pMain.pTables.KeyTable == null)
 				{
 					DataTable pKeyTableStruct = new();
 
@@ -420,8 +420,6 @@ namespace LastChaos_ToolBoxNG
 						if ((nNewPackageID = pMain.AskForIndex(this.Text, "a_index")) == -1) // I don't test it...
 							return;
 					}
-
-					QueryReturn = null;
 				}
 				else
 				{

@@ -13,7 +13,7 @@ namespace LastChaos_ToolBoxNG
 		private Main.ListBoxItem? pLastSelected;
 		private DataRow pTempMagicRow;
 		private ContextMenuStrip? cmLevels;
-		string[] strParamsNames = { "PsP", "PtP", "HsP", "HtP" };
+		private string[] strParamsNames = { "PsP", "PtP", "HsP", "HtP" };
 
 		public MagicEditor(Main mainForm)
 		{
@@ -525,7 +525,7 @@ namespace LastChaos_ToolBoxNG
 #endif
 				};
 
-				if (pMain.pTables.MagicTable == null)	// If is null, create new DataTable and set schema (column name & datatype).
+				if (pMain.pTables.MagicTable == null)
 				{
 					DataTable pMagicTableStruct = new();
 
@@ -552,8 +552,6 @@ namespace LastChaos_ToolBoxNG
 						if ((nNewMagicID = pMain.AskForIndex(this.Text, "a_index")) == -1)	// I don't test it...
 							return;
 					}
-
-					QueryReturn = null;
 				}
 				else
 				{

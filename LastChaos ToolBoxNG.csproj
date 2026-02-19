@@ -7,7 +7,7 @@
     <Nullable>enable</Nullable>
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
-    <AssemblyVersion>2.0.0.10234</AssemblyVersion>
+    <AssemblyVersion>2.0.0.10251</AssemblyVersion>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <ApplicationIcon>Resources\NG.ico</ApplicationIcon>
     <NuGetAuditMode>direct</NuGetAuditMode>
