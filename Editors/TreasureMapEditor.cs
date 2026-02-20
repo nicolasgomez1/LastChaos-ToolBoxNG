@@ -125,7 +125,7 @@
 		private async Task LoadZoneDataAsync()
 		{
 			bool bRequestNeeded = false;
-			List<string> listQueryCompose = new List<string> { "a_name", "a_treasurecount", "a_treasure_area" };
+			List<string> listQueryCompose = ["a_name", "a_treasurecount", "a_treasure_area"];
 
 			if (pMain.pTables.ZoneTable == null)
 			{

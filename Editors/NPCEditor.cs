@@ -194,8 +194,8 @@ namespace LastChaos_ToolBoxNG
 		private async Task LoadNPCDataAsync()
 		{
 			bool bRequestNeeded = false;
-			List<string> listQueryCompose = new List<string>
-			{
+			List<string> listQueryCompose =
+			[
 				"a_enable", "a_family", "a_skillmaster", "a_flag", "a_flag1", "a_state_flag", "a_level", "a_exp", "a_prize", "a_sight", "a_size", "a_move_area", "a_attack_area", "a_skill_point", "a_sskill_master", "a_str", "a_dex", "a_int", "a_con", "a_attack", "a_magic", "a_defense", "a_resist", "a_attacklevel", "a_defenselevel", "a_hp", "a_mp", "a_attackType", "a_attackSpeed", "a_recover_hp", "a_recover_mp", "a_walk_speed", "a_run_speed", "a_skill0", "a_skill1", "a_skill2", "a_skill3", "a_item_0", "a_item_1", "a_item_2", "a_item_3", "a_item_4", "a_item_5", "a_item_6", "a_item_7", "a_item_8", "a_item_9", "a_item_10", "a_item_11", "a_item_12", "a_item_13", "a_item_14", "a_item_15", "a_item_16", "a_item_17", "a_item_18", "a_item_19", "a_item_percent_0", "a_item_percent_1", "a_item_percent_2", "a_item_percent_3", "a_item_percent_4", "a_item_percent_5", "a_item_percent_6", "a_item_percent_7", "a_item_percent_8", "a_item_percent_9", "a_item_percent_10", "a_item_percent_11", "a_item_percent_12", "a_item_percent_13", "a_item_percent_14", "a_item_percent_15", "a_item_percent_16", "a_item_percent_17", "a_item_percent_18", "a_item_percent_19", "a_minplus", "a_maxplus", "a_probplus", "a_product0", "a_product1", "a_product2", "a_product3", "a_product4", "a_file_smc", "a_motion_walk", "a_motion_idle", "a_motion_dam", "a_motion_attack", "a_motion_die", "a_motion_run", "a_motion_idle2", "a_motion_attack2", "a_scale", "a_attribute", "a_fireDelayCount", "a_fireDelay0", "a_fireDelay1", "a_fireDelay2", "a_fireDelay3", "a_fireEffect0", "a_fireEffect1", "a_fireEffect2", "a_fireObject", "a_fireSpeed", "a_aitype", "a_aiflag", "a_aileader_flag", "a_ai_summonHp", "a_aileader_idx", "a_aileader_count", "a_hit", "a_dodge", "a_magicavoid", "a_job_attribute", "a_jewel_0", "a_jewel_1", "a_jewel_2", "a_jewel_3", "a_jewel_4", "a_jewel_5", "a_jewel_6", "a_jewel_7", "a_jewel_8", "a_jewel_9", "a_jewel_10", "a_jewel_11", "a_jewel_12", "a_jewel_13", "a_jewel_14", "a_jewel_15", "a_jewel_16", "a_jewel_17", "a_jewel_18", "a_jewel_19", "a_jewel_percent_0", "a_jewel_percent_1", "a_jewel_percent_2", "a_jewel_percent_3", "a_jewel_percent_4", "a_jewel_percent_5", "a_jewel_percent_6", "a_jewel_percent_7", "a_jewel_percent_8", "a_jewel_percent_9", "a_jewel_percent_10", "a_jewel_percent_11", "a_jewel_percent_12", "a_jewel_percent_13", "a_jewel_percent_14", "a_jewel_percent_15", "a_jewel_percent_16", "a_jewel_percent_17", "a_jewel_percent_18", "a_jewel_percent_19", "a_zone_flag", "a_extra_flag", "a_rvr_value", "a_rvr_grade", "a_bound", "a_lifetime"
 #if NPC_CHANNEL
 				, "a_channel_flag"
@@ -203,7 +203,7 @@ namespace LastChaos_ToolBoxNG
 #if REWARDS_BY_DAMAGE
 				, "a_reward_gold_min", "a_reward_gold_max", "a_reward_gold_multiplier"
 #endif
-			};
+			];
 
 			foreach (string strNation in pMain.pSettings.NationSupported)
 				listQueryCompose.AddRange("a_name_" + strNation.ToLower(), "a_descr_" + strNation.ToLower());
@@ -240,7 +240,8 @@ namespace LastChaos_ToolBoxNG
 		private async Task LoadNPCRegenDataAsync()  // NOTE: This... is a little bit stupid cuz load 3k rows...
 		{
 			bool bRequestNeeded = false;
-			List<string> listQueryCompose = new List<string> {
+			List<string> listQueryCompose =
+			[
 				"a_npc_idx",
 				"a_zone_num",
 				"a_pos_x",
@@ -252,7 +253,7 @@ namespace LastChaos_ToolBoxNG
 				"a_y_layer",
 				"a_regen_sec",
 				"a_total_num"
-			};
+			];
 
 			if (pMain.pTables.NPCRegenTable == null)
 			{
@@ -286,7 +287,7 @@ namespace LastChaos_ToolBoxNG
 		private async Task LoadZoneDataAsync()
 		{
 			bool bRequestNeeded = false;
-			List<string> listQueryCompose = new List<string> { "a_name", "a_poscount" };
+			List<string> listQueryCompose = ["a_name", "a_poscount"];
 
 			if (pMain.pTables.ZoneTable == null)
 			{
@@ -320,7 +321,8 @@ namespace LastChaos_ToolBoxNG
 		private async Task LoadNPCDropJobAsync()
 		{
 			bool bRequestNeeded = false;
-			List<string> listQueryCompose = new List<string> {
+			List<string> listQueryCompose =
+			[
 				"a_titan_item",
 				"a_titan_item_prob",
 				"a_knight_item",
@@ -339,7 +341,7 @@ namespace LastChaos_ToolBoxNG
 				"a_exrogue_item_prob",
 				"a_exmage_item",
 				"a_exmage_item_prob"
-			};
+			];
 
 			if (pMain.pTables.NPCDropJobTable == null)
 			{
@@ -435,7 +437,7 @@ namespace LastChaos_ToolBoxNG
 		private async Task LoadNPCDropAllAsync()
 		{
 			bool bRequestNeeded = false;
-			List<string> listQueryCompose = new List<string> { "a_item_idx", "a_prob" };
+			List<string> listQueryCompose = ["a_item_idx", "a_prob"];
 
 			if (pMain.pTables.NPCDropAllTable == null)
 			{
@@ -527,8 +529,8 @@ namespace LastChaos_ToolBoxNG
 		private async Task LoadNPCDropRaidAsync()
 		{
 			bool bRequestNeeded = false;
-			List<string> listQueryCompose = new List<string>
-			{
+			List<string> listQueryCompose =
+			[
 				"a_item_index",
 				"a_count",
 				"a_prob",
@@ -549,7 +551,7 @@ namespace LastChaos_ToolBoxNG
 				"a_spec_item_index14",
 				"a_spec_count",
 				"a_spec_prob"
-			};
+			];
 
 			if (pMain.pTables.NPCDropRaidTable == null)
 			{
@@ -711,7 +713,7 @@ namespace LastChaos_ToolBoxNG
 					int nZoneID = Convert.ToInt32(pRow["a_zone_index"]);
 					string strZoneName = pRow["a_name"].ToString() ?? string.Empty;
 
-					if (pTempRegenRows.Length > 0 && pTempRegenRows.AsEnumerable().Any(row => Convert.ToInt32(row["a_zone_num"]) == nZoneID))
+					if (pTempRegenRows.AsEnumerable().Any(row => Convert.ToInt32(row["a_zone_num"]) == nZoneID))
 						strZoneName += "\t*";
 
 					lbRegenZones.Items.Add(new Main.ListBoxItem
@@ -1698,8 +1700,8 @@ namespace LastChaos_ToolBoxNG
 				int i, nNewNPCID = 9999;
 				DataRow pNewRow;
 
-				List<string> listIntColumns = new List<string>	// Here add all int columns.
-				{
+				List<string> listIntColumns =   // Here add all int columns.
+				[
 					"a_index",
 					"a_enable",
 					"a_flag1",
@@ -1790,20 +1792,20 @@ namespace LastChaos_ToolBoxNG
 #if REWARDS_BY_DAMAGE
 					, "a_reward_gold_min", "a_reward_gold_max", "a_reward_gold_multiplier"
 #endif
-				};
+				];
 
-				List<string> listTinyIntColumns = new List<string>	// Here add all tinyint columns.
-				{
+				List<string> listTinyIntColumns =   // Here add all tinyint columns.
+				[
 					"a_skillmaster",
 					"a_sskill_master",
 					"a_attackType",
 					"a_attackSpeed",
 					"a_fireDelayCount",
 					"a_fireObject"
-				};
+				];
 
-				List<string> listVarcharColumns = new List<string>	// Here add all varchar columns.
-				{
+				List<string> listVarcharColumns =   // Here add all varchar columns.
+				[
 					"a_skill0",
 					"a_skill1",
 					"a_skill2",
@@ -1820,26 +1822,26 @@ namespace LastChaos_ToolBoxNG
 					"a_fireEffect0",
 					"a_fireEffect1",
 					"a_fireEffect2"
-				};
+				];
 
 				foreach (string strNation in pMain.pSettings.NationSupported)
 					listVarcharColumns.AddRange("a_name_" + strNation.ToLower(), "a_descr_" + strNation.ToLower());
 
-				List<string> listBigIntColumns = new List<string>	// Here add all bigint columns.
-				{
+				List<string> listBigIntColumns =    // Here add all bigint columns.
+				[
 					"a_flag",
 					"a_zone_flag",
 					"a_extra_flag"
-				};
+				];
 
-				List<string> listSmallIntColumns = new List<string>	// Here add all smallint columns.
-				{
+				List<string> listSmallIntColumns =  // Here add all smallint columns.
+				[
 					"a_family",
 					"a_move_area"
-				};
+				];
 
-				List<string> listFloatColumns = new List<string>	// Here add all float columns.
-				{
+				List<string> listFloatColumns =	// Here add all float columns.
+				[
 					"a_sight",
 					"a_size",
 					"a_attack_area",
@@ -1852,7 +1854,7 @@ namespace LastChaos_ToolBoxNG
 					"a_fireDelay3",
 					"a_fireSpeed",
 					"a_bound"
-				};
+				];
 
 				if (pMain.pTables.NPCTable == null)    // If is null, create new DataTable and set schema (column name & datatype).
 				{
@@ -1898,8 +1900,8 @@ namespace LastChaos_ToolBoxNG
 					pNewRow = pMain.pTables.NPCTable.NewRow();
 				}
 
-				List<object> listDefaultValue = new List<object>
-				{
+				List<object> listDefaultValue =
+				[
 					nNewNPCID,	// a_index
 					0,	// a_enable
 					0,	// a_flag1
@@ -2054,7 +2056,7 @@ namespace LastChaos_ToolBoxNG
 					"",	// a_fireEffect0
 					"",	// a_fireEffect1
 					""	// a_fireEffect2
-				};
+				];
 
 				foreach (string strNation in pMain.pSettings.NationSupported)
 					listDefaultValue.AddRange("New NPC", "Created with NicolasG LastChaos ToolBox");
@@ -3068,7 +3070,7 @@ namespace LastChaos_ToolBoxNG
 				else
 					nSkillLevel = 1;
 
-				SkillPicker pSkillSelector = new(pMain, this, new object[] { pTempNPCRow["a_skill" + nNumber].ToString().Split(' ')[0], nSkillLevel }, true);
+				SkillPicker pSkillSelector = new(pMain, this, [pTempNPCRow["a_skill" + nNumber].ToString().Split(' ')[0], nSkillLevel], true);
 				if (pSkillSelector.ShowDialog() != DialogResult.OK)
 					return;
 

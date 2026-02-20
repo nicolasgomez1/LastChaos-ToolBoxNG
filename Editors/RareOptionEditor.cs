@@ -95,8 +95,8 @@ namespace LastChaos_ToolBoxNG
 		private async Task LoadRareOptionDataAsync()
 		{
 			bool bRequestNeeded = false;
-			List<string> listQueryCompose = new List<string>
-			{
+			List<string> listQueryCompose =
+			[
 				"a_grade",
 #if ENABLE_TYPE
 				"a_type",
@@ -135,7 +135,7 @@ namespace LastChaos_ToolBoxNG
 				"a_option_index9",
 				"a_option_level9",
 				"a_option_prob9"
-			};
+			];
 
 			foreach (string strNation in pMain.pSettings.NationSupported)
 				listQueryCompose.Add("a_prefix_" + strNation.ToLower());
@@ -457,16 +457,16 @@ namespace LastChaos_ToolBoxNG
 				int i, nNewRareOptionID = 9999;
 				DataRow pNewRow;
 
-				List<string> listTinyIntColumns = new List<string>	// Here add all tinyint columns.
-				{
+				List<string> listTinyIntColumns =
+				[
 					"a_grade"
 #if ENABLE_TYPE
 					, "a_type"
 #endif
-				};
+				];
 
-				List<string> listIntColumns = new List<string>	// Here add all int columns.
-				{
+				List<string> listIntColumns =
+				[
 					"a_index",
 					"a_attack",
 					"a_defense",
@@ -502,7 +502,7 @@ namespace LastChaos_ToolBoxNG
 					"a_option_index9",
 					"a_option_level9",
 					"a_option_prob9"
-				};
+				];
 
 				List<string> listVarcharColumns = new();	// Here add all varchar columns.
 
@@ -544,8 +544,8 @@ namespace LastChaos_ToolBoxNG
 					pNewRow = pMain.pTables.RareOptionTable.NewRow();
 				}
 
-				List<object> listDefaultValue = new List<object>
-				{
+				List<object> listDefaultValue =
+				[
 					0,	// a_grade
 #if ENABLE_TYPE
 					0,	// a_type
@@ -585,7 +585,7 @@ namespace LastChaos_ToolBoxNG
 					-1,	// a_option_index9
 					0,	// a_option_level9
 					0	// a_option_prob9
-				};
+				];
 
 				foreach (string strNation in pMain.pSettings.NationSupported)
 					listDefaultValue.Add("New Rare Option");

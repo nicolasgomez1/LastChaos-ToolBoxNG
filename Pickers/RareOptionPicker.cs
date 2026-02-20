@@ -35,7 +35,7 @@
 			this.Location = new Point(pParentForm.Location.X + (pParentForm.Width - this.Width) / 2, pParentForm.Location.Y + (pParentForm.Height - this.Height) / 2);
 
 			bool bRequestNeeded = false;
-			List<string> listQueryCompose = new List<string> { "a_prefix_" + pMain.pSettings.WorkLocale };
+			List<string> listQueryCompose = ["a_prefix_" + pMain.pSettings.WorkLocale];
 
 			if (pMain.pTables.RareOptionTable == null)
 			{

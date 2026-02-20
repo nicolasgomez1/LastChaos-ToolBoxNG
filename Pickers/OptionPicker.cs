@@ -58,7 +58,8 @@
 			this.Location = new Point(pParentForm.Location.X + (pParentForm.Width - this.Width) / 2, pParentForm.Location.Y + (pParentForm.Height - this.Height) / 2);
 
 			bool bRequestNeeded = false;
-			List<string> listQueryCompose = new List<string> {
+			List<string> listQueryCompose =
+			[
 				"a_type",
 				"a_level",
 				"a_prob",
@@ -66,7 +67,7 @@
 				"a_wear_type",
 				"a_accessory_type",
 				"a_name_" + pMain.pSettings.WorkLocale
-			};
+			];
 
 			if (pMain.pTables.OptionTable == null)
 			{
@@ -257,7 +258,7 @@
 		{
 			DialogResult = DialogResult.OK;
 
-			ReturnValues = new object[] { -1, 0, "NONE", new string[] { } };
+			ReturnValues = [-1, 0, "NONE", new string[] { }];
 
 			Close();
 		}

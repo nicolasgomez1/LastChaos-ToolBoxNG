@@ -195,8 +195,8 @@ namespace LastChaos_ToolBoxNG
 		private async Task LoadTitleDataAsync()
 		{
 			bool bRequestNeeded = false;
-			List<string> listQueryCompose = new List<string>
-			{
+			List<string> listQueryCompose =
+			[
 				"a_enable",
 				"a_effect_name",
 				"a_attack",
@@ -214,7 +214,7 @@ namespace LastChaos_ToolBoxNG
 				"a_flag",
 #endif
 				"a_castle_num"
-			};
+			];
 
 			if (pMain.pTables.TitleTable == null)
 			{
@@ -619,18 +619,18 @@ namespace LastChaos_ToolBoxNG
 				string strNewTitleName = "New Title";
 				DataRow pNewRow;
 
-				List<string> listTinyIntColumns = new List<string>	// Here add all tinyint columns.
-				{
+				List<string> listTinyIntColumns =
+				[
 					"a_enable",
 					"a_option_level0",
 					"a_option_level1",
 					"a_option_level2",
 					"a_option_level3",
 					"a_option_level4"
-				};
+				];
 
-				List<string> listIntColumns = new List<string>	// Here add all int columns.
-				{
+				List<string> listIntColumns =
+				[
 					"a_index",
 					"a_time",
 					"a_option_index0",
@@ -643,16 +643,16 @@ namespace LastChaos_ToolBoxNG
 					"a_flag",
 #endif
 					"a_castle_num"
-				};
+				];
 
-				List<string> listVarcharColumns = new List<string>	// Here add all varchar columns.
-				{
+				List<string> listVarcharColumns =
+				[
 					"a_effect_name",
 					"a_effect_name",
 					"a_damage",
 					"a_bgcolor",
 					"a_color"
-				};
+				];
 
 				if (pMain.pTables.TitleTable == null)
 				{
@@ -693,8 +693,8 @@ namespace LastChaos_ToolBoxNG
 				if (pInput.ShowDialog() == DialogResult.OK)
 					strNewTitleName = pInput.strOutput;
 
-				List<object> listDefaultValue = new List<object>
-				{
+				List<object> listDefaultValue =
+				[
 					1,	// a_enable
 					0,	// a_option_level0
 					0,	// a_option_level1
@@ -722,7 +722,7 @@ namespace LastChaos_ToolBoxNG
 					"",	// a_damage
 					"000000FF",	// a_bgcolor
 					"FFFFFFFF"	// a_color
-				};
+				];
 
 				i = 0;
 				foreach (string strColumnName in listTinyIntColumns.Concat(listIntColumns).Concat(listVarcharColumns))

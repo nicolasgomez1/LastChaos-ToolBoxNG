@@ -430,7 +430,7 @@
 				{
 					while (true)
 					{
-						MessageBox_ComboBox pComboBox = new(this, "HARDCORE Values mismatch. Please set a value (Remember press 'Save All' to apply the change):", new string[] { "FALSE", "TRUE" });
+						MessageBox_ComboBox pComboBox = new(this, "HARDCORE Values mismatch. Please set a value (Remember press 'Save All' to apply the change):", ["FALSE", "TRUE"]);
 						if (pComboBox.ShowDialog() == DialogResult.OK && pComboBox.nSelected != -1)
 						{
 							cbHardcore.Checked = Convert.ToBoolean(pComboBox.nSelected);
@@ -459,7 +459,7 @@
 			{
 				while (true)
 				{
-					MessageBox_ComboBox pComboBox = new(this, "AllowedExternalIP Values mismatch. Please set a value (Remember press 'Save All' to apply the change):", new string[] { "FALSE", "TRUE" });
+					MessageBox_ComboBox pComboBox = new(this, "AllowedExternalIP Values mismatch. Please set a value (Remember press 'Save All' to apply the change):", ["FALSE", "TRUE"]);
 					if (pComboBox.ShowDialog() == DialogResult.OK && pComboBox.nSelected != -1)
 					{
 						cbAllowedExternalIP.Checked = Convert.ToBoolean(pComboBox.nSelected);
@@ -487,7 +487,7 @@
 			{
 				while (true)
 				{
-					MessageBox_ComboBox pComboBox = new(this, "IntergrationServer Values mismatch. Please set a value (Remember press 'Save All' to apply the change):", new string[] { "FALSE", "TRUE" });
+					MessageBox_ComboBox pComboBox = new(this, "IntergrationServer Values mismatch. Please set a value (Remember press 'Save All' to apply the change):", ["FALSE", "TRUE"]);
 					if (pComboBox.ShowDialog() == DialogResult.OK && pComboBox.nSelected != -1)
 					{
 						cbIntegrationServer.Checked = Convert.ToBoolean(pComboBox.nSelected);

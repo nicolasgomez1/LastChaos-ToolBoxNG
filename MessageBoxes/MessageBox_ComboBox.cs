@@ -7,7 +7,7 @@
 	 * Returns:
 	 *	Int<ID of selected Item from ComboBox>
 	// Call and receive implementation
-	MessageBox_ComboBox pComboBox = new(this, "Please enter a value:", new[] { "Option 1", "Option 2" });
+	MessageBox_ComboBox pComboBox = new(this, "Please enter a value:", ["Option 1", "Option 2"]);
 	if (pComboBox.ShowDialog() == DialogResult.OK && pComboBox.nSelected != -1)
 		 return;
 

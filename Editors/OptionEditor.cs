@@ -72,7 +72,7 @@
 		private async Task LoadOptionDataAsync()
 		{
 			bool bRequestNeeded = false;
-			List<string> listQueryCompose = new List<string> { "a_type", "a_level", "a_prob", "a_weapon_type", "a_wear_type", "a_accessory_type" };
+			List<string> listQueryCompose = ["a_type", "a_level", "a_prob", "a_weapon_type", "a_wear_type", "a_accessory_type"];
 
 			foreach (string strNation in pMain.pSettings.NationSupported)
 				listQueryCompose.Add("a_name_" + strNation.ToLower());
@@ -406,20 +406,20 @@
 				int i, nNewOptionID = 9999;
 				DataRow pNewRow;
 
-				List<string> listIntColumns = new List<string>	// Here add all int columns.
-				{
+				List<string> listIntColumns =
+				[
 					"a_index",
 					"a_type",
 					"a_weapon_type",
 					"a_wear_type",
 					"a_accessory_type"
-				};
+				];
 
-				List<string> listVarcharColumns = new List<string>	// Here add all varchar columns.
-				{
+				List<string> listVarcharColumns =
+				[
 					"a_level",
 					"a_prob"
-				};
+				];
 
 				foreach (string strNation in pMain.pSettings.NationSupported)
 					listVarcharColumns.Add("a_name_" + strNation.ToLower());
@@ -456,8 +456,8 @@
 					pNewRow = pMain.pTables.OptionTable.NewRow();
 				}
 
-				List<object> listDefaultValue = new List<object>
-				{
+				List<object> listDefaultValue =
+				[
 					nNewOptionID,	// a_index
 					0,	// a_type
 					0,	// a_weapon_type
@@ -465,7 +465,7 @@
 					0,	// a_accessory_type
 					0,	// a_level
 					0	// a_prob
-				};
+				];
 
 				foreach (string strNation in pMain.pSettings.NationSupported)
 					listDefaultValue.Add("New Option");

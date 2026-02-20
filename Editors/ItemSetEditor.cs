@@ -85,8 +85,8 @@ namespace LastChaos_ToolBoxNG
 		private async Task LoadItemSetDataAsync()
 		{
 			bool bRequestNeeded = false;
-			List<string> listQueryCompose = new List<string>
-			{
+			List<string> listQueryCompose =
+			[
 				"a_job",
 				"a_enable",
 				"a_item_idx",
@@ -95,7 +95,7 @@ namespace LastChaos_ToolBoxNG
 				"a_option_type",
 				"a_option_idx",
 				"a_option_level"
-			};
+			];
 
 			foreach (string strNation in pMain.pSettings.NationSupported)
 				listQueryCompose.Add("a_set_name_" + strNation.ToLower());
@@ -489,22 +489,22 @@ namespace LastChaos_ToolBoxNG
 				int i, nNewSetID = 9999;
 				DataRow pNewRow;
 
-				List<string> listIntColumns = new List<string>	// Here add all int columns.
-				{
+				List<string> listIntColumns =
+				[
 					"a_set_idx",
 					"a_job",
 					"a_enable",
 					"a_option_count"
-				};
+				];
 
-				List<string> listVarcharColumns = new List<string>	// Here add all varchar columns.
-				{
+				List<string> listVarcharColumns =
+				[
 					"a_item_idx",
 					"a_wear_count",
 					"a_option_type",
 					"a_option_idx",
 					"a_option_level"
-				};
+				];
 
 				foreach (string strNation in pMain.pSettings.NationSupported)
 					listVarcharColumns.Add("a_set_name_" + strNation.ToLower());
@@ -541,8 +541,8 @@ namespace LastChaos_ToolBoxNG
 					pNewRow = pMain.pTables.ItemSetTable.NewRow();
 				}
 
-				List<object> listDefaultValue = new List<object>
-				{
+				List<object> listDefaultValue =
+				[
 					nNewSetID,	// a_set_idx
 					0,	// a_job
 					0,	// a_enable
@@ -552,7 +552,7 @@ namespace LastChaos_ToolBoxNG
 					"-1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1",	// a_option_type	// Hardcode!
 					"-1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1",	// a_option_idx	// Hardcode!
 					"0 0 0 0 0 0 0 0 0 0 0 0"				// a_option_level	// Hardcode!
-				};
+				];
 
 				foreach (string strNation in pMain.pSettings.NationSupported)
 					listDefaultValue.Add("New Set");
@@ -874,7 +874,7 @@ namespace LastChaos_ToolBoxNG
 
 				void OpenSkillPicker()
 				{
-					SkillPicker pSkillSelector = new(pMain, this, new object[] { Convert.ToInt32(strOptionIDs[nPos]), Convert.ToInt32(strOptionLevels[nPos]) });
+					SkillPicker pSkillSelector = new(pMain, this, [Convert.ToInt32(strOptionIDs[nPos]), Convert.ToInt32(strOptionLevels[nPos])]);
 					if (pSkillSelector.ShowDialog() != DialogResult.OK)
 						return;
 

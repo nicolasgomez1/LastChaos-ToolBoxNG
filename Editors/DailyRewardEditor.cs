@@ -131,7 +131,7 @@
 		private async Task LoadDailyRewardsDataAsync()
 		{
 			bool bRequestNeeded = false;
-			List<string> listQueryCompose = new List<string> { "a_item_idx", "a_item_flag", "a_item_amount" };
+			List<string> listQueryCompose = ["a_item_idx", "a_item_flag", "a_item_amount"];
 
 			if (pMain.pTables.DailyRewardTable == null)
 			{
@@ -276,46 +276,7 @@
 
 		private void tbSearch_TextChanged(object sender, EventArgs e) { nSearchPosition = 0; }
 
-		private void tbSearch_KeyDown(object sender, KeyEventArgs e)
-		{
-			if (e.KeyCode == Keys.Enter)
-			{
-				void Search()
-				{
-					int i = 0;
-					string[] searchTokens = pMain.NormalizeText(tbSearch.Text).Split(' ', StringSplitOptions.RemoveEmptyEntries);
-
-					foreach (DataGridViewRow row in gridRewards.Rows)
-					{
-						if (pMain.ContainsAllTokens(row.Cells["item"].Value.ToString(), searchTokens) && i > nSearchPosition)
-						{
-							gridRewards.FirstDisplayedScrollingRowIndex = row.Index;
-							row.Selected = true;
-							nSearchPosition = row.Index;
-							return;
-						}
-
-						i++;
-					}
-
-					for (i = 0; i <= nSearchPosition; i++)
-					{
-						if (pMain.ContainsAllTokens(gridRewards.Rows[i].Cells["item"].Value.ToString(), searchTokens))
-						{
-							gridRewards.FirstDisplayedScrollingRowIndex = gridRewards.Rows[i].Index;
-							gridRewards.Rows[i].Selected = true;
-							nSearchPosition = gridRewards.Rows[i].Index;
-							return;
-						}
-					}
-				}
-
-				Search();
-
-				e.Handled = true;
-				e.SuppressKeyPress = true;
-			}
-		}
+		private void tbSearch_KeyDown(object sender, KeyEventArgs e) { nSearchPosition = pMain.SearchInGridView(tbSearch, e, gridRewards, nSearchPosition); }
 
 		private void cbChangesAppliedNotification_CheckedChanged(object sender, EventArgs e)
 		{

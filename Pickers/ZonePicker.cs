@@ -90,7 +90,7 @@
 		{
 			DialogResult = DialogResult.OK;
 
-			ReturnValues = new object[] { -1, "NONE" };
+			ReturnValues = [-1, "NONE"];
 
 			Close();
 		}

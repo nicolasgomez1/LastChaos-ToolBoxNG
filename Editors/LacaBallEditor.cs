@@ -37,7 +37,6 @@
 				}
 				else    // the current selected LacaBall is temporary.
 				{
-					// TODO: Esto en realidad va en donde se llama a esta función y se da este caso concreto; NO HAY QUE BORRAR SI es que se reemplazó el item requerido.
 					DialogResult pDialogReturn = MessageBox.Show("The current Token is temporary, if you don't press Update. Do you want to continue and lose all the information regarding it?", "LacaBall Editor", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
 					if (pDialogReturn != DialogResult.Yes)
 						bProceed = false;
@@ -74,7 +73,8 @@
 		private async Task LoadLacaBallDataAsync()
 		{
 			bool bRequestNeeded = false;
-			List<string> listQueryCompose = new List<string> {
+			List<string> listQueryCompose =
+			[
 				"a_item_order",
 				"a_tocken_index",
 				"a_course_code",
@@ -83,7 +83,7 @@
 				"a_item_count",
 				"a_item_max",
 				"a_item_remain"
-			};
+			];
 
 			if (pMain.pTables.LacaBallTable == null)
 			{
@@ -263,68 +263,65 @@
 
 			btnRequiredItem.Text = strRequiredItemName;
 			/****************************************/
-			if (bLoadFrompLacaBallTable)
+			gridRewards.Rows.Clear();
+
+			gridRewards.SuspendLayout();
+
+			int nRewardCount = 1, nAddedCourseCode = -1;
+
+			foreach (DataRow pRow in pTempLacaBallTokenRows)
 			{
-				gridRewards.Rows.Clear();
+				// Group Header
+				int nCouseCode = Convert.ToInt32(pRow["a_course_code"]);
 
-				gridRewards.SuspendLayout();
-
-				int nRewardCount = 1, nAddedCourseCode = -1;
-
-				foreach (DataRow pRow in pTempLacaBallTokenRows)
+				if (nAddedCourseCode != nCouseCode)
 				{
-					// Group Header
-					int nCouseCode = Convert.ToInt32(pRow["a_course_code"]);
+					gridRewards.Rows.Add(CreateGroupRow(nCouseCode));
 
-					if (nAddedCourseCode != nCouseCode)
-					{
-						gridRewards.Rows.Add(CreateGroupRow(nCouseCode));
-
-						nRewardCount = 1;
-						nAddedCourseCode = nCouseCode;
-					}
-
-					// Rewards of the Group/Course Code
-					int nRewardID, nGroupRowIndex = gridRewards.Rows.Count;
-					string strRewardItemName;
-
-					gridRewards.Rows.Insert(nGroupRowIndex);
-
-					gridRewards.Rows[nGroupRowIndex].HeaderCell.Value = nRewardCount.ToString();
-
-					nRewardID = Convert.ToInt32(pRow["a_item_index"]);
-					strRewardItemName = nRewardID.ToString();
-
-					if (nRewardID > 0)
-					{
-						pItemRow = pMain.pTables.ItemTable?.AsEnumerable().Where(row => Convert.ToInt32(row["a_index"]) == nRewardID).FirstOrDefault();
-						if (pItemRow != null)
-						{
-							strRewardItemName += $" - {pItemRow["a_name_" + pMain.pSettings.WorkLocale]}";
-
-							gridRewards.Rows[nGroupRowIndex].Cells["itemIcon"].Value = new Bitmap(pMain.GetIcon("ItemBtn", pItemRow["a_texture_id"].ToString(), Convert.ToInt32(pItemRow["a_texture_row"]), Convert.ToInt32(pItemRow["a_texture_col"])), new Size(24, 24));
-						}
-					}
-
-					gridRewards.Rows[nGroupRowIndex].Cells["item"].Value = strRewardItemName;
-					gridRewards.Rows[nGroupRowIndex].Cells["item"].Tag = nRewardID;
-					gridRewards.Rows[nGroupRowIndex].Cells["count"].Value = pRow["a_item_count"];
-
-					if (nRewardID == Defs.NAS_ITEM_DB_INDEX)
-					{
-						gridRewards.Rows[nGroupRowIndex].Cells["count"].Style.ForeColor = pMain.GetGoldColor(Convert.ToInt64(pRow["a_item_count"]));
-						gridRewards.Rows[nGroupRowIndex].Cells["count"].Style.BackColor = Color.FromArgb(166, 166, 166);
-					}
-
-					gridRewards.Rows[nGroupRowIndex].Cells["max"].Value = pRow["a_item_max"];
-					gridRewards.Rows[nGroupRowIndex].Cells["remain"].Value = pRow["a_item_remain"];
-
-					nRewardCount++;
-					nGroupRowIndex++;
+					nRewardCount = 1;
+					nAddedCourseCode = nCouseCode;
 				}
 
-				gridRewards.ResumeLayout();
+				// Rewards of the Group/Course Code
+				int nRewardID, nGroupRowIndex = gridRewards.Rows.Count;
+				string strRewardItemName;
+
+				gridRewards.Rows.Insert(nGroupRowIndex);
+
+				gridRewards.Rows[nGroupRowIndex].HeaderCell.Value = nRewardCount.ToString();
+
+				nRewardID = Convert.ToInt32(pRow["a_item_index"]);
+				strRewardItemName = nRewardID.ToString();
+
+				if (nRewardID > 0)
+				{
+					pItemRow = pMain.pTables.ItemTable?.AsEnumerable().Where(row => Convert.ToInt32(row["a_index"]) == nRewardID).FirstOrDefault();
+					if (pItemRow != null)
+					{
+						strRewardItemName += $" - {pItemRow["a_name_" + pMain.pSettings.WorkLocale]}";
+
+						gridRewards.Rows[nGroupRowIndex].Cells["itemIcon"].Value = new Bitmap(pMain.GetIcon("ItemBtn", pItemRow["a_texture_id"].ToString(), Convert.ToInt32(pItemRow["a_texture_row"]), Convert.ToInt32(pItemRow["a_texture_col"])), new Size(24, 24));
+					}
+				}
+
+				gridRewards.Rows[nGroupRowIndex].Cells["item"].Value = strRewardItemName;
+				gridRewards.Rows[nGroupRowIndex].Cells["item"].Tag = nRewardID;
+				gridRewards.Rows[nGroupRowIndex].Cells["count"].Value = pRow["a_item_count"];
+
+				if (nRewardID == Defs.NAS_ITEM_DB_INDEX)
+				{
+					gridRewards.Rows[nGroupRowIndex].Cells["count"].Style.ForeColor = pMain.GetGoldColor(Convert.ToInt64(pRow["a_item_count"]));
+					gridRewards.Rows[nGroupRowIndex].Cells["count"].Style.BackColor = Color.FromArgb(166, 166, 166);
+				}
+
+				gridRewards.Rows[nGroupRowIndex].Cells["max"].Value = pRow["a_item_max"];
+				gridRewards.Rows[nGroupRowIndex].Cells["remain"].Value = pRow["a_item_remain"];
+
+				nRewardCount++;
+				nGroupRowIndex++;
 			}
+
+			gridRewards.ResumeLayout();
 			/****************************************/
 			bUserAction = true;
 
@@ -415,14 +412,14 @@
 			}
 		}
 
-		private void btnAddNew_Click(object sender, EventArgs e)	// TODO: No se limpia la grilla...
+		private void btnAddNew_Click(object sender, EventArgs e)
 		{
 			bool bSuccess = true;
 			var (bProceed, bDeleteActual) = CheckUnsavedChanges();
 
 			if (bProceed)
 			{
-				int i, nNewTokenID, nNewTokenItemOrder = 0;
+				int i, nNewIndexID = 0, nNewTokenID, nNewTokenItemOrder = 0;
 
 				var (nItemID, strItemName) = AskForItemIndex();
 				if (nItemID == -1)
@@ -432,8 +429,8 @@
 
 				DataRow pNewRow;
 
-				List<string> listIntColumns = new List<string>	// Here add all int columns.
-				{
+				List<string> listIntColumns =
+				[
 					"a_index",
 					"a_item_order",
 					"a_tocken_index",
@@ -441,13 +438,13 @@
 					"a_item_count",
 					"a_item_max",
 					"a_item_remain"
-				};
+				];
 
-				List<string> listTinyIntColumns = new List<string>	// Here add all tinyint columns.
-				{
+				List<string> listTinyIntColumns =
+				[
 					"a_course_code",
 					"a_order"
-				};
+				];
 
 				if (pMain.pTables.LacaBallTable == null)
 				{
@@ -467,12 +464,13 @@
 				{
 					pNewRow = pMain.pTables.LacaBallTable.NewRow();
 
+					nNewIndexID = pMain.pTables.LacaBallTable.AsEnumerable().Max(row => Convert.ToInt32(row["a_index"])) + 1;
 					nNewTokenItemOrder = pMain.pTables.LacaBallTable.AsEnumerable().Max(row => Convert.ToInt32(row["a_item_order"])) + 1;
 				}
 
-				List<object> listDefaultValue = new List<object>
-				{
-					0,		// a_index
+				List<object> listDefaultValue =
+				[
+					nNewIndexID,	// a_index
 					nNewTokenItemOrder,	// a_item_order
 					nNewTokenID,	// a_tocken_index
 					43,	// a_item_index
@@ -481,7 +479,7 @@
 					1,	// a_item_remain
 					0,	// a_course_code
 					0	// a_order
-				};
+				];
 
 				i = 0;
 				foreach (string strColumnName in listIntColumns.Concat(listTinyIntColumns))
@@ -493,9 +491,7 @@
 
 				try
 				{
-					pTempLacaBallTokenRows = Array.Empty<DataRow>();
-
-					pTempLacaBallTokenRows[0] = pNewRow;
+					pTempLacaBallTokenRows = [pNewRow];
 				}
 				catch (Exception ex)
 				{
@@ -539,7 +535,11 @@
 
 				int nNewTokenItemOrder = pMain.pTables.LacaBallTable.AsEnumerable().Max(row => Convert.ToInt32(row["a_item_order"])) + 1;
 
-				pTempLacaBallTokenRows = pMain.pTables.LacaBallTable?.AsEnumerable().Where(row => Convert.ToInt32(row["a_tocken_index"]) == nOriginalTokenID).ToArray();
+				pTempLacaBallTokenRows = pMain.pTables.LacaBallTable.AsEnumerable().Where(row => Convert.ToInt32(row["a_tocken_index"]) == nOriginalTokenID).Select(row => {
+					DataRow newRow = pMain.pTables.LacaBallTable.NewRow();
+					newRow.ItemArray = (object[])row.ItemArray.Clone();
+					return newRow;
+				}).ToArray();
 
 				foreach (DataRow pRow in pTempLacaBallTokenRows)
 				{

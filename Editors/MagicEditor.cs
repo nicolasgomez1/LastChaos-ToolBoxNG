@@ -75,7 +75,8 @@ namespace LastChaos_ToolBoxNG
 		private async Task LoadMagicDataAsync()
 		{
 			bool bRequestNeeded = false;
-			List<string> listQueryCompose = new List<string> {
+			List<string> listQueryCompose =
+			[
 				"a_name",
 #if ENABLE_MAXLEVEL
 				"a_maxlevel",
@@ -94,7 +95,7 @@ namespace LastChaos_ToolBoxNG
 #if ENABLE_TOGGLE
 				, "a_togle"
 #endif
-			};
+			];
 
 			if (pMain.pTables.MagicTable == null)
 			{
@@ -127,7 +128,7 @@ namespace LastChaos_ToolBoxNG
 			bRequestNeeded = false;
 			listQueryCompose.Clear();
 
-			listQueryCompose = new List<string> { "a_level", "a_power", "a_hitrate" };
+			listQueryCompose = ["a_level", "a_power", "a_hitrate"];
 
 			if (pMain.pTables.MagicLevelTable == null)
 			{
@@ -494,22 +495,22 @@ namespace LastChaos_ToolBoxNG
 				int i, nNewMagicID = 9999;
 				DataRow pNewRow;
 
-				List<string> listIntColumns = new List<string>	// Here add all int columns.
-				{
+				List<string> listIntColumns =
+				[
 					"a_index",
 					"a_psp",
 					"a_ptp",
 					"a_hsp",
 					"a_htp"
-				};
+				];
 
-				List<string> listVarcharColumns = new List<string>	// Here add all varchar columns.
-				{
+				List<string> listVarcharColumns =
+				[
 					"a_name"
-				};
+				];
 
-				List<string> listTinyIntColumns = new List<string>	// Here add all tinyint columns.
-				{
+				List<string> listTinyIntColumns =
+				[
 #if ENABLE_MAXLEVEL
 					"a_maxlevel",
 #endif
@@ -523,7 +524,7 @@ namespace LastChaos_ToolBoxNG
 #if ENABLE_TOGGLE
 					, "a_togle"
 #endif
-				};
+				];
 
 				if (pMain.pTables.MagicTable == null)
 				{
@@ -560,8 +561,8 @@ namespace LastChaos_ToolBoxNG
 					pNewRow = pMain.pTables.MagicTable.NewRow();
 				}
 
-				List<object> listDefaultValue = new List<object>
-				{
+				List<object> listDefaultValue =
+				[
 					nNewMagicID,	// a_index
 					0,	// a_psp
 					0,	// a_ptp
@@ -581,7 +582,7 @@ namespace LastChaos_ToolBoxNG
 #if ENABLE_TOGGLE
 					, 0	// a_togle
 #endif
-				};
+				];
 
 				i = 0;
 				foreach (string strColumnName in listIntColumns.Concat(listVarcharColumns).Concat(listTinyIntColumns))

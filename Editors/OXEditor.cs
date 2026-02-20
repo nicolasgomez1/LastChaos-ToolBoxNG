@@ -72,7 +72,7 @@
 		private async Task LoadOXDataAsync()
 		{
 			bool bRequestNeeded = false;
-			List<string> listQueryCompose = new List<string> { "a_name", "a_answer" };
+			List<string> listQueryCompose = ["a_name", "a_answer"];
 
 			foreach (string strNation in pMain.pSettings.NationSupported)
 				listQueryCompose.Add("a_question_" + strNation.ToLower());
@@ -108,7 +108,7 @@
 			bRequestNeeded = false;
 			listQueryCompose.Clear();
 
-			listQueryCompose = new List<string> { "a_item_idx", "a_item_flag", "a_item_amount" };
+			listQueryCompose = ["a_item_idx", "a_item_flag", "a_item_amount"];
 
 			if (pMain.pTables.OXRewardTable == null)
 			{
@@ -594,16 +594,16 @@
 				int i, nNewQuestionID = 9999;
 				DataRow? pNewRow;
 
-				List<string> listIntColumns = new List<string>
-				{
+				List<string> listIntColumns =
+				[
 					"a_index"
-				};
+				];
 
-				List<string> listVarcharColumns = new List<string>
-				{
+				List<string> listVarcharColumns =
+				[
 					"a_name",
 					"a_answer"
-				};
+				];
 
 				foreach (string strNation in pMain.pSettings.NationSupported)
 					listVarcharColumns.Add("a_question_" + strNation.ToLower());
@@ -640,12 +640,12 @@
 					pNewRow = pMain.pTables.OXQuizTable?.NewRow();
 				}
 
-				List<object> listDefaultValue = new List<object>
-				{
+				List<object> listDefaultValue =
+				[
 					nNewQuestionID,	// a_index
 					"New Quiz",		// a_name
 					"O"				// a_answer
-				};
+				];
 
 				foreach (string strNation in pMain.pSettings.NationSupported)
 					listDefaultValue.Add("Created with NicolasG LastChaos ToolBox");
@@ -766,46 +766,7 @@
 		/****************************************/
 		private void tbSearchRewards_TextChanged(object sender, EventArgs e) { nSearchRewardsPosition = 0; }
 
-		private void tbSearchRewards_KeyDown(object sender, KeyEventArgs e)
-		{
-			if (e.KeyCode == Keys.Enter)
-			{
-				void Search()
-				{
-					int i = 0;
-					string[] searchTokens = pMain.NormalizeText(tbSearchRewards.Text).Split(' ', StringSplitOptions.RemoveEmptyEntries);
-
-					foreach (DataGridViewRow row in gridRewards.Rows)
-					{
-						if (pMain.ContainsAllTokens(row.Cells["item"].Value.ToString(), searchTokens) && i > nSearchRewardsPosition)
-						{
-							gridRewards.FirstDisplayedScrollingRowIndex = row.Index;
-							row.Selected = true;
-							nSearchRewardsPosition = row.Index;
-							return;
-						}
-
-						i++;
-					}
-
-					for (i = 0; i <= nSearchRewardsPosition; i++)
-					{
-						if (pMain.ContainsAllTokens(gridRewards.Rows[i].Cells["item"].Value.ToString(), searchTokens))
-						{
-							gridRewards.FirstDisplayedScrollingRowIndex = gridRewards.Rows[i].Index;
-							gridRewards.Rows[i].Selected = true;
-							nSearchRewardsPosition = gridRewards.Rows[i].Index;
-							return;
-						}
-					}
-				}
-
-				Search();
-
-				e.Handled = true;
-				e.SuppressKeyPress = true;
-			}
-		}
+		private void tbSearchRewards_KeyDown(object sender, KeyEventArgs e) { nSearchRewardsPosition = pMain.SearchInGridView(tbSearchRewards, e, gridRewards, nSearchRewardsPosition); }
 
 		private void gridRewards_CellValueChanged(object? sender, DataGridViewCellEventArgs e) {
 			if (bUserAction)

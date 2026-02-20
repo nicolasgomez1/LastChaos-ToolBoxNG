@@ -128,7 +128,7 @@
 		{
 			DialogResult = DialogResult.OK;
 
-			ReturnValues = new object[] { 0, "NONE" };
+			ReturnValues = [0, "NONE"];
 
 			Close();
 		}

@@ -105,8 +105,8 @@ namespace LastChaos_ToolBoxNG
 		private async Task LoadShopDataAsync()
 		{
 			bool bRequestNeeded = false;
-			List<string> listQueryCompose = new List<string>
-			{
+			List<string> listQueryCompose =
+			[
 				"a_zone_num",
 				"a_sell_rate",
 				"a_buy_rate",
@@ -118,7 +118,7 @@ namespace LastChaos_ToolBoxNG
 				"a_pos_h",
 				"a_pos_r",
 				"a_y_layer"
-			};
+			];
 
 			if (pMain.pTables.ShopTable == null)
 			{
@@ -151,13 +151,14 @@ namespace LastChaos_ToolBoxNG
 			bRequestNeeded = false;
 			listQueryCompose.Clear();
 
-			listQueryCompose = new List<string> {
+			listQueryCompose =
+			[
 				"a_item_idx",
 #if ITEM_PLUS_SYSTEM
 				"a_item_plus",
 #endif
-				"a_national",
-			};
+				"a_national"
+			];
 
 			if (pMain.pTables.ShopItemTable == null)
 			{
@@ -191,7 +192,7 @@ namespace LastChaos_ToolBoxNG
 		private async Task LoadNPCDataAsync()
 		{
 			bool bRequestNeeded = false;
-			List<string> listQueryCompose = new List<string> { "a_level", "a_hp", "a_file_smc", "a_name_" + pMain.pSettings.WorkLocale, "a_descr_" + pMain.pSettings.WorkLocale };
+			List<string> listQueryCompose = ["a_level", "a_hp", "a_file_smc", "a_name_" + pMain.pSettings.WorkLocale, "a_descr_" + pMain.pSettings.WorkLocale];
 
 			if (pMain.pTables.NPCTable == null)
 			{
@@ -621,8 +622,8 @@ namespace LastChaos_ToolBoxNG
 
 				DataRow pNewRow;
 
-				List<string> listIntColumns = new List<string>
-				{
+				List<string> listIntColumns =
+				[
 					"a_keeper_idx",
 					"a_zone_num",
 					"a_sell_rate",
@@ -631,15 +632,15 @@ namespace LastChaos_ToolBoxNG
 					"a_required_quest",
 #endif
 					"a_y_layer"
-				};
+				];
 
-				List<string> listFloatColumns = new List<string>
-				{
+				List<string> listFloatColumns =
+				[
 					"a_pos_x",
 					"a_pos_z",
 					"a_pos_h",
 					"a_pos_r"
-				};
+				];
 
 				if (pMain.pTables.ShopTable == null)
 				{
@@ -660,8 +661,8 @@ namespace LastChaos_ToolBoxNG
 					pNewRow = pMain.pTables.ShopTable.NewRow();
 				}
 
-				List<object> listDefaultValue = new List<object>
-				{
+				List<object> listDefaultValue =
+				[
 					nNewShopID,	// a_keeper_idx
 					0,	// a_zone_num
 					0,	// a_sell_rate
@@ -674,7 +675,7 @@ namespace LastChaos_ToolBoxNG
 					0,	// a_pos_z
 					0,	// a_pos_h
 					0	// a_pos_r
-				};
+				];
 
 				i = 0;
 				foreach (string strColumnName in listIntColumns.Concat(listFloatColumns))

@@ -672,20 +672,20 @@ namespace LastChaos_ToolBoxNG
 				Stopwatch stopwatch = Stopwatch.StartNew();
 #endif
 				// NOTE: The higher the number, the more likely you are to win the reward.
-				int[] LacaretteNumCounts = { 1, 1, 2, 2, 2, 2, 3, 3, 4, 4 };	// Hardcode! (How many times is the prize in Lacarette)
+				int[] LacaretteNumCounts = { 1, 1, 2, 2, 2, 2, 3, 3, 4, 4 };    // Hardcode! (How many times is the prize in Lacarette)
 
-				List<List<int>> LacaretteNums = new List<List<int>> {	// Hardcode! (Where is the prize in Lacarette each time)
-					new List<int> { 1 },
-					new List<int> { 13 },
-					new List<int> { 3, 18 },
-					new List<int> { 9, 21 },
-					new List<int> { 11, 23 },
-					new List<int> { 5, 16 },
-					new List<int> { 7, 12, 20 },
-					new List<int> { 6, 14, 24 },
-					new List<int> { 4, 10, 17, 22 },
-					new List<int> { 2, 8, 15, 19 }
-				};
+				List<List<int>> LacaretteNums = [	// Hardcode! (Where is the prize in Lacarette each time)
+					[1],
+					[13],
+					[3, 18],
+					[9, 21],
+					[11, 23],
+					[5, 16],
+					[7, 12, 20],
+					[6, 14, 24],
+					[4, 10, 17, 22],
+					[2, 8, 15, 19]
+				];
 
 				int i, nCoinCount, nPrizeCount;
 				string strFilePath = pMain.pSettings.ClientPath + "\\Data";

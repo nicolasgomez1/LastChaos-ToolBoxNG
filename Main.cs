@@ -114,7 +114,7 @@ namespace LastChaos_ToolBoxNG
 			public int MaxReUpTrys = 2;
 			public bool StartCashServerOnStartAll = false;
 			public int TotalGameServers = 0;
-			public string[] Services = new string[] {	// Add Services Here ↓
+			public string[] Services = [	// Add Services Here ↓
 				"Messenger",
 				"Connector",
 				"Helper",
@@ -125,7 +125,7 @@ namespace LastChaos_ToolBoxNG
 				"GameServer2",
 				"GameServer3",
 				"GameServer4"
-			};
+			];
 
 			public class ServiceDataStruct
 			{
@@ -150,7 +150,7 @@ namespace LastChaos_ToolBoxNG
 
 			Assembly? pAssembly = Assembly.GetAssembly(typeof(Main));
 
-			this.Text = pAssembly?.GetName().Name + " Build: " + pAssembly?.GetName()?.Version?.Revision;
+			this.Text = $"{pAssembly?.GetName().Name} Build: {pAssembly?.GetName()?.Version?.Revision}";
 
 			mouseTimer.Interval = 10;
 			mouseTimer.Tick += MouseTimer_Tick;
@@ -184,6 +184,8 @@ namespace LastChaos_ToolBoxNG
 			Status.Items.Add(tsslStatus);
 
 			LoadSettings();
+
+			ConnectToDatabase();
 			/****************************************/
 			if (pSettings.DockToTop)
 			{
@@ -204,11 +206,8 @@ namespace LastChaos_ToolBoxNG
 
 			cbMaximizeOnStartUp.Checked = pSettings.MaximizeOnStartUp;
 			/****************************************/
-
 			(new ToolTip()).SetToolTip(lbEditors, "Press Enter or Space to Open any Tool");
 			(new ToolTip()).SetToolTip(rtbConsole, "Press C to clear");
-
-			ConnectToDatabase();
 
 			pEditors = new Dictionary<string, Func<Form>>
 			{	// Add Editors or Tools Here ↓
@@ -232,7 +231,7 @@ namespace LastChaos_ToolBoxNG
 
 			lbEditors.DataSource = pEditors.Keys.ToList();
 
-			if (await CheckInternetConnection())    // NOTE: I put it here to not disturb if don't are insterested in updates
+			if (await CheckInternetConnection())
 				btnCheckUpdates.PerformClick();
 		}
 
@@ -795,9 +794,9 @@ namespace LastChaos_ToolBoxNG
 			public override string ToString() { return DisplayText; }
 		}
 		/****************************************/
-		public string NormalizeText(string strText) { return new string(strText.Where(c => char.IsLetterOrDigit(c) || char.IsLetterOrDigit(c)).ToArray()).ToLowerInvariant(); }
-		public bool ContainsAllTokens(string strText, string[] strTokens) { return strTokens.All(token => NormalizeText(strText).Contains(token)); }
-		/****************************************/
+		private string NormalizeText(string strText) { return new string(strText.Where(c => char.IsLetterOrDigit(c) || char.IsLetterOrDigit(c)).ToArray()).ToLowerInvariant(); }
+		private bool ContainsAllTokens(string strText, string[] strTokens) { return strTokens.All(token => NormalizeText(strText).Contains(token)); }
+
 		public int SearchInListBox(TextBox pTextBoxInput, KeyEventArgs pTextBoxEvent, ListBox pListBoxToSearch, int nSearchPosition)
 		{
 			if (pTextBoxEvent.KeyCode == Keys.Enter)
@@ -818,6 +817,7 @@ namespace LastChaos_ToolBoxNG
 						if (ContainsAllTokens(pListBoxToSearch.GetItemText(pListBoxToSearch.Items[i]) ?? string.Empty, searchTokens) && i > nSearchPosition)
 						{
 							pListBoxToSearch.SetSelected(i, true);
+
 							return i;
 						}
 					}
@@ -827,8 +827,49 @@ namespace LastChaos_ToolBoxNG
 						if (ContainsAllTokens(pListBoxToSearch.GetItemText(pListBoxToSearch.Items[i]) ?? string.Empty, searchTokens))
 						{
 							pListBoxToSearch.SetSelected(i, true);
+
 							return i;
 						}
+					}
+				}
+			}
+
+			return nSearchPosition;
+		}
+
+		public int SearchInGridView(TextBox pTextBoxInput, KeyEventArgs pTextBoxEvent, DataGridView pGridViewToSearch, int nSearchPosition)
+		{
+			if (pTextBoxEvent.KeyCode == Keys.Enter)
+			{
+				pTextBoxEvent.Handled = true;
+				pTextBoxEvent.SuppressKeyPress = true;
+
+				int i = 0;
+				string[] searchTokens = NormalizeText(pTextBoxInput.Text).Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+				foreach (DataGridViewRow row in pGridViewToSearch.Rows)
+				{
+					if (ContainsAllTokens(row.Cells["item"].Value.ToString(), searchTokens) && i > nSearchPosition)
+					{
+						pGridViewToSearch.FirstDisplayedScrollingRowIndex = row.Index;
+						row.Selected = true;
+						nSearchPosition = row.Index;
+
+						return i;
+					}
+
+					i++;
+				}
+
+				for (i = 0; i <= nSearchPosition; i++)
+				{
+					if (ContainsAllTokens(pGridViewToSearch.Rows[i].Cells["item"].Value.ToString(), searchTokens))
+					{
+						pGridViewToSearch.FirstDisplayedScrollingRowIndex = pGridViewToSearch.Rows[i].Index;
+						pGridViewToSearch.Rows[i].Selected = true;
+						nSearchPosition = pGridViewToSearch.Rows[i].Index;
+
+						return i;
 					}
 				}
 			}
@@ -1216,7 +1257,7 @@ namespace LastChaos_ToolBoxNG
 		public async Task GenericLoadZoneDataAsync()
 		{
 			bool bRequestNeeded = false;
-			List<string> listQueryCompose = new List<string> { "a_name" };
+			List<string> listQueryCompose = ["a_name"];
 
 			if (pTables.ZoneTable == null)
 			{
@@ -1250,7 +1291,7 @@ namespace LastChaos_ToolBoxNG
 		public async Task GenericLoadStringDataAsync()
 		{
 			bool bRequestNeeded = false;
-			List<string> listQueryCompose = new List<string> { "a_string_" + pSettings.WorkLocale };
+			List<string> listQueryCompose = ["a_string_" + pSettings.WorkLocale];
 
 			if (pTables.StringTable == null)
 			{
@@ -1284,13 +1325,14 @@ namespace LastChaos_ToolBoxNG
 		public async Task GenericLoadSkillDataAsync()
 		{
 			bool bRequestNeeded = false;
-			List<string> listQueryCompose = new List<string> {
+			List<string> listQueryCompose =
+			[
 				"a_name_" + pSettings.WorkLocale,
 				"a_client_description_" + pSettings.WorkLocale,
 				"a_client_icon_texid",
 				"a_client_icon_row",
 				"a_client_icon_col"
-			};
+			];
 
 			if (pTables.SkillTable == null)
 			{
@@ -1324,7 +1366,7 @@ namespace LastChaos_ToolBoxNG
 		public async Task GenericLoadSkillLevelDataAsync()
 		{
 			bool bRequestNeeded = false;
-			List<string> listQueryCompose = new List<string> { "a_level", "a_dummypower" };
+			List<string> listQueryCompose = ["a_level", "a_dummypower"];
 
 			if (pTables.SkillLevelTable == null)
 			{
@@ -1358,12 +1400,7 @@ namespace LastChaos_ToolBoxNG
 		public async Task GenericLoadQuestDataAsync()
 		{
 			bool bRequestNeeded = false;
-			List<string> listQueryCompose = new List<string> {
-				"a_need_min_level",
-				"a_need_max_level",
-				"a_name_" + pSettings.WorkLocale,
-				"a_desc_" + pSettings.WorkLocale
-			};
+			List<string> listQueryCompose = ["a_need_min_level", "a_need_max_level", "a_name_" + pSettings.WorkLocale, "a_desc_" + pSettings.WorkLocale];
 
 			if (pTables.QuestTable == null)
 			{
@@ -1397,14 +1434,7 @@ namespace LastChaos_ToolBoxNG
 		public async Task GenericLoadItemDataAsync()
 		{
 			bool bRequestNeeded = false;
-			List<string> listQueryCompose = new List<string> {
-				"a_texture_id",
-				"a_texture_row",
-				"a_texture_col",
-				"a_name_" + pSettings.WorkLocale,
-				"a_descr_" + pSettings.WorkLocale,
-				"a_level"
-			};
+			List<string> listQueryCompose = ["a_texture_id", "a_texture_row", "a_texture_col", "a_name_" + pSettings.WorkLocale, "a_descr_" + pSettings.WorkLocale, "a_level"];
 
 			if (pTables.ItemTable == null)
 			{
@@ -1438,7 +1468,7 @@ namespace LastChaos_ToolBoxNG
 		public async Task GenericLoadNPCDataAsync()
 		{
 			bool bRequestNeeded = false;
-			List<string> listQueryCompose = new List<string> { "a_level", "a_hp", "a_name_" + pSettings.WorkLocale, "a_descr_" + pSettings.WorkLocale };
+			List<string> listQueryCompose = ["a_level", "a_hp", "a_name_" + pSettings.WorkLocale, "a_descr_" + pSettings.WorkLocale];
 
 			if (pTables.NPCTable == null)
 			{
@@ -1472,7 +1502,7 @@ namespace LastChaos_ToolBoxNG
 		public async Task GenericLoadOptionDataAsync()
 		{
 			bool bRequestNeeded = false;
-			List<string> listQueryCompose = new List<string> { "a_type", "a_level", "a_prob", "a_name_" + pSettings.WorkLocale };
+			List<string> listQueryCompose = ["a_type", "a_level", "a_prob", "a_name_" + pSettings.WorkLocale];
 
 			if (pTables.OptionTable == null)
 			{

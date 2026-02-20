@@ -72,7 +72,8 @@ namespace LastChaos_ToolBoxNG
 		private async Task LoadCraftingDataAsync()
 		{
 			bool bRequestNeeded = false;
-			List<string> listQueryCompose = new List<string> {
+			List<string> listQueryCompose =
+			[
 #if USE_a_job_AND_a_item_type_TABLE
 				"a_job",
 #endif
@@ -87,7 +88,7 @@ namespace LastChaos_ToolBoxNG
 				"a_nas",
 				"a_stuff",
 				"a_stuff_cnt"
-			};
+			];
 
 			if (pMain.pTables.CraftingTable == null) 
 			{
@@ -121,7 +122,8 @@ namespace LastChaos_ToolBoxNG
 		private async Task LoadItemDataAsync()
 		{
 			bool bRequestNeeded = false;
-			List<string> listQueryCompose = new List<string> {
+			List<string> listQueryCompose =
+			[
 				"a_name_" + pMain.pSettings.WorkLocale,
 				"a_descr_" + pMain.pSettings.WorkLocale,
 				"a_texture_id",
@@ -130,7 +132,7 @@ namespace LastChaos_ToolBoxNG
 #if USE_a_job_AND_a_item_type_TABLE
 				, "a_subtype_idx"
 #endif
-			};
+			];
 
 			if (pMain.pTables.ItemTable == null)
 			{
@@ -491,8 +493,8 @@ namespace LastChaos_ToolBoxNG
 				DataRow? pNewRow;
 				int[] nRequiredItemID = new int[Defs.MAX_FACTORY_ITEM_STUFF], nRequiredItemCount = new int[Defs.MAX_FACTORY_ITEM_STUFF];
 
-				List<string> listIntColumns = new List<string>	// Here add all int columns.
-				{
+				List<string> listIntColumns =
+				[
 					"a_index",
 #if USE_a_job_AND_a_item_type_TABLE
 					"a_job",
@@ -503,20 +505,20 @@ namespace LastChaos_ToolBoxNG
 					"a_item_type",
 #endif
 					"a_item_idx"
-				};
+				];
 
-				List<string> listBigIntColumns = new List<string>   // Here add all bigint columns.
-				{
+				List<string> listBigIntColumns =
+				[
 					"a_make_exp",
 					"a_need_exp",
 					"a_nas"
-				};
+				];
 
-				List<string> listVarcharColumns = new List<string>	// Here add all varchar columns.
-				{
+				List<string> listVarcharColumns =
+				[
 					"a_stuff",
 					"a_stuff_cnt"
-				};
+				];
 
 				if (pMain.pTables.CraftingTable == null)
 				{
@@ -553,8 +555,8 @@ namespace LastChaos_ToolBoxNG
 					pNewRow = pMain.pTables.CraftingTable?.NewRow();
 				}
 
-				List<object> listDefaultValue = new List<object>
-				{
+				List<object> listDefaultValue =
+				[
 					nNewCraftID,	// a_index
 #if USE_a_job_AND_a_item_type_TABLE
 					0,	// a_job
@@ -568,7 +570,7 @@ namespace LastChaos_ToolBoxNG
 					0,	// a_make_exp
 					0,	// a_need_exp
 					0	// a_nas
-				};
+				];
 
 				for (i = 0; i < Defs.MAX_FACTORY_ITEM_STUFF; i++)
 				{
@@ -712,7 +714,7 @@ namespace LastChaos_ToolBoxNG
 		{
 			if (bUserAction)
 			{
-				SkillPicker pSkillSelector = new(pMain, this, new object[] { pTempCraftingRow["a_seal_type"], 1 }, false);
+				SkillPicker pSkillSelector = new(pMain, this, [pTempCraftingRow["a_seal_type"], 1], false);
 				if (pSkillSelector.ShowDialog() != DialogResult.OK)
 					return;
 

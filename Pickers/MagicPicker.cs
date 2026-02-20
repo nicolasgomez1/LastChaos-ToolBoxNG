@@ -62,7 +62,8 @@ namespace LastChaos_ToolBoxNG
 			this.Location = new Point(pParentForm.Location.X + (pParentForm.Width - this.Width) / 2, pParentForm.Location.Y + (pParentForm.Height - this.Height) / 2);
 
 			bool bRequestNeeded = false;
-			List<string> listQueryCompose = new List<string> {
+			List<string> listQueryCompose =
+			[
 				"a_name",
 				"a_maxlevel",
 				"a_type",
@@ -79,7 +80,7 @@ namespace LastChaos_ToolBoxNG
 #if ENABLE_TOGGLE
 				, "a_togle"
 #endif
-			};
+			];
 
 			if (pMain.pTables.MagicTable == null)
 			{
@@ -111,7 +112,7 @@ namespace LastChaos_ToolBoxNG
 				bRequestNeeded = false;
 				listQueryCompose.Clear();
 
-				listQueryCompose = new List<string> { "a_level", "a_power", "a_hitrate" };
+				listQueryCompose = ["a_level", "a_power", "a_hitrate"];
 
 				if (pMain.pTables.MagicLevelTable == null)
 				{
@@ -153,7 +154,7 @@ namespace LastChaos_ToolBoxNG
 					MainList.Items.Add(new Main.ListBoxItem
 					{
 						ID = nSkillID,
-						Text = pRow["a_index"] + " - " + pRow["a_name"]
+						Text = $"{pRow["a_index"]} - {pRow["a_name"]}"
 					});
 
 					if (nSkillID == Convert.ToInt32(ReturnValues[0]))
@@ -333,7 +334,7 @@ namespace LastChaos_ToolBoxNG
 		{
 			DialogResult = DialogResult.OK;
 
-			ReturnValues = new int[] { -1, 0 };
+			ReturnValues = [-1, 0];
 
 			Close();
 		}

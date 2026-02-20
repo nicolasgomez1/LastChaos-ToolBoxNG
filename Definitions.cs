@@ -82,32 +82,32 @@
 
 	public static readonly Dictionary<string, StringType> StringTypes = new Dictionary<string, StringType>
 	{
-		//["NPCSHOP"] = new StringTypeInfo("", "", "", new List<string> { "" }, ""),
-		//["NPCHELP"] = new StringTypeInfo("", "", "", new List<string> { "" }, ""),
-		["LACARETTE"] = new StringType("strLacarette", "SELECT", "t_lacarette", new List<string> { "a_index", "a_name" }, "WHERE a_enable=1"),
-		["AFFINITY"] = new StringType("strAffinity", "SELECT", "t_affinity", new List<string> { "a_index", "a_name" }, "WHERE a_enable=1"),
-		["COMBO"] = new StringType("strCombo", "SELECT", "t_missioncase", new List<string> { "a_index", "a_name" }, "WHERE a_enable=1"),
-		["ACTION"] = new StringType("strAction", "SELECT", "t_action", new List<string> { "a_index", "a_name", "a_client_description" }, ""),
-		["SPECIALSKILL"] = new StringType("strSSkill", "SELECT", "t_special_skill", new List<string> { "a_index", "a_name", "a_desc" }, "WHERE a_enable=1"),
-		["SKILL"] = new StringType("strSkill", "SELECT", "t_skill", new List<string> { "a_index", "a_name", "a_client_description", "a_client_tooltip" }, "WHERE a_job>=0"),
-		["QUEST"] = new StringType("strQuest", "SELECT", "t_quest", new List<string> { "a_index", "a_name", "a_desc", "a_desc2", "a_desc3" }, ""),
-		["NPCNAME"] = new StringType("strNPCName", "SELECT DISTINCT", "t_npc", new List<string> { "a_index", "a_name", "a_descr" }, "WHERE a_enable=1"),
-		["RAREOPTION"] = new StringType("strRareOption", "SELECT", "t_rareoption", new List<string> { "a_index", "a_prefix" }, ""),
-		["RAREOPTION"] = new StringType("strRareOption", "SELECT", "t_rareoption", new List<string> { "a_index", "a_prefix" }, ""),
-		["OPTION"] = new StringType("strOption", "SELECT", "t_option", new List<string> { "a_index", "a_name" }, ""),
-		["ITEMCOLLECTION"] = new StringType("strItemCollection", "SELECT", "t_item_collection", new List<string> { "a_theme", "a_theme_string", "a_desc_string" }, ""),
-		["SETITEM"] = new StringType("strSetItem", "SELECT", "t_set_item", new List<string> { "a_set_idx", "a_set_name" }, "WHERE a_enable=1"),
-		["ITEM"] = new StringType("strItem", "SELECT", "t_item", new List<string> { "a_index", "a_name", "a_descr" }, "WHERE a_enable=1"),
-		//["HELP1"] = new StringType("strHelp", "SELECT", "t_help1", new List<string> { "a_index", "a_name", "a_desc" }, ""),	// NOTE: Uncomment this line if need strHelp_X.lod files
-		["STRING"] = new StringType("strClient", "SELECT", "t_string", new List<string> { "a_index", "a_string" }, "")
+		//["NPCSHOP"] = new StringTypeInfo("", "", "", [""], ""),
+		//["NPCHELP"] = new StringTypeInfo("", "", "", [""], ""),
+		["LACARETTE"] = new StringType("strLacarette", "SELECT", "t_lacarette", ["a_index", "a_name"], "WHERE a_enable=1"),
+		["AFFINITY"] = new StringType("strAffinity", "SELECT", "t_affinity", ["a_index", "a_name"], "WHERE a_enable=1"),
+		["COMBO"] = new StringType("strCombo", "SELECT", "t_missioncase", ["a_index", "a_name"], "WHERE a_enable=1"),
+		["ACTION"] = new StringType("strAction", "SELECT", "t_action", ["a_index", "a_name", "a_client_description"], ""),
+		["SPECIALSKILL"] = new StringType("strSSkill", "SELECT", "t_special_skill", ["a_index", "a_name", "a_desc"], "WHERE a_enable=1"),
+		["SKILL"] = new StringType("strSkill", "SELECT", "t_skill", ["a_index", "a_name", "a_client_description", "a_client_tooltip"], "WHERE a_job>=0"),
+		["QUEST"] = new StringType("strQuest", "SELECT", "t_quest", ["a_index", "a_name", "a_desc", "a_desc2", "a_desc3"], ""),
+		["NPCNAME"] = new StringType("strNPCName", "SELECT DISTINCT", "t_npc", ["a_index", "a_name", "a_descr"], "WHERE a_enable=1"),
+		["RAREOPTION"] = new StringType("strRareOption", "SELECT", "t_rareoption", ["a_index", "a_prefix"], ""),
+		["RAREOPTION"] = new StringType("strRareOption", "SELECT", "t_rareoption", ["a_index", "a_prefix"], ""),
+		["OPTION"] = new StringType("strOption", "SELECT", "t_option", ["a_index", "a_name"], ""),
+		["ITEMCOLLECTION"] = new StringType("strItemCollection", "SELECT", "t_item_collection", ["a_theme", "a_theme_string", "a_desc_string"], ""),
+		["SETITEM"] = new StringType("strSetItem", "SELECT", "t_set_item", ["a_set_idx", "a_set_name"], "WHERE a_enable=1"),
+		["ITEM"] = new StringType("strItem", "SELECT", "t_item", ["a_index", "a_name", "a_descr"], "WHERE a_enable=1"),
+		//["HELP1"] = new StringType("strHelp", "SELECT", "t_help1", ["a_index", "a_name", "a_desc"], ""),	// NOTE: Uncomment this line if need strHelp_X.lod files
+		["STRING"] = new StringType("strClient", "SELECT", "t_string", ["a_index", "a_string"], "")
 	};
 
 	public static readonly Dictionary<string, List<string>> ItemTypesNSubTypes = new Dictionary<string, List<string>>
 	{
 		// Standards
 		{
-			"Weapon", new List<string>
-			{
+			"Weapon",
+			[
 				// Standards
 				"(Knight) Single Sword",
 				"(EX|Rogue) Crossbow",
@@ -125,11 +125,11 @@
 				"(Sorcerer) Scythe",
 				"(Sorcerer) Fallarm",
 				"(Nightshadow) Soul"
-			}
+			]
 		},
 		{
-			"Armor", new List<string>
-			{
+			"Armor",
+			[
 				// Standards
 				"Helmet",
 				"Shirt",
@@ -139,11 +139,11 @@
 				"Shield",
 				"Backpack | Wings",
 				"Complete Costume (SUIT)"
-			}
+			]
 		},
 		{
-			"Once (Varied)", new List<string>
-			{
+			"Once (Varied)",
+			[
 				// Standards
 				"Teleporting (WARP)",
 				"Production Manual",
@@ -169,20 +169,20 @@
 				"GPS",
 				"Holy Water",
 				"Protect PvP"
-			}
+			]
 		},
 		{
-			"Shot", new List<string>
-			{
+			"Shot",
+			[
 				// Standards
 				"Bullet Attack",
 				"Bullet Mana",
 				"Bullet Arrow"
-			}
+			]
 		},
 		{
-			"Etc (Quest, Event, Upgrade)", new List<string>
-			{
+			"Etc (Quest, Event, Upgrade)",
+			[
 				// Standards
 				"Quest",
 				"Event",
@@ -209,11 +209,11 @@
 				"Chaos Jewel",
 				"Functions",
 				"RvR Jewel"
-			}
+			]
 		},
 		{
-			"Accesory", new List<string>
-			{
+			"Accesory",
+			[
 				// Standards
 				"Charm",
 				"Magic Stone",
@@ -224,11 +224,11 @@
 				"Pet",
 				"APet (ATTACK_PET)",
 				"Artifact"
-			}
+			]
 		},
 		{
-			"Potion", new List<string>
-			{
+			"Potion",
+			[
 				// Standards
 				"Antidote/Cure (STATE)",
 				"HP Recover (HP)",
@@ -246,7 +246,7 @@
 				"APet Speed Up (PET_SPEEDUP)",
 				"Totem",
 				"APet MP Recover (PET_MP)"
-			}
+			]
 		}
 	};
 
@@ -272,11 +272,11 @@
 	{
 		// Standards
 		{
-			"None", new List<string>()
+			"None", []
 		},
 		{
-			"Kailux", new List<string>
-			{
+			"Kailux",
+			[
 				// Standards
 				"Squire",
 				"Knight",
@@ -288,11 +288,11 @@
 				"Marquise",
 				"Duka",					// NOTE: probably not used
 				"Principal"	// Principe	// NOTE: probably not used
-			}
+			]
 		},
 		{
-			"Dilamun", new List<string>
-			{
+			"Dilamun",
+			[
 				// Standards
 				"Neopyte",	// Neoptye
 				"Zelator",
@@ -301,7 +301,7 @@
 				"Adeptus",
 				"Magus",		// NOTE: probably not used
 				"Ipsissimus"	// NOTE: probably not used
-			}
+			]
 		}
 	};
 
@@ -534,8 +534,8 @@
 	{
 		// Standards
 		{
-			"Stat", new List<string>
-			{
+			"Stat",
+			[
 				// Standards
 				"Attack",
 				"Defense",
@@ -576,11 +576,11 @@
 				"NPC Magic",
 				"Skill Cool Time",
 				"Decrase Mana Spend"
-			}
+			]
 		},
 		{
-			"Attribute", new List<string>
-			{
+			"Attribute",
+			[
 				// Standards
 				"Neutral",
 				"Fire",
@@ -590,11 +590,11 @@
 				"Darkess",
 				"Light",
 				"Random"
-			}
+			]
 		},
 		{
-			"Assist", new List<string>
-			{
+			"Assist",
+			[
 				// Standards
 				"Poison",
 				"Hold",
@@ -651,11 +651,11 @@
 				"Artifact GPS",
 				"Totem Item Buff",
 				"Totem Item Attack"
-			}
+			]
 		},
 		{
-			"Attack", new List<string>
-			{
+			"Attack",
+			[
 				// Standards
 				"Normal",
 				"Critical",
@@ -663,11 +663,11 @@
 				"One Shot Kill",
 				"Deadly",
 				"Hard"
-			}
+			]
 		},
 		{
-			"Recover", new List<string>
-			{
+			"Recover",
+			[
 				// Standards
 				"HP",
 				"MP",
@@ -675,11 +675,11 @@
 				"Faith",
 				"EXP",
 				"SP"
-			}
+			]
 		},
 		{
-			"Cure", new List<string>
-			{
+			"Cure",
+			[
 				// Standards
 				"Posion",
 				"Hold",
@@ -697,11 +697,11 @@
 				"Curse",
 				"All",
 				"Instant Death"
-			}
+			]
 		},
 		{
-			"Other", new List<string>
-			{
+			"Other",
+			[
 				// Standards
 				"Instant Death",
 				"Skill Cancel",
@@ -734,28 +734,28 @@
 				"Guild Party Exp",
 				"Guild Party Sp",
 				"Summon NPC"
-			}
+			]
 		},
 		{
-			"Reduce", new List<string>
-			{
+			"Reduce",
+			[
 				// Standards
 				"Melee",
 				"Range",
 				"Magic",
 				"Skill"
-			}
+			]
 		},
 		{
-			"Immune", new List<string>
-			{
+			"Immune",
+			[
 				// Standards
 				"Blind"
-			}
+			]
 		},
 		{
-			"Castle", new List<string>
-			{
+			"Castle",
+			[
 				// Standards
 				"Melee",
 				"Range",
@@ -764,16 +764,16 @@
 				"Defense",
 				"Resist",
 				"Tower Attack"
-			}
+			]
 		},
 		{
-			"Money", new List<string>
-			{
+			"Money",
+			[
 				// Standards
 				"Buy",
 				"Sell",
 				"Nas"
-			}
+			]
 		}
 	};
 
@@ -848,15 +848,15 @@
 	public static readonly Dictionary<int, List<string>> CharactersClassNJobsTypes = new Dictionary<int, List<string>>
 	{
 		// Standards
-		{ 0, new List<string> { "0 - Titan",       "1 - Highlander",   "2 - Warmaster" } },
-		{ 1, new List<string> { "0 - Knight",      "1 - Royal",        "2 - Templar" } },
-		{ 2, new List<string> { "0 - Healer",      "1 - Archer",       "2 - Cleric" } },
-		{ 3, new List<string> { "0 - Mage",        "1 - Wizard",       "2 - Witch" } },
-		{ 4, new List<string> { "0 - Rogue",       "1 - Assasin",      "2 - Ranger" } },
-		{ 5, new List<string> { "0 - Sorcerer",    "1 - Elementalist", "2 - Specialist" } },
-		{ 6, new List<string> { "0 - NightShadow", "1 - NightShadow",  "2 - NightShadow" } },
-		{ 7, new List<string> { "0 - Ex-Rogue",    "1 - Ex-Assasin",   "2 - Ex-Ranger" } },
-		{ 8, new List<string> { "0 - ArchMage",    "1 - Arch-Wizard",  "2 - Arch-Witch" } }
+		{ 0, ["0 - Titan",       "1 - Highlander",   "2 - Warmaster"] },
+		{ 1, ["0 - Knight",      "1 - Royal",        "2 - Templar"] },
+		{ 2, ["0 - Healer",      "1 - Archer",       "2 - Cleric"] },
+		{ 3, ["0 - Mage",        "1 - Wizard",       "2 - Witch"] },
+		{ 4, ["0 - Rogue",       "1 - Assasin",      "2 - Ranger"] },
+		{ 5, ["0 - Sorcerer",    "1 - Elementalist", "2 - Specialist"] },
+		{ 6, ["0 - NightShadow", "1 - NightShadow",  "2 - NightShadow"] },
+		{ 7, ["0 - Ex-Rogue",    "1 - Ex-Assasin",   "2 - Ex-Ranger"] },
+		{ 8, ["0 - ArchMage",    "1 - Arch-Wizard",  "2 - Arch-Witch"] }
 	};
 
 	public static readonly string[] NPCFlags =

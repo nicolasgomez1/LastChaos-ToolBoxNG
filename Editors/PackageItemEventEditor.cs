@@ -123,7 +123,7 @@ namespace LastChaos_ToolBoxNG
 		private async Task LoadPackageItemEventDataAsync()
 		{
 			bool bRequestNeeded = false;
-			List<string> listQueryCompose = new List<string> { "a_strkey", "a_enable", "a_uses_limit", "a_date_limit", "a_rewards" };
+			List<string> listQueryCompose = ["a_strkey", "a_enable", "a_uses_limit", "a_date_limit", "a_rewards"];
 
 			if (pMain.pTables.KeyTable == null)
 			{
@@ -375,23 +375,23 @@ namespace LastChaos_ToolBoxNG
 				int i, nNewPackageID = 9999;
 				DataRow pNewRow;
 
-				List<string> listIntColumns = new List<string>	// Here add all int columns.
-				{
+				List<string> listIntColumns =	// Here add all int columns.
+				[
 					"a_index",
 					"a_enable",
 					"a_uses_limit"
-				};
+				];
 
-				List<string> listVarcharColumns = new List<string>	// Here add all varchar columns.
-				{
+				List<string> listVarcharColumns =	// Here add all varchar columns.
+				[
 					"a_strkey",
 					"a_rewards"
-				};
+				];
 
-				List<string> listDateTimeColumns = new List<string>	// Here add all datetime columns.
-				{
+				List<string> listDateTimeColumns =	// Here add all datetime columns.
+				[
 					"a_date_limit"
-				};
+				];
 
 				if (pMain.pTables.KeyTable == null)
 				{
@@ -430,15 +430,15 @@ namespace LastChaos_ToolBoxNG
 
 				string strNewRandomCode = GenerateRandomCode();
 
-				List<object> listDefaultValue = new List<object>
-				{
+				List<object> listDefaultValue =
+				[
 					nNewPackageID,	// a_index
 					0,	// a_enable
 					-1,	// a_uses_limit
 					strNewRandomCode,	// a_strkey
 					43,	// a_rewards
 					DateTime.Now	// a_date_limit
-				};
+				];
 
 				i = 0;
 				foreach (string strColumnName in listIntColumns.Concat(listVarcharColumns).Concat(listDateTimeColumns))

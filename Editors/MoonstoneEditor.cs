@@ -24,7 +24,7 @@
 		private async Task LoadMoonstoneRewardDataAsync()
 		{
 			bool bRequestNeeded = false;
-			List<string> listQueryCompose = new List<string> { "a_type", "a_giftindex", "a_giftcount", "a_giftprob", "a_giftflag" };
+			List<string> listQueryCompose = ["a_type", "a_giftindex", "a_giftcount", "a_giftprob", "a_giftflag"];
 
 			if (pMain.pTables.MoonstoneRewardTable == null)
 			{
@@ -116,7 +116,7 @@
 							pItemRow = pMain.pTables.ItemTable?.AsEnumerable().Where(row => Convert.ToInt32(row["a_index"]) == nRewardID).FirstOrDefault();
 							if (pItemRow != null)
 							{
-								strRewardItemName += " - " + pItemRow["a_name_" + pMain.pSettings.WorkLocale].ToString();
+								strRewardItemName += $" - {pItemRow["a_name_" + pMain.pSettings.WorkLocale]}";
 
 								gridRewards.Rows[nGroupRowIndex].Cells["itemIcon"].Value = new Bitmap(pMain.GetIcon("ItemBtn", pItemRow["a_texture_id"].ToString(), Convert.ToInt32(pItemRow["a_texture_row"]), Convert.ToInt32(pItemRow["a_texture_col"])), new Size(24, 24));
 							}
@@ -396,46 +396,7 @@
 
 		private void tbSearch_TextChanged(object sender, EventArgs e) { nSearchPosition = 0; }
 
-		private void tbSearch_KeyDown(object sender, KeyEventArgs e)
-		{
-			if (e.KeyCode == Keys.Enter)
-			{
-				void Search()
-				{
-					int i = 0;
-					string[] searchTokens = pMain.NormalizeText(tbSearch.Text).Split(' ', StringSplitOptions.RemoveEmptyEntries);
-
-					foreach (DataGridViewRow row in gridRewards.Rows)
-					{
-						if (pMain.ContainsAllTokens(row.Cells["item"].Value.ToString(), searchTokens) && i > nSearchPosition)
-						{
-							gridRewards.FirstDisplayedScrollingRowIndex = GetGroupRowID(row.Index);
-							row.Selected = true;
-							nSearchPosition = row.Index;
-							return;
-						}
-
-						i++;
-					}
-
-					for (i = 0; i <= nSearchPosition; i++)
-					{
-						if (pMain.ContainsAllTokens(gridRewards.Rows[i].Cells["item"].Value.ToString(), searchTokens))
-						{
-							gridRewards.FirstDisplayedScrollingRowIndex = GetGroupRowID(gridRewards.Rows[i].Index);
-							gridRewards.Rows[i].Selected = true;
-							nSearchPosition = gridRewards.Rows[i].Index;
-							return;
-						}
-					}
-				}
-
-				Search();
-
-				e.Handled = true;
-				e.SuppressKeyPress = true;
-			}
-		}
+		private void tbSearch_KeyDown(object sender, KeyEventArgs e) { nSearchPosition = pMain.SearchInGridView(tbSearch, e, gridRewards, nSearchPosition); }
 
 		private void cbChangesAppliedNotification_CheckedChanged(object sender, EventArgs e)
 		{
@@ -629,7 +590,7 @@
 							if (nItemID != Defs.NAS_ITEM_DB_INDEX)
 								lDefaultFlag = 1025;
 
-							var (bProceed, lLastInsertID) = DoINSERT(new object[] { e.RowIndex, nItemID, nDefaultAmount, fDefaultProbability, lDefaultFlag} );
+							var (bProceed, lLastInsertID) = DoINSERT([e.RowIndex, nItemID, nDefaultAmount, fDefaultProbability, lDefaultFlag]);
 							if (bProceed)
 							{
 								if (!Convert.ToBoolean(gridRewards.Rows[e.RowIndex].Cells[1].Tag))

@@ -96,7 +96,7 @@ namespace LastChaos_ToolBoxNG
 						nSkillLevel = Convert.ToInt32(tbSecondInputObject.Text);
 					}
 
-					SkillPicker pSkillSelector = new(pMain, this, new object[] { nActualValue, nSkillLevel }, false);
+					SkillPicker pSkillSelector = new(pMain, this, [nActualValue, nSkillLevel], false);
 					if (pSkillSelector.ShowDialog() != DialogResult.OK)
 						return;
 
@@ -196,7 +196,7 @@ namespace LastChaos_ToolBoxNG
 						nSkillLevel = Convert.ToInt32(tbSecondInputObject.Text);
 					}
 
-					SpecialSkillPicker pSpecialSkillSelector = new(pMain, this, new object[] { nActualValue, nSkillLevel }, false);
+					SpecialSkillPicker pSpecialSkillSelector = new(pMain, this, [nActualValue, nSkillLevel], false);
 					if (pSpecialSkillSelector.ShowDialog() != DialogResult.OK)
 						return;
 
@@ -373,8 +373,8 @@ namespace LastChaos_ToolBoxNG
 		{
 			bool bRequestNeeded = false;
 			// NOTE: Here you must define the columns that you want to request from the database.
-			List<string> listQueryCompose = new List<string>
-			{
+			List<string> listQueryCompose =
+			[
 				"a_enable",
 				"a_texture_id",
 				"a_texture_row",
@@ -442,7 +442,7 @@ namespace LastChaos_ToolBoxNG
 				"a_rare_index_7", "a_rare_prob_7",
 				"a_rare_index_8", "a_rare_prob_8",
 				"a_rare_index_9", "a_rare_prob_9"
-			};
+			];
 
 			// NOTE: If columns related to locale are required, they must be defined here.
 			foreach (string strNation in pMain.pSettings.NationSupported)
@@ -482,14 +482,14 @@ namespace LastChaos_ToolBoxNG
 		private async Task LoadSpecialSkillDataAsync()
 		{
 			bool bRequestNeeded = false;
-			List<string> listQueryCompose = new List<string>
-			{
+			List<string> listQueryCompose =
+			[
 				"a_name_" + pMain.pSettings.WorkLocale,
 				"a_desc_" + pMain.pSettings.WorkLocale,
 				"a_texture_id",
 				"a_texture_row",
 				"a_texture_col",
-			};
+			];
 
 			if (pMain.pTables.SpecialSkillTable == null)
 			{
@@ -523,7 +523,7 @@ namespace LastChaos_ToolBoxNG
 		private async Task LoadRareOptionDataAsync()
 		{
 			bool bRequestNeeded = false;
-			List<string> listQueryCompose = new List<string> { "a_prefix_" + pMain.pSettings.WorkLocale };
+			List<string> listQueryCompose = ["a_prefix_" + pMain.pSettings.WorkLocale];
 
 			if (pMain.pTables.RareOptionTable == null)
 			{
@@ -558,7 +558,7 @@ namespace LastChaos_ToolBoxNG
 		{
 			// Load t_fortune_head
 			bool bRequestNeeded = false;
-			List<string> listQueryCompose = new List<string> { "a_prob_type", "a_enable" };
+			List<string> listQueryCompose = ["a_prob_type", "a_enable"];
 
 			if (pMain.pTables.ItemFortuneHeadTable == null)
 			{
@@ -592,7 +592,7 @@ namespace LastChaos_ToolBoxNG
 			bRequestNeeded = false;
 
 			listQueryCompose.Clear();
-			listQueryCompose = new List<string> { "a_skill_index", "a_skill_level", "a_string_index", "a_prob" };
+			listQueryCompose = ["a_skill_index", "a_skill_level", "a_string_index", "a_prob"];
 
 			if (pMain.pTables.ItemFortuneDataTable == null)
 			{
@@ -1340,10 +1340,10 @@ namespace LastChaos_ToolBoxNG
 			{
 				int i, nNewItemID = -1;
 
-				List<string> listUIntColumns = new List<string> { "a_durability" };	// Here add all unsigned int columns.
+				List<string> listUIntColumns = ["a_durability"];	// Here add all unsigned int columns.
 
-				List<string> listIntColumns = new List<string>	// Here add all int columns.
-				{
+				List<string> listIntColumns =	// Here add all int columns.
+				[
 					"a_index",
 					"a_enable",
 					"a_weight",
@@ -1393,10 +1393,10 @@ namespace LastChaos_ToolBoxNG
 					"a_rare_index_7", "a_rare_prob_7",
 					"a_rare_index_8", "a_rare_prob_8",
 					"a_rare_index_9", "a_rare_prob_9"
-				};
+				];
 
-				List<string> listUTinyIntColumns = new List<string>	// Here add all unsigned tinyint columns.
-				{
+				List<string> listUTinyIntColumns =  // Here add all unsigned tinyint columns.
+				[
 					"a_origin_variation1",
 					"a_origin_variation2",
 					"a_origin_variation3",
@@ -1406,10 +1406,10 @@ namespace LastChaos_ToolBoxNG
 					"a_rvr_value",
 					"a_rvr_grade",
 					"a_castle_war"
-				};
+				];
 
-				List<string> listTinyIntColumns = new List<string>	// Here add all tinyint columns.
-				{
+				List<string> listTinyIntColumns =	// Here add all tinyint columns.
+				[
 					"a_texture_id",
 					"a_texture_row",
 					"a_texture_col",
@@ -1418,29 +1418,29 @@ namespace LastChaos_ToolBoxNG
 #if ENABLE_SECOND_SKILL_TO_CRAFT
 					, "a_need_sskill_level2"
 #endif
-				};
+				];
 
-				List<string> listVarcharColumns = new List<string>	// Here add all varchar columns.
-				{
+				List<string> listVarcharColumns =   // Here add all varchar columns.
+				[
 					"a_file_smc",
 					"a_effect_name",
 					"a_attack_effect_name",
 					"a_damage_effect_name"
-				};
+				];
 
 				foreach (string strNation in pMain.pSettings.NationSupported)
 					listVarcharColumns.AddRange("a_name_" + strNation.ToLower(), "a_descr_" + strNation.ToLower());
 
-				List<string> listBigIntColumns = new List<string>	// Here add all bigint columns.
-				{
+				List<string> listBigIntColumns =	// Here add all bigint columns.
+				[
 #if ALLOWED_ZONE_SYSTEM
 					"a_zone_flag",
 #endif
 					"a_flag"
-				};
+				];
 
-				List<string> listSmallIntColumns = new List<string>	// Here add all smallint columns.
-				{
+				List<string> listSmallIntColumns =	// Here add all smallint columns.
+				[
 					"a_need_item_count0",
 					"a_need_item_count1",
 					"a_need_item_count2",
@@ -1451,7 +1451,7 @@ namespace LastChaos_ToolBoxNG
 					"a_need_item_count7",
 					"a_need_item_count8",
 					"a_need_item_count9"
-				};
+				];
 
 				if (pMain.pTables.ItemTable == null || bCallFromOutsideForm)    // If is null, create new DataTable and set schema (column name & datatype).
 				{
@@ -1500,8 +1500,8 @@ namespace LastChaos_ToolBoxNG
 					pNewRow = pMain.pTables.ItemTable.NewRow();
 				}
 
-				List<object> listDefaultValue = new List<object>
-				{
+				List<object> listDefaultValue =
+				[
 					0,	// a_durability
 					nNewItemID,	// a_index
 					0,	// a_enable
@@ -1583,7 +1583,7 @@ namespace LastChaos_ToolBoxNG
 					"",	// a_effect_name
 					"",	// a_attack_effect_name
 					""	// a_damage_effect_name
-				};
+				];
 
 				foreach (string strNation in pMain.pSettings.NationSupported)
 					listDefaultValue.AddRange(strName, "Created with NicolasG LastChaos ToolBox");
@@ -2487,7 +2487,7 @@ namespace LastChaos_ToolBoxNG
 				string strIDColumn = "a_need_sskill";
 				string strLevelColumn = "a_need_sskill_level";
 
-				SpecialSkillPicker pSpecialSkillSelector = new(pMain, this, new object[] { pTempItemRow[strIDColumn], pTempItemRow[strLevelColumn] });
+				SpecialSkillPicker pSpecialSkillSelector = new(pMain, this, [pTempItemRow[strIDColumn], pTempItemRow[strLevelColumn]]);
 				if (pSpecialSkillSelector.ShowDialog() != DialogResult.OK)
 					return;
 
@@ -2535,7 +2535,7 @@ namespace LastChaos_ToolBoxNG
 				string strIDColumn = "a_need_sskill2";
 				string strLevelColumn = "a_need_sskill_level2";
 
-				SpecialSkillPicker pSpecialSkillSelector = new(pMain, this, new object[] { pTempItemRow[strIDColumn], pTempItemRow[strLevelColumn] });
+				SpecialSkillPicker pSpecialSkillSelector = new(pMain, this, [pTempItemRow[strIDColumn], pTempItemRow[strLevelColumn]]);
 				if (pSpecialSkillSelector.ShowDialog() != DialogResult.OK)
 					return;
 
@@ -2760,7 +2760,7 @@ namespace LastChaos_ToolBoxNG
 					int nSkillID = Convert.ToInt32(gridFortune.Rows[e.RowIndex].Cells["skill"].Tag);
 					string strSkillLevel = gridFortune.Rows[e.RowIndex].Cells["level"].Tag.ToString() ?? "0";
 
-					SkillPicker pSkillSelector = new(pMain, this, new object[] { nSkillID, strSkillLevel }, false);
+					SkillPicker pSkillSelector = new(pMain, this, [nSkillID, strSkillLevel], false);
 					if (pSkillSelector.ShowDialog() != DialogResult.OK)
 						return;
 
@@ -2809,7 +2809,7 @@ namespace LastChaos_ToolBoxNG
 					addItem.Click += (_, _) =>
 					{
 						bool bSuccess = true;
-						SkillPicker pSkillSelector = new(pMain, this, new object[] { 0, 1 }, false);
+						SkillPicker pSkillSelector = new(pMain, this, [0, 1], false);
 						if (pSkillSelector.ShowDialog() != DialogResult.OK)
 							return;
 

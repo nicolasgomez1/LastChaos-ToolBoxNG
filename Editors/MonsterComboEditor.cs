@@ -74,7 +74,7 @@
 		private async Task LoadMonsterComboDataAsync()
 		{
 			bool bRequestNeeded = false;
-			List<string> listQueryCompose = new List<string> { "a_enable", "a_nas", "a_texture_id", "a_texture_row", "a_texture_col", "a_point" };
+			List<string> listQueryCompose = ["a_enable", "a_nas", "a_texture_id", "a_texture_row", "a_texture_col", "a_point"];
 
 			foreach (string strNation in pMain.pSettings.NationSupported)
 				listQueryCompose.Add("a_name_" + strNation.ToLower());
@@ -110,7 +110,7 @@
 			bRequestNeeded = false;
 			listQueryCompose.Clear();
 
-			listQueryCompose = new List<string> { "a_npcidx", "a_count", "a_enable", "a_step" };
+			listQueryCompose = ["a_npcidx", "a_count", "a_enable", "a_step"];
 
 			if (pMain.pTables.NPCRegenComboTable == null)
 			{
@@ -165,7 +165,7 @@
 					{
 						pNPCRow = pMain.pTables.NPCTable?.AsEnumerable().Where(row => Convert.ToInt32(row["a_index"]) == nNPCID).FirstOrDefault();
 						if (pNPCRow != null)
-							strNPCName += " - " + pNPCRow["a_name_" + pMain.pSettings.WorkLocale].ToString();
+							strNPCName += $" - {pNPCRow["a_name_" + pMain.pSettings.WorkLocale]}";
 					}
 
 					gridRegens.Rows[i].Cells["mob"].Value = strNPCName;
@@ -431,16 +431,16 @@
 				int i, nNewCaseID = 9999;
 				DataRow pRow;
 
-				List<string> listIntColumns = new List<string>	// Here add all int columns.
-				{
+				List<string> listIntColumns =
+				[
 					"a_index",
 					"a_enable",
 					"a_nas",
 					"a_texture_id",
 					"a_texture_row",
 					"a_texture_col",
-					"a_point",
-				};
+					"a_point"
+				];
 
 				List<string> listVarcharColumns = new();    // Here add all varchar columns.
 
@@ -479,8 +479,8 @@
 					pRow = pMain.pTables.MissionCaseTable.NewRow();
 				}
 
-				List<object> listDefaultValue = new List<object>
-				{
+				List<object> listDefaultValue =
+				[
 					nNewCaseID,	// a_index
 					0,	// a_enable
 					0,	// a_nas
@@ -488,7 +488,7 @@
 					0,	// a_texture_row
 					0,	// a_texture_col
 					0	// a_point
-				};
+				];
 
 				foreach (string strNation in pMain.pSettings.NationSupported)
 					listDefaultValue.Add("New Combo");

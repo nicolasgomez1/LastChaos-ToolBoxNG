@@ -8,7 +8,7 @@
 	 * Returns:
 	 *	Object Array<Skill ID, Skill Level, Skill Name, Skill Description, Texture File, Texture Row, Texture Col, Skill Levels List>
 	// Call and receive implementation
-	SkillPicker pSkillSelector = new(pMain, this, new object[] { 0, 1 }, true);
+	SkillPicker pSkillSelector = new(pMain, this, [0, 1], true);
 	if (pSkillSelector.ShowDialog() != DialogResult.OK)
 		return;
 
@@ -152,7 +152,7 @@
 		{
 			DialogResult = DialogResult.OK;
 
-			ReturnValues = new object[] { -1, 0, "", "", "", "", "", new string[] { } };
+			ReturnValues = [-1, 0, "", "", "", "", "", new string[] { }];
 
 			Close();
 		}

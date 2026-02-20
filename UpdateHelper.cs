@@ -103,18 +103,18 @@ namespace LastChaos_ToolBoxNG
 		{
 			string strText = tvStage.Nodes[nStage].Text;
 			Color Color = Color.FromArgb(208, 203, 148);
-
-			strText = strText.Replace(" 🔴", "");
+			//✅❌
+			strText = strText.Replace(" 🔴❌", "");
 			strText = strText.Replace("...", "");
 
 			if (nState == 1)
 			{
-				strText += " 🔴";
+				strText += " 🔴❌";
 				Color = Color.FromArgb(9, 127, 10);
 			}
 			else if (nState == 2)
 			{
-				strText += " 🔴";
+				strText += " 🔴❌";
 				Color = Color.FromArgb(243, 11, 10);
 			}
 			else if (nState == 3)

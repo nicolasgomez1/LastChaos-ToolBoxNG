@@ -7,7 +7,7 @@
 	 * Returns:
 	 *	Object Array<Special Skill ID, Special Skill Level, Special Skill Name, Special Skill Description, Texture File, Texture Row, Texture Col>
 	// Call and receive implementation
-	SpecialSkillPicker pSpecialSkillSelector = new(pMain, this, new object[] { 0, 1 });
+	SpecialSkillPicker pSpecialSkillSelector = new(pMain, this, [0, 1]);
 	if (pSpecialSkillSelector.ShowDialog() != DialogResult.OK)
 		return;
 
@@ -121,7 +121,8 @@
 			this.Location = new Point(pParentForm.Location.X + (pParentForm.Width - this.Width) / 2, pParentForm.Location.Y + (pParentForm.Height - this.Height) / 2);
 
 			bool bRequestNeeded = false;
-			List<string> listQueryCompose = new List<string> {
+			List<string> listQueryCompose =
+			[
 				"a_name_" + pMain.pSettings.WorkLocale,
 				"a_desc_" + pMain.pSettings.WorkLocale,
 				"a_texture_id",
@@ -133,7 +134,7 @@
 				"a_preference",
 				"a_need_sskill",
 				"a_need_sskill_level"
-			};
+			];
 
 			for( int i = 0; i < Defs.SSKILL_MAX_LEVEL; i++ )
 			{
@@ -265,7 +266,7 @@
 		{
 			DialogResult = DialogResult.OK;
 
-			ReturnValues = new object[] { -1, 0, "", "", "", "", "" };
+			ReturnValues = [-1, 0, "", "", "", "", ""];
 
 			Close();
 		}
