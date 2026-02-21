@@ -1,4 +1,7 @@
-﻿namespace LastChaos_ToolBoxNG
+﻿//#define USE_ORIGINAL_LACABALL_TABLE_LOCATION_AND_NAME
+// WARNING NOTE: This Editor needs a primary key column called a_index in the lacaball table.
+
+namespace LastChaos_ToolBoxNG
 {
 	public partial class LacaBallEditor : Form
 	{
@@ -104,7 +107,11 @@
 			{
 				DataTable? pNewTable = await Task.Run(() =>
 				{
+#if USE_ORIGINAL_LACABALL_TABLE_LOCATION_AND_NAME
+					return pMain.QuerySelect(pMain.pSettings.DBCharset, $"SELECT a_index, {string.Join(", ", listQueryCompose)} FROM {pMain.pSettings.DBUser}.t_lcball ORDER BY a_index;");
+#else
 					return pMain.QuerySelect(pMain.pSettings.DBCharset, $"SELECT a_index, {string.Join(", ", listQueryCompose)} FROM {pMain.pSettings.DBData}.t_lacaball ORDER BY a_index;");
+#endif
 				});
 
 				if (pMain.pTables.LacaBallTable == null)
@@ -557,7 +564,11 @@
 
 			if (pMain.pTables.LacaBallTable?.Select("a_tocken_index=" + nOriginalTokenID).FirstOrDefault() != null)
 			{
+#if USE_ORIGINAL_LACABALL_TABLE_LOCATION_AND_NAME
+				if (!(bSuccess = pMain.QueryUpdateInsertDelete(pMain.pSettings.DBCharset, $"DELETE FROM {pMain.pSettings.DBUser}.t_lcball WHERE a_tocken_index={nOriginalTokenID};", out long _)))
+#else
 				if (!(bSuccess = pMain.QueryUpdateInsertDelete(pMain.pSettings.DBCharset, $"DELETE FROM {pMain.pSettings.DBData}.t_lacaball WHERE a_tocken_index={nOriginalTokenID};", out long _)))
+#endif
 				{
 					string strError = $"LacaBall Editor > Token: {nOriginalTokenID} Something got wrong while trying to execute the MySQL Transaction. Changes not applied.";
 
@@ -884,8 +895,203 @@
 		}
 
 		private void btnUpdate_Click(object sender, EventArgs e)
-		{
+		{/*
 			// TODO: ...
+#if USE_ORIGINAL_LACABALL_TABLE_LOCATION_AND_NAME
+			//{pMain.pSettings.DBUser}.t_lcball
+#else
+			//{pMain.pSettings.DBData}.t_lacaball
+#endif
+			bool bSuccess = true;
+			int i = 0, nShopID = Convert.ToInt32(pTempShopRow["a_keeper_idx"]);
+			StringBuilder strbuilderQuery = new();
+
+			// Init transaction.
+			strbuilderQuery.Append("START TRANSACTION;\n");
+
+			if (gridSaleItems.Rows.Count > 0)
+			{
+				pTempShopItemRows = new DataRow[gridSaleItems.Rows.Count];
+
+				foreach (DataGridViewRow row in gridSaleItems.Rows)
+				{
+					DataRow pRow = pMain.pTables.ShopItemTable?.NewRow();
+
+					pRow["a_keeper_idx"] = nShopID; // Put NEW Shop ID
+					pRow["a_item_idx"] = row.Cells["item"].Tag;
+#if ITEM_PLUS_SYSTEM
+					pRow["a_item_plus"] = row.Cells["itemPlus"].Value;
+#endif
+					pRow["a_national"] = row.Cells["nation"].Value;
+
+					pTempShopItemRows[i] = pRow;
+
+					i++;
+				}
+
+				strbuilderQuery.Append($"DELETE FROM {pMain.pSettings.DBData}.t_shopitem WHERE a_keeper_idx={nOriginalShopID};\n");
+
+				// Compose t_shopitem INSERT Query.
+				StringBuilder strColumnsNames = new();
+				StringBuilder strColumnsValues = new();
+				HashSet<string> addedColumns = new();
+
+				foreach (DataRow pRow in pTempShopItemRows)
+				{
+					strColumnsValues.Append("(");
+
+					foreach (DataColumn pCol in pRow.Table.Columns)
+					{
+						string strColumnName = pCol.ColumnName;
+
+						if (!addedColumns.Contains(strColumnName))
+						{
+							strColumnsNames.Append(strColumnName + ", ");
+							addedColumns.Add(strColumnName);
+						}
+
+						strColumnsValues.Append(pRow[pCol] + ", ");
+					}
+
+					strColumnsValues.Length -= 2;
+
+					strColumnsValues.Append("), ");
+				}
+
+				strColumnsNames.Length -= 2;
+				strColumnsValues.Length -= 2;
+
+				strbuilderQuery.Append($"INSERT INTO {pMain.pSettings.DBData}.t_shopitem ({strColumnsNames}) VALUES {strColumnsValues};\n");
+			}
+
+			DataRow pShopTableRow = pMain.pTables.ShopTable.Select("a_keeper_idx=" + nOriginalShopID).FirstOrDefault();
+			if (pShopTableRow != null)  // UPDATE
+			{
+				// Compose UPDATE Query.
+				strbuilderQuery.Append($"UPDATE {pMain.pSettings.DBData}.t_shop SET");
+
+				foreach (DataColumn pCol in pTempShopRow.Table.Columns)
+				{
+					object objValue = pTempShopRow[pCol];
+					if (objValue is string)
+						objValue = pMain.EscapeChars(objValue.ToString());
+					else
+						objValue = Convert.ToString(objValue, CultureInfo.InvariantCulture);
+
+					strbuilderQuery.Append($" {pCol.ColumnName}='{objValue}',");
+				}
+
+				strbuilderQuery.Length -= 1;
+
+				strbuilderQuery.Append($" WHERE a_keeper_idx={nOriginalShopID};\n");
+			}
+			else    // INSERT
+			{
+				// Compose INSERT Query.
+				StringBuilder strColumnsNames = new();
+				StringBuilder strColumnsValues = new();
+
+				foreach (DataColumn pCol in pTempShopRow.Table.Columns)
+				{
+					strColumnsNames.Append(pCol.ColumnName + ", ");
+
+					object objValue = pTempShopRow[pCol];
+					if (objValue is string)
+						objValue = pMain.EscapeChars(objValue.ToString());
+					else
+						objValue = Convert.ToString(objValue, CultureInfo.InvariantCulture);
+
+					strColumnsValues.Append($"'{objValue}', ");
+				}
+
+				strColumnsNames.Length -= 2;
+				strColumnsValues.Length -= 2;
+
+				strbuilderQuery.Append($"INSERT INTO {pMain.pSettings.DBData}.t_shop ({strColumnsNames}) VALUES ({strColumnsValues});\n");
+			}
+
+			if (pMain.QueryUpdateInsertDelete(pMain.pSettings.DBCharset, strbuilderQuery.Append("COMMIT;").ToString(), out long _))
+			{
+				try
+				{
+					if (pTempShopItemRows != null && pTempShopItemRows.Length > 0)
+					{
+						DataRow[] pShopItemTableRowsOld = pMain.pTables.ShopItemTable?.Select("a_keeper_idx=" + nOriginalShopID);
+						foreach (DataRow row in pShopItemTableRowsOld)
+							row.Delete();
+
+						if (nShopID != nOriginalShopID)
+						{
+							DataRow[] pShopItemTableRowsNew = pMain.pTables.ShopItemTable?.Select("a_keeper_idx=" + nShopID);
+							foreach (DataRow row in pShopItemTableRowsNew)
+								row.Delete();
+						}
+
+						foreach (DataRow pRow in pTempShopItemRows)
+						{
+							DataRow? newDataRow = pMain.pTables.ShopItemTable?.NewRow();
+							newDataRow.ItemArray = (object[])pRow.ItemArray.Clone();
+							pMain.pTables.ShopItemTable?.Rows.Add(newDataRow);
+						}
+
+						pMain.pTables.ShopItemTable?.AcceptChanges();
+					}
+
+					if (pShopTableRow != null)  // Row exist in Global Table, update it.
+					{
+						pShopTableRow.ItemArray = (object[])pTempShopRow.ItemArray.Clone();
+					}
+					else    // Row not exist in Global Table, insert it.
+					{
+						pShopTableRow = pMain.pTables.ShopTable.NewRow();
+						pShopTableRow.ItemArray = (object[])pTempShopRow.ItemArray.Clone();
+						pMain.pTables.ShopTable.Rows.Add(pShopTableRow);
+					}
+				}
+				catch (Exception ex)
+				{
+					string strError = $"Shop Editor > Shop: {nOriginalShopID} Changes applied in DataBase, but something got wrong while transferring temp data to main tables. Please restart the application ({ex.Message}).";
+
+					pMain.Logger(LogTypes.Error, strError);
+
+					MessageBox.Show(strError, "Shop Editor", MessageBoxButtons.OK, MessageBoxIcon.Error);
+
+					bSuccess = false;
+				}
+				finally
+				{
+					if (bSuccess)
+					{
+						int nSelectedIndex = MainList.SelectedIndex;
+						Main.ListBoxItem pSelectedItem = (Main.ListBoxItem)MainList.Items[nSelectedIndex];
+						pSelectedItem.ID = nShopID;
+
+						DataRow pNPCRow = pMain.pTables.NPCTable?.AsEnumerable().Where(row => Convert.ToInt32(row["a_index"]) == nShopID).FirstOrDefault();
+						string strShoperName = "NPC NOT FOUND";
+
+						if (pNPCRow != null)
+							strShoperName = pNPCRow["a_name_" + pMain.pSettings.WorkLocale].ToString();
+
+						pSelectedItem.Text = $"{nShopID} - {strShoperName}";
+
+						MainList.SelectedIndexChanged -= MainList_SelectedIndexChanged;
+						MainList.Items[nSelectedIndex] = pSelectedItem;
+						MainList.SelectedIndexChanged += MainList_SelectedIndexChanged;
+
+						MessageBox.Show("Changes applied successfully!", "Shop Editor", MessageBoxButtons.OK);
+
+						bUnsavedChanges = false;
+					}
+				}
+			}
+			else
+			{
+				string strError = $"Shop Editor > Shop: {nOriginalShopID} Something got wrong while trying to execute the MySQL Transaction. Changes not applied.";
+
+				pMain.Logger(LogTypes.Error, strError);
+
+				MessageBox.Show(strError, "Shop Editor", MessageBoxButtons.OK, MessageBoxIcon.Error);
+			}*/
 		}
 	}
 }

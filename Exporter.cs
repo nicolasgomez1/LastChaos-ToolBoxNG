@@ -2,7 +2,6 @@
 //#define REQUIRED_QUEST_TO_USE_SHOPPER_V1	// NOTE: Uncomment this line if use my custom required quest to use shopper v1 system
 //#define USE_ORIGINAL_SKILL_CALCULATESUM_AND_END_TAG	// NOTE: Uncomment this line if use original Skills File format
 //#define EXPORT_LACARETTES_FILES_FOR_EACH_LANGUAGE   // NOTE: This is not actually necessary; since the cliente source takes the Course names directly from strLacarette_X.lod
-//#define USE_ORIGINAL_MONSTERCOMBO_FILE_SERIALIZATION	// NOTE: This is not actually necessary. I recommend do the same for your source code.
 
 namespace LastChaos_ToolBoxNG
 {
@@ -456,8 +455,7 @@ namespace LastChaos_ToolBoxNG
 					using (BinaryWriter Stream = new(File.Create(strFilePath)))
 					{
 						Stream.Write(pTable.Rows.Count);
-
-						Stream.Write(Convert.ToInt32(pTable.AsEnumerable().LastOrDefault()?[StringTypeData.Columns[0]]));    // Write Last Row ID
+						Stream.Write(Convert.ToInt32(pTable.AsEnumerable().LastOrDefault()?[StringTypeData.Columns[0]]));	// Write Last Row ID
 
 						foreach (DataRow pRow in pTable.Rows)
 						{
@@ -879,9 +877,7 @@ namespace LastChaos_ToolBoxNG
 
 					using (BinaryWriter Stream = new(File.Create(strFilePath)))
 					{
-						Stream.Write(Convert.ToInt32(pTable.AsEnumerable().LastOrDefault()?["a_index"]) + 1); // Write Last Row ID
-						//Stream.Write(Convert.ToInt32(pTable.AsEnumerable().LastOrDefault()["a_index"]));    // Write Last Row ID
-
+						Stream.Write(pTable.Rows.Count);
 						Stream.Write(0);    // Write first Item null?
 						Stream.Write(0);    // Write second Item null?
 
@@ -996,7 +992,7 @@ namespace LastChaos_ToolBoxNG
 							Stream.Write(Convert.ToInt32(pRow["a_texture_id"]));
 							Stream.Write(Convert.ToInt32(pRow["a_texture_row"]));
 							Stream.Write(Convert.ToInt32(pRow["a_texture_col"]));
-#if USE_ORIGINAL_MONSTERCOMBO_FILE_SERIALIZATION
+#if USE_ORIGINAL_SQL_REQUEST_AND_ORIGINAL_FILE_SERIALIZATION
 							Stream.Write(0);
 #endif
 							Stream.Write(Convert.ToInt32(pRow["a_point"]));
@@ -1166,7 +1162,11 @@ namespace LastChaos_ToolBoxNG
 
 					using (BinaryWriter Stream = new(File.Create(strFilePath)))
 					{
+#if USE_ORIGINAL_SQL_REQUEST_AND_ORIGINAL_FILE_SERIALIZATION
 						Stream.Write(Convert.ToInt32(pTableSkills.AsEnumerable().LastOrDefault()?["a_index"]));  // Write Last Row ID
+#else
+						Stream.Write(pTableSkills.Rows.Count);
+#endif
 
 						foreach (DataRow pSkillRow in pTableSkills.Rows)
 						{
@@ -1849,8 +1849,11 @@ namespace LastChaos_ToolBoxNG
 
 					using (BinaryWriter Stream = new(File.Create(strFilePath)))
 					{
+#if USE_ORIGINAL_SQL_REQUEST_AND_ORIGINAL_FILE_SERIALIZATION
 						Stream.Write(Convert.ToInt32(pShopsTable.AsEnumerable().LastOrDefault()?["a_keeper_idx"]));  // Write Last Row ID
-
+#else
+						Stream.Write(pShopsTable.Rows.Count);
+#endif
 						foreach (DataRow pShopsRow in pShopsTable.Rows)
 						{
 							Stream.Write(Convert.ToInt32(pShopsRow["a_keeper_idx"]));
