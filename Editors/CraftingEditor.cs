@@ -211,7 +211,7 @@ namespace LastChaos_ToolBoxNG
 				MainList.BeginUpdate();
 
 				int nResultItemID;
-				string strResultItemName = "NOT FOUND";
+				string strResultItemName = "ITEM NOT FOUND";
 				
 				foreach (DataRow pRow in pMain.pTables.CraftingTable.Rows)
 				{

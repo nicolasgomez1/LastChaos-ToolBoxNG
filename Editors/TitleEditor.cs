@@ -326,7 +326,7 @@ namespace LastChaos_ToolBoxNG
 				MainList.BeginUpdate();
 
 				int nClaimItemID;
-				string strClaimItemName = "NOT FOUND";
+				string strClaimItemName = "ITEM NOT FOUND";
 
 				foreach (DataRow pRow in pMain.pTables.TitleTable.Rows)
 				{
@@ -1343,7 +1343,7 @@ namespace LastChaos_ToolBoxNG
 						pSelectedItem.ID = nTitleID;
 
 						DataRow? pItemRow = pMain.pTables.ItemTable?.Select("a_index=" + pTitleTableRow["a_item_index"]).FirstOrDefault();
-						string strTitleName = "";
+						string strTitleName = "ITEM NOT FOUND";
 
 						if (pItemRow != null)
 							strTitleName = pItemRow["a_name_" + pMain.pSettings.WorkLocale].ToString() ?? string.Empty;

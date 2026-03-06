@@ -142,7 +142,7 @@ namespace LastChaos_ToolBoxNG
 				MainList.BeginUpdate();
 
 				int nRequiredItemID;
-				string strRequiredItemName = "NOT FOUND";
+				string strRequiredItemName = "ITEM NOT FOUND";
 
 				foreach (DataRow pRow in pMain.pTables.LacaBallTable.AsEnumerable().GroupBy(row => Convert.ToInt32(row["a_tocken_index"])).Select(group => group.First()).OrderBy(row => Convert.ToInt32(row["a_item_order"])).ThenByDescending(row => Convert.ToInt32(row["a_course_code"])))
 				{
@@ -895,48 +895,56 @@ namespace LastChaos_ToolBoxNG
 		}
 
 		private void btnUpdate_Click(object sender, EventArgs e)
-		{/*
-			// TODO: ...
-#if USE_ORIGINAL_LACABALL_TABLE_LOCATION_AND_NAME
-			//{pMain.pSettings.DBUser}.t_lcball
-#else
-			//{pMain.pSettings.DBData}.t_lacaball
-#endif
+		{
 			bool bSuccess = true;
-			int i = 0, nShopID = Convert.ToInt32(pTempShopRow["a_keeper_idx"]);
+			DataRow[] pTempRewardsRows = null;
+			int i = 0;
+			int nTokenID = Convert.ToInt32(pTempLacaBallTokenRows[0]["a_tocken_index"]);
+			int nTokenOrder = Convert.ToInt32(pTempLacaBallTokenRows[0]["a_item_order"]);
+			int nNewIndexID = pMain.pTables.LacaBallTable.AsEnumerable().Max(row => Convert.ToInt32(row["a_index"])) + 1;
 			StringBuilder strbuilderQuery = new();
 
 			// Init transaction.
 			strbuilderQuery.Append("START TRANSACTION;\n");
 
-			if (gridSaleItems.Rows.Count > 0)
+			if (gridRewards.Rows.Count > 0)
 			{
-				pTempShopItemRows = new DataRow[gridSaleItems.Rows.Count];
+				List<DataRow> pTempRewardsList = new();
 
-				foreach (DataGridViewRow row in gridSaleItems.Rows)
+				foreach (DataGridViewRow row in gridRewards.Rows)
 				{
-					DataRow pRow = pMain.pTables.ShopItemTable?.NewRow();
+					if (row.Cells[0].Tag?.ToString() != "GROUP")
+					{
+						DataRow pRow = pMain.pTables.LacaBallTable?.NewRow();
 
-					pRow["a_keeper_idx"] = nShopID; // Put NEW Shop ID
-					pRow["a_item_idx"] = row.Cells["item"].Tag;
-#if ITEM_PLUS_SYSTEM
-					pRow["a_item_plus"] = row.Cells["itemPlus"].Value;
-#endif
-					pRow["a_national"] = row.Cells["nation"].Value;
+						pRow["a_index"] = nNewIndexID + i;
+						pRow["a_item_order"] = nTokenOrder;
+						pRow["a_tocken_index"] = nTokenID; // Put NEW Token ID
+						pRow["a_course_code"] = GetGroupRowID(row.Index);
+						pRow["a_order"] = i;
+						pRow["a_item_index"] = row.Cells["item"].Tag;
+						pRow["a_item_count"] = row.Cells["count"].Value;
+						pRow["a_item_max"] = row.Cells["max"].Value;
+						pRow["a_item_remain"] = row.Cells["remain"].Value;
 
-					pTempShopItemRows[i] = pRow;
+						pTempRewardsList.Add(pRow);
 
-					i++;
+						i++;
+					}
 				}
 
-				strbuilderQuery.Append($"DELETE FROM {pMain.pSettings.DBData}.t_shopitem WHERE a_keeper_idx={nOriginalShopID};\n");
-
+				pTempRewardsRows = pTempRewardsList.ToArray();
+#if USE_ORIGINAL_LACABALL_TABLE_LOCATION_AND_NAME
+				strbuilderQuery.Append($"DELETE FROM {pMain.pSettings.DBUser}.t_lcball WHERE a_tocken_index={nOriginalTokenID};\n");
+#else
+				strbuilderQuery.Append($"DELETE FROM {pMain.pSettings.DBData}.t_lacaball WHERE a_tocken_index={nOriginalTokenID};\n");
+#endif
 				// Compose t_shopitem INSERT Query.
 				StringBuilder strColumnsNames = new();
 				StringBuilder strColumnsValues = new();
 				HashSet<string> addedColumns = new();
 
-				foreach (DataRow pRow in pTempShopItemRows)
+				foreach (DataRow pRow in pTempRewardsRows)
 				{
 					strColumnsValues.Append("(");
 
@@ -960,101 +968,47 @@ namespace LastChaos_ToolBoxNG
 
 				strColumnsNames.Length -= 2;
 				strColumnsValues.Length -= 2;
-
-				strbuilderQuery.Append($"INSERT INTO {pMain.pSettings.DBData}.t_shopitem ({strColumnsNames}) VALUES {strColumnsValues};\n");
-			}
-
-			DataRow pShopTableRow = pMain.pTables.ShopTable.Select("a_keeper_idx=" + nOriginalShopID).FirstOrDefault();
-			if (pShopTableRow != null)  // UPDATE
-			{
-				// Compose UPDATE Query.
-				strbuilderQuery.Append($"UPDATE {pMain.pSettings.DBData}.t_shop SET");
-
-				foreach (DataColumn pCol in pTempShopRow.Table.Columns)
-				{
-					object objValue = pTempShopRow[pCol];
-					if (objValue is string)
-						objValue = pMain.EscapeChars(objValue.ToString());
-					else
-						objValue = Convert.ToString(objValue, CultureInfo.InvariantCulture);
-
-					strbuilderQuery.Append($" {pCol.ColumnName}='{objValue}',");
-				}
-
-				strbuilderQuery.Length -= 1;
-
-				strbuilderQuery.Append($" WHERE a_keeper_idx={nOriginalShopID};\n");
-			}
-			else    // INSERT
-			{
-				// Compose INSERT Query.
-				StringBuilder strColumnsNames = new();
-				StringBuilder strColumnsValues = new();
-
-				foreach (DataColumn pCol in pTempShopRow.Table.Columns)
-				{
-					strColumnsNames.Append(pCol.ColumnName + ", ");
-
-					object objValue = pTempShopRow[pCol];
-					if (objValue is string)
-						objValue = pMain.EscapeChars(objValue.ToString());
-					else
-						objValue = Convert.ToString(objValue, CultureInfo.InvariantCulture);
-
-					strColumnsValues.Append($"'{objValue}', ");
-				}
-
-				strColumnsNames.Length -= 2;
-				strColumnsValues.Length -= 2;
-
-				strbuilderQuery.Append($"INSERT INTO {pMain.pSettings.DBData}.t_shop ({strColumnsNames}) VALUES ({strColumnsValues});\n");
+#if USE_ORIGINAL_LACABALL_TABLE_LOCATION_AND_NAME
+				strbuilderQuery.Append($"INSERT INTO {pMain.pSettings.DBUser}.t_lcball ({strColumnsNames}) VALUES {strColumnsValues};\n");
+#else
+				strbuilderQuery.Append($"INSERT INTO {pMain.pSettings.DBData}.t_lacaball ({strColumnsNames}) VALUES {strColumnsValues};\n");
+#endif
 			}
 
 			if (pMain.QueryUpdateInsertDelete(pMain.pSettings.DBCharset, strbuilderQuery.Append("COMMIT;").ToString(), out long _))
 			{
 				try
 				{
-					if (pTempShopItemRows != null && pTempShopItemRows.Length > 0)
+					if (pTempRewardsRows != null && pTempRewardsRows.Length > 0)
 					{
-						DataRow[] pShopItemTableRowsOld = pMain.pTables.ShopItemTable?.Select("a_keeper_idx=" + nOriginalShopID);
-						foreach (DataRow row in pShopItemTableRowsOld)
+						DataRow[] pLacaBallTableRowsOld = pMain.pTables.LacaBallTable?.Select("a_tocken_index=" + nOriginalTokenID);
+						foreach (DataRow row in pLacaBallTableRowsOld)
 							row.Delete();
 
-						if (nShopID != nOriginalShopID)
+						if (nTokenID != nOriginalTokenID)
 						{
-							DataRow[] pShopItemTableRowsNew = pMain.pTables.ShopItemTable?.Select("a_keeper_idx=" + nShopID);
-							foreach (DataRow row in pShopItemTableRowsNew)
+							DataRow[] pLacaBallTableRowsNew = pMain.pTables.LacaBallTable?.Select("a_tocken_index=" + nTokenID);
+							foreach (DataRow row in pLacaBallTableRowsNew)
 								row.Delete();
 						}
 
-						foreach (DataRow pRow in pTempShopItemRows)
+						foreach (DataRow pRow in pTempRewardsRows)
 						{
-							DataRow? newDataRow = pMain.pTables.ShopItemTable?.NewRow();
+							DataRow? newDataRow = pMain.pTables.LacaBallTable?.NewRow();
 							newDataRow.ItemArray = (object[])pRow.ItemArray.Clone();
-							pMain.pTables.ShopItemTable?.Rows.Add(newDataRow);
+							pMain.pTables.LacaBallTable?.Rows.Add(newDataRow);
 						}
 
-						pMain.pTables.ShopItemTable?.AcceptChanges();
-					}
-
-					if (pShopTableRow != null)  // Row exist in Global Table, update it.
-					{
-						pShopTableRow.ItemArray = (object[])pTempShopRow.ItemArray.Clone();
-					}
-					else    // Row not exist in Global Table, insert it.
-					{
-						pShopTableRow = pMain.pTables.ShopTable.NewRow();
-						pShopTableRow.ItemArray = (object[])pTempShopRow.ItemArray.Clone();
-						pMain.pTables.ShopTable.Rows.Add(pShopTableRow);
+						pMain.pTables.LacaBallTable?.AcceptChanges();
 					}
 				}
 				catch (Exception ex)
 				{
-					string strError = $"Shop Editor > Shop: {nOriginalShopID} Changes applied in DataBase, but something got wrong while transferring temp data to main tables. Please restart the application ({ex.Message}).";
+					string strError = $"LacaBall Editor > Token: {nOriginalTokenID} Changes applied in DataBase, but something got wrong while transferring temp data to main tables. Please restart the application ({ex.Message}).";
 
 					pMain.Logger(LogTypes.Error, strError);
 
-					MessageBox.Show(strError, "Shop Editor", MessageBoxButtons.OK, MessageBoxIcon.Error);
+					MessageBox.Show(strError, "LacaBall Editor", MessageBoxButtons.OK, MessageBoxIcon.Error);
 
 					bSuccess = false;
 				}
@@ -1064,21 +1018,21 @@ namespace LastChaos_ToolBoxNG
 					{
 						int nSelectedIndex = MainList.SelectedIndex;
 						Main.ListBoxItem pSelectedItem = (Main.ListBoxItem)MainList.Items[nSelectedIndex];
-						pSelectedItem.ID = nShopID;
+						pSelectedItem.ID = nTokenOrder;
 
-						DataRow pNPCRow = pMain.pTables.NPCTable?.AsEnumerable().Where(row => Convert.ToInt32(row["a_index"]) == nShopID).FirstOrDefault();
-						string strShoperName = "NPC NOT FOUND";
+						DataRow pItemRow = pMain.pTables.ItemTable?.AsEnumerable().Where(row => Convert.ToInt32(row["a_index"]) == nTokenID).FirstOrDefault();
+						string strTokenName = "ITEM NOT FOUND";
 
-						if (pNPCRow != null)
-							strShoperName = pNPCRow["a_name_" + pMain.pSettings.WorkLocale].ToString();
+						if (pItemRow != null)
+							strTokenName = pItemRow["a_name_" + pMain.pSettings.WorkLocale].ToString();
 
-						pSelectedItem.Text = $"{nShopID} - {strShoperName}";
+						pSelectedItem.Text = $"{nTokenOrder} - {strTokenName}";
 
 						MainList.SelectedIndexChanged -= MainList_SelectedIndexChanged;
 						MainList.Items[nSelectedIndex] = pSelectedItem;
 						MainList.SelectedIndexChanged += MainList_SelectedIndexChanged;
 
-						MessageBox.Show("Changes applied successfully!", "Shop Editor", MessageBoxButtons.OK);
+						MessageBox.Show("Changes applied successfully!", "LacaBall Editor", MessageBoxButtons.OK);
 
 						bUnsavedChanges = false;
 					}
@@ -1086,12 +1040,12 @@ namespace LastChaos_ToolBoxNG
 			}
 			else
 			{
-				string strError = $"Shop Editor > Shop: {nOriginalShopID} Something got wrong while trying to execute the MySQL Transaction. Changes not applied.";
+				string strError = $"LacaBall Editor > Token: {nOriginalTokenID} Something got wrong while trying to execute the MySQL Transaction. Changes not applied.";
 
 				pMain.Logger(LogTypes.Error, strError);
 
-				MessageBox.Show(strError, "Shop Editor", MessageBoxButtons.OK, MessageBoxIcon.Error);
-			}*/
+				MessageBox.Show(strError, "LacaBall Editor", MessageBoxButtons.OK, MessageBoxIcon.Error);
+			}
 		}
 	}
 }

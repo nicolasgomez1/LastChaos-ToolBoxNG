@@ -1097,7 +1097,7 @@ namespace LastChaos_ToolBoxNG
 							pTable.Load(MySQLDataReader);
 
 							if (bLogSuccess)
-								Logger(LogTypes.Success, $"MySQL > Query (Charset: {strCharset})\n{strQuery}\nExecute successfully.");
+								Logger(LogTypes.Success, $"MySQL > Query (Charset: {strCharset})\r{strQuery.Replace(";", ";\r")}Execute successfully.");
 
 							return pTable;
 						}
@@ -1106,7 +1106,7 @@ namespace LastChaos_ToolBoxNG
 			}
 			catch (Exception ex)
 			{
-				Logger(LogTypes.Error, $"MySQL > Query (Charset: {strCharset})\n{strQuery}\nFail > {ex.Message}.");
+				Logger(LogTypes.Error, $"MySQL > Query (Charset: {strCharset})\r{strQuery.Replace(";", ";\r")}Fail > {ex.Message}.");
 
 				return null;
 			}
@@ -1131,7 +1131,7 @@ namespace LastChaos_ToolBoxNG
 						lLastInsertID = MySQLCommand.LastInsertedId;
 
 						if (bLogSuccess)
-							Logger(LogTypes.Success, $"MySQL > Query (Charset: {strCharset})\n{strQuery}\nExecute successfully.");
+							Logger(LogTypes.Success, $"MySQL > Query (Charset: {strCharset})\r{strQuery.Replace(";", ";\r")}Execute successfully.");
 
 						return true;
 					}
@@ -1139,7 +1139,7 @@ namespace LastChaos_ToolBoxNG
 			}
 			catch (Exception ex)
 			{
-				Logger(LogTypes.Error, $"MySQL > Query (Charset: {strCharset})\n{strQuery}\nFail > {ex.Message}.");
+				Logger(LogTypes.Error, $"MySQL > Query (Charset: {strCharset})\r{strQuery.Replace(";", ";\r")}Fail > {ex.Message}.");
 
 				return false;
 			}

@@ -30,9 +30,9 @@ namespace LastChaos_ToolBoxNG
 		/// </summary>
 		private void InitializeComponent()
 		{
-			DataGridViewCellStyle dataGridViewCellStyle10 = new DataGridViewCellStyle();
-			DataGridViewCellStyle dataGridViewCellStyle11 = new DataGridViewCellStyle();
-			DataGridViewCellStyle dataGridViewCellStyle12 = new DataGridViewCellStyle();
+			DataGridViewCellStyle dataGridViewCellStyle4 = new DataGridViewCellStyle();
+			DataGridViewCellStyle dataGridViewCellStyle5 = new DataGridViewCellStyle();
+			DataGridViewCellStyle dataGridViewCellStyle6 = new DataGridViewCellStyle();
 			btnReload = new Button();
 			groupBox1 = new GroupBox();
 			label2 = new Label();
@@ -104,6 +104,7 @@ namespace LastChaos_ToolBoxNG
 			// 
 			// btnRequiredItem
 			// 
+			btnRequiredItem.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
 			btnRequiredItem.BackColor = Color.FromArgb(40, 40, 40);
 			btnRequiredItem.FlatAppearance.BorderColor = Color.FromArgb(91, 85, 76);
 			btnRequiredItem.FlatAppearance.MouseDownBackColor = Color.FromArgb(40, 40, 40);
@@ -114,7 +115,7 @@ namespace LastChaos_ToolBoxNG
 			btnRequiredItem.Location = new Point(82, 55);
 			btnRequiredItem.Margin = new Padding(4, 3, 4, 3);
 			btnRequiredItem.Name = "btnRequiredItem";
-			btnRequiredItem.Size = new Size(223, 27);
+			btnRequiredItem.Size = new Size(656, 27);
 			btnRequiredItem.TabIndex = 1048;
 			btnRequiredItem.UseVisualStyleBackColor = false;
 			btnRequiredItem.Click += btnRequiredItem_Click;
@@ -147,24 +148,24 @@ namespace LastChaos_ToolBoxNG
 			gridRewards.BackgroundColor = Color.FromArgb(28, 30, 31);
 			gridRewards.BorderStyle = BorderStyle.None;
 			gridRewards.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.Single;
-			dataGridViewCellStyle10.Alignment = DataGridViewContentAlignment.MiddleCenter;
-			dataGridViewCellStyle10.BackColor = Color.FromArgb(60, 56, 54);
-			dataGridViewCellStyle10.Font = new Font("Microsoft Sans Serif", 8.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
-			dataGridViewCellStyle10.ForeColor = Color.FromArgb(208, 203, 148);
-			dataGridViewCellStyle10.SelectionBackColor = Color.FromArgb(60, 56, 54);
-			dataGridViewCellStyle10.SelectionForeColor = Color.FromArgb(208, 203, 148);
-			dataGridViewCellStyle10.WrapMode = DataGridViewTriState.True;
-			gridRewards.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle10;
+			dataGridViewCellStyle4.Alignment = DataGridViewContentAlignment.MiddleCenter;
+			dataGridViewCellStyle4.BackColor = Color.FromArgb(60, 56, 54);
+			dataGridViewCellStyle4.Font = new Font("Microsoft Sans Serif", 8.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
+			dataGridViewCellStyle4.ForeColor = Color.FromArgb(208, 203, 148);
+			dataGridViewCellStyle4.SelectionBackColor = Color.FromArgb(60, 56, 54);
+			dataGridViewCellStyle4.SelectionForeColor = Color.FromArgb(208, 203, 148);
+			dataGridViewCellStyle4.WrapMode = DataGridViewTriState.True;
+			gridRewards.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle4;
 			gridRewards.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
 			gridRewards.Columns.AddRange(new DataGridViewColumn[] { itemIcon, item, count, max, remain });
-			dataGridViewCellStyle11.Alignment = DataGridViewContentAlignment.MiddleCenter;
-			dataGridViewCellStyle11.BackColor = Color.FromArgb(40, 40, 40);
-			dataGridViewCellStyle11.Font = new Font("Microsoft Sans Serif", 8.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
-			dataGridViewCellStyle11.ForeColor = Color.FromArgb(208, 203, 148);
-			dataGridViewCellStyle11.SelectionBackColor = Color.FromArgb(60, 56, 54);
-			dataGridViewCellStyle11.SelectionForeColor = Color.FromArgb(208, 203, 148);
-			dataGridViewCellStyle11.WrapMode = DataGridViewTriState.False;
-			gridRewards.DefaultCellStyle = dataGridViewCellStyle11;
+			dataGridViewCellStyle5.Alignment = DataGridViewContentAlignment.MiddleCenter;
+			dataGridViewCellStyle5.BackColor = Color.FromArgb(40, 40, 40);
+			dataGridViewCellStyle5.Font = new Font("Microsoft Sans Serif", 8.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
+			dataGridViewCellStyle5.ForeColor = Color.FromArgb(208, 203, 148);
+			dataGridViewCellStyle5.SelectionBackColor = Color.FromArgb(60, 56, 54);
+			dataGridViewCellStyle5.SelectionForeColor = Color.FromArgb(208, 203, 148);
+			dataGridViewCellStyle5.WrapMode = DataGridViewTriState.False;
+			gridRewards.DefaultCellStyle = dataGridViewCellStyle5;
 			gridRewards.EditMode = DataGridViewEditMode.EditOnEnter;
 			gridRewards.EnableHeadersVisualStyles = false;
 			gridRewards.GridColor = Color.FromArgb(91, 85, 76);
@@ -173,14 +174,14 @@ namespace LastChaos_ToolBoxNG
 			gridRewards.MultiSelect = false;
 			gridRewards.Name = "gridRewards";
 			gridRewards.RowHeadersBorderStyle = DataGridViewHeaderBorderStyle.Single;
-			dataGridViewCellStyle12.Alignment = DataGridViewContentAlignment.MiddleCenter;
-			dataGridViewCellStyle12.BackColor = Color.FromArgb(60, 56, 54);
-			dataGridViewCellStyle12.Font = new Font("Microsoft Sans Serif", 8.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
-			dataGridViewCellStyle12.ForeColor = Color.FromArgb(208, 203, 148);
-			dataGridViewCellStyle12.SelectionBackColor = SystemColors.Highlight;
-			dataGridViewCellStyle12.SelectionForeColor = Color.FromArgb(208, 203, 148);
-			dataGridViewCellStyle12.WrapMode = DataGridViewTriState.True;
-			gridRewards.RowHeadersDefaultCellStyle = dataGridViewCellStyle12;
+			dataGridViewCellStyle6.Alignment = DataGridViewContentAlignment.MiddleCenter;
+			dataGridViewCellStyle6.BackColor = Color.FromArgb(60, 56, 54);
+			dataGridViewCellStyle6.Font = new Font("Microsoft Sans Serif", 8.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
+			dataGridViewCellStyle6.ForeColor = Color.FromArgb(208, 203, 148);
+			dataGridViewCellStyle6.SelectionBackColor = SystemColors.Highlight;
+			dataGridViewCellStyle6.SelectionForeColor = Color.FromArgb(208, 203, 148);
+			dataGridViewCellStyle6.WrapMode = DataGridViewTriState.True;
+			gridRewards.RowHeadersDefaultCellStyle = dataGridViewCellStyle6;
 			gridRewards.RowHeadersWidthSizeMode = DataGridViewRowHeadersWidthSizeMode.AutoSizeToAllHeaders;
 			gridRewards.ScrollBars = ScrollBars.Vertical;
 			gridRewards.Size = new Size(730, 445);
