@@ -622,6 +622,7 @@ namespace LastChaos_ToolBoxNG
 #else
 					pStreamWriter.WriteLine($"{strTimestamp} > {strMsg}");
 #endif
+					// TODO: Capaz es mejor que siempre sea instantaneo si el proyecto está compilado en modo debug
 					if (lgType == LogTypes.Error)   // Insta flush if log type is Error
 						pStreamWriter.Flush();
 				}

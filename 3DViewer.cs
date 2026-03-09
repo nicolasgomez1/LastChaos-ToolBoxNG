@@ -15,7 +15,7 @@ namespace LastChaos_ToolBoxNG
 		private Vector3 vecCameraPosition = new(0.0f, -2.0f, 4f);
 		private Vector3 vecEntityPosition = new(0f, 0.0f, 0.0f);
 		private static string? strFilePath;
-		private Texture? pMissingTexture;	// FIX out of range error
+		private Texture? pMissingTexture;   // FIX out of range error
 		private PresentParameters? pPresentParameters;
 		private bool bDeviceReset = false;
 		private bool bCaptureShot = false;
@@ -99,7 +99,7 @@ namespace LastChaos_ToolBoxNG
 				fLeftRight -= Math.Sign(e.Delta) * 0.2f;
 				fLeftRight = Math.Max(-5, Math.Min(5.0f, fLeftRight));
 			}
-			else if(ModifierKeys.HasFlag(Keys.Alt))
+			else if (ModifierKeys.HasFlag(Keys.Alt))
 			{
 				fRotation += Math.Sign(e.Delta) * 0.1f;
 				fRotation %= 360;
@@ -466,7 +466,7 @@ namespace LastChaos_ToolBoxNG
 					{
 						++index1;
 						string[] strArray2 = list[i].Split('"');
-						
+
 						if (strArray2.Length > 1)
 							smcMeshList.Add(new smcMesh(str + strArray2[1]));
 						else
@@ -714,7 +714,7 @@ namespace LastChaos_ToolBoxNG
 				uint normalCount = pMesh.HeaderInfo.NormalCount;
 				uint jointCount = pMesh.HeaderInfo.JointCount;
 				uint texMapCount = pMesh.HeaderInfo.TextureMaps;
-				
+
 				tHeaderInfo headerInfo = pMesh.HeaderInfo;
 				headerInfo.NormalCount = vtxCount;
 				headerInfo.JointCount = normalCount;
@@ -897,7 +897,7 @@ namespace LastChaos_ToolBoxNG
 
 				pMesh.Objects = new tMeshObject[(int)pMesh.HeaderInfo.ObjCount];
 
-				for (int index1 = 0;  index1 < pMesh.HeaderInfo.ObjCount; ++index1)
+				for (int index1 = 0; index1 < pMesh.HeaderInfo.ObjCount; ++index1)
 				{
 					tMeshObject tMeshObject = new tMeshObject();
 					tMeshObject.FromVert = Decoder.Decode(b.ReadUInt32());
@@ -1000,7 +1000,7 @@ namespace LastChaos_ToolBoxNG
 					return format;
 			}
 		}
-		
+
 		private Texture BuildTexture(byte[] imageData, Format imageFormat, int width, int height)
 		{
 			if (imageFormat == Format.R8G8B8)
@@ -1162,11 +1162,11 @@ namespace LastChaos_ToolBoxNG
 
 			fZoom = fRotation = 0.0f;
 		}
-		
+
 		private void timerRender_Tick(object? sender, EventArgs e)
 		{
 			pDevice.Viewport = new Viewport(0, 0, panel3DView.Width, panel3DView.Height);
-			
+
 			if (bDeviceReset)
 			{
 				pDevice.SetRenderState(RenderState.Lighting, false);

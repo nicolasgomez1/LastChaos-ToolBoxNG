@@ -129,6 +129,48 @@ namespace LastChaos_ToolBoxNG
 			}
 		}
 
+		private async Task LoadItemDataAsync()
+		{
+			bool bRequestNeeded = false;
+			List<string> listQueryCompose =
+			[
+				"a_name_" + pMain.pSettings.WorkLocale,
+				"a_descr_" + pMain.pSettings.WorkLocale,
+				"a_texture_id",
+				"a_texture_row",
+				"a_texture_col",
+				"a_set_4"
+			];
+
+			if (pMain.pTables.ItemTable == null)
+			{
+				bRequestNeeded = true;
+			}
+			else
+			{
+				foreach (string strColumnName in listQueryCompose.ToList())
+				{
+					if (!pMain.pTables.ItemTable.Columns.Contains(strColumnName))
+						bRequestNeeded = true;
+					else
+						listQueryCompose.Remove(strColumnName);
+				}
+			}
+
+			if (bRequestNeeded)
+			{
+				DataTable? pNewTable = await Task.Run(() =>
+				{
+					return pMain.QuerySelect(pMain.pSettings.DBCharset, $"SELECT a_index, {string.Join(", ", listQueryCompose)} FROM {pMain.pSettings.DBData}.t_item ORDER BY a_index;");
+				});
+
+				if (pMain.pTables.ItemTable == null)
+					pMain.pTables.ItemTable = pNewTable;
+				else
+					pMain.MergeDataTables(pNewTable, "a_index", ref pMain.pTables.ItemTable);
+			}
+		}
+
 		private async void ItemSetEditor_LoadAsync(object sender, EventArgs e)
 		{
 			MessageBox_Progress pProgressDialog = new(this, "Loading Data, Please Wait...");
@@ -155,21 +197,25 @@ namespace LastChaos_ToolBoxNG
 			cbJobSelector.EndUpdate();
 			/****************************************/
 			for (int i = 0; i < Defs.MAX_SET_ITEM_OPTION; i++)
-				(new ToolTip()).SetToolTip(((Button)Controls.Find("btnOption" + i, true)[0]), "Left Click to open Picker for current Type/Right Click to open de opposite Type.");
+			{
+				// (new ToolTip()).SetToolTip(((Button)Controls.Find("btnOption" + i, true)[0]), "Left Click to open Picker for current Type/Right Click to open the opposite Type.");
+				// Rigid/Fixed version
+				(new ToolTip()).SetToolTip(((Button)Controls.Find("btnOption" + i, true)[0]), "Left Click to open Skills Picker/Right Click to open Options.");
+			}
 			/****************************************/
 #if DEBUG
 			Stopwatch stopwatch = Stopwatch.StartNew();
 #endif
 			await Task.WhenAll(
 				LoadItemSetDataAsync(),
-				pMain.GenericLoadItemDataAsync(),
+				LoadItemDataAsync(),
 				pMain.GenericLoadOptionDataAsync(),
 				pMain.GenericLoadSkillDataAsync(),
 				pMain.GenericLoadSkillLevelDataAsync()
 			);
 #if DEBUG
 			stopwatch.Stop();
-			pMain.Logger(LogTypes.Message, $"Item Sets, Items, Options & Skills Data load took: {stopwatch.ElapsedMilliseconds}ms.");
+			pMain.Logger(LogTypes.Message, $"Item Sets, Items, Options, Skills & Skills Levels Data load took: {stopwatch.ElapsedMilliseconds}ms.");
 #endif
 			/****************************************/
 			if (pMain.pTables.ItemSetTable != null)
@@ -611,6 +657,7 @@ namespace LastChaos_ToolBoxNG
 				pTempSetRow.ItemArray = (object[])pMain.pTables.ItemSetTable.Select("a_set_idx=" + nSetIDToCopy)[0].ItemArray.Clone();
 
 				pTempSetRow["a_set_idx"] = nNewSetID;
+				pTempSetRow["a_item_idx"] = "-1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1";
 
 				foreach (string strNation in pMain.pSettings.NationSupported)
 					pTempSetRow["a_set_name_" + strNation.ToLower()] = pTempSetRow["a_set_name_" + strNation.ToLower()] + " Copy";
@@ -761,6 +808,27 @@ namespace LastChaos_ToolBoxNG
 					return;
 
 				int nItemID = Convert.ToInt32(pItemSelector.ReturnValues[0]);
+
+				if (nItemID > 0)
+				{
+					DataRow? pItemRow = pMain.pTables.ItemTable.AsEnumerable().Where(row => Convert.ToInt32(row["a_index"]) == nItemID).FirstOrDefault();
+					if (pItemRow != null)
+					{
+						int nItemSetID = Convert.ToInt32(pItemRow["a_set_4"]);
+
+						if (nItemSetID > 0 && nItemSetID != Convert.ToInt32(pTempSetRow["a_set_idx"]))
+						{
+							DataRow? pSetRow = pMain.pTables.ItemSetTable.AsEnumerable().Where(row => Convert.ToInt32(row["a_set_idx"]) == nItemSetID).FirstOrDefault();
+							string strSetName = $"NOT FOUND (ID: {nItemSetID})";
+							if (pSetRow != null)
+								strSetName = $"{nItemSetID} - {pSetRow["a_set_name_" + pMain.pSettings.WorkLocale].ToString()}";
+
+							MessageBox.Show($"This Item is already part of Set {strSetName}. An item cannot belong to multiple sets.", "Item Set Editor", MessageBoxButtons.OK, MessageBoxIcon.Error);
+							return;
+						}
+					}
+				}
+
 				string strItemName = nItemID.ToString();
 
 				if (nItemID > 0)
@@ -917,7 +985,7 @@ namespace LastChaos_ToolBoxNG
 					ApplyUpdate("1", nSkillID.ToString(), nSkillLevel.ToString());
 				}
 
-				if (e.Button == MouseButtons.Left)  // Open current Type
+				/*if (e.Button == MouseButtons.Left)  // Open current Type
 				{
 					if (strOptionTypes[nPos] == "0")
 						OpenOptionPicker();
@@ -934,7 +1002,12 @@ namespace LastChaos_ToolBoxNG
 						OpenOptionPicker();
 					else
 						OpenOptionPicker();
-				}
+				}*/
+				// Rigid/Fixed version
+				if (e.Button == MouseButtons.Left)
+					OpenSkillPicker();
+				else
+					OpenOptionPicker();
 			}
 		}
 
@@ -985,11 +1058,12 @@ namespace LastChaos_ToolBoxNG
 		{
 			bool bSuccess = true;
 			int nSetID = Convert.ToInt32(pTempSetRow["a_set_idx"]);
+			string[] strSetParts = (pTempSetRow["a_item_idx"].ToString() ?? string.Empty).Split(' ');
 			StringBuilder strbuilderQuery = new();
 
-			// Check if Option exist in Global Table, if exist, do a UPDATE. If not, do a INSERT.
-			DataRow? pOptionRow = pMain.pTables.ItemSetTable?.Select("a_set_idx=" + nSetID).FirstOrDefault();
-			if (pOptionRow != null)  // UPDATE
+			// Check if Set exist in Global Table, if exist, do a UPDATE. If not, do a INSERT.
+			DataRow? pSetRow = pMain.pTables.ItemSetTable?.Select("a_set_idx=" + nSetID).FirstOrDefault();
+			if (pSetRow != null)  // UPDATE
 			{
 				// Compose UPDATE Query.
 				strbuilderQuery.Append($"UPDATE {pMain.pSettings.DBData}.t_set_item SET");
@@ -1020,19 +1094,39 @@ namespace LastChaos_ToolBoxNG
 				strbuilderQuery.Append($"INSERT INTO {pMain.pSettings.DBData}.t_set_item ({strColumnsNames}) VALUES ({strColumnsValues});");
 			}
 
+			strbuilderQuery.Append($"UPDATE {pMain.pSettings.DBData}.t_item SET a_set_4=0 WHERE a_set_4={nSetID};");
+
+			foreach (string strItemID in strSetParts)
+			{
+				if (strItemID != "-1" && strItemID != "0")
+					strbuilderQuery.Append($"UPDATE {pMain.pSettings.DBData}.t_item SET a_set_4={nSetID} WHERE a_index={strItemID};");
+			}
+
 			if (pMain.QueryUpdateInsertDelete(pMain.pSettings.DBCharset, strbuilderQuery.ToString(), out long _))
 			{
 				try
 				{
-					if (pOptionRow != null)  // Row exist in Global Table, update it.
+					foreach (string strItemID in strSetParts)
 					{
-						pOptionRow.ItemArray = (object[])pTempSetRow.ItemArray.Clone();
+						if (strItemID != "-1" && strItemID != "0")
+						{
+							DataRow[] pItemTableRows = pMain.pTables.ItemTable.Select("a_index=" + strItemID);
+							foreach (DataRow pRow in pItemTableRows)
+								pRow["a_set_4"] = nSetID.ToString();
+						}
+					}
+
+					pMain.pTables.ItemTable.AcceptChanges();
+
+					if (pSetRow != null)  // Row exist in Global Table, update it.
+					{
+						pSetRow.ItemArray = (object[])pTempSetRow.ItemArray.Clone();
 					}
 					else // Row not exist in Global Table, insert it.
 					{
-						pOptionRow = pMain.pTables.ItemSetTable.NewRow();
-						pOptionRow.ItemArray = (object[])pTempSetRow.ItemArray.Clone();
-						pMain.pTables.ItemSetTable.Rows.Add(pOptionRow);
+						pSetRow = pMain.pTables.ItemSetTable.NewRow();
+						pSetRow.ItemArray = (object[])pTempSetRow.ItemArray.Clone();
+						pMain.pTables.ItemSetTable.Rows.Add(pSetRow);
 					}
 				}
 				catch (Exception ex)

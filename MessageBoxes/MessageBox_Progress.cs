@@ -69,7 +69,7 @@ namespace LastChaos_ToolBoxNG
 		private void ResizeForm() {
 			Size sizeCaption = TextRenderer.MeasureText(pLabel.Text, pLabel.Font);
 
-			pDialogForm.Size = new Size(sizeCaption.Width + 20, pDialogForm.Height);	// Hardcode!
+			pDialogForm.Size = new Size(sizeCaption.Width + 2, pDialogForm.Height);
 		}
 #if ENABLE_PROGRESSBAR
 		public void UpdateText(string strText)
