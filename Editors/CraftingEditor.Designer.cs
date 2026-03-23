@@ -30,9 +30,9 @@ namespace LastChaos_ToolBoxNG
 		/// </summary>
 		private void InitializeComponent()
 		{
-			DataGridViewCellStyle dataGridViewCellStyle1 = new DataGridViewCellStyle();
-			DataGridViewCellStyle dataGridViewCellStyle2 = new DataGridViewCellStyle();
-			DataGridViewCellStyle dataGridViewCellStyle3 = new DataGridViewCellStyle();
+			DataGridViewCellStyle dataGridViewCellStyle7 = new DataGridViewCellStyle();
+			DataGridViewCellStyle dataGridViewCellStyle8 = new DataGridViewCellStyle();
+			DataGridViewCellStyle dataGridViewCellStyle9 = new DataGridViewCellStyle();
 			btnReload = new Button();
 			btnAddNew = new Button();
 			MainList = new ListBox();
@@ -179,24 +179,24 @@ namespace LastChaos_ToolBoxNG
 			gridMaterials.BackgroundColor = Color.FromArgb(28, 30, 31);
 			gridMaterials.BorderStyle = BorderStyle.None;
 			gridMaterials.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.Single;
-			dataGridViewCellStyle1.Alignment = DataGridViewContentAlignment.MiddleCenter;
-			dataGridViewCellStyle1.BackColor = Color.FromArgb(60, 56, 54);
-			dataGridViewCellStyle1.Font = new Font("Microsoft Sans Serif", 8.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
-			dataGridViewCellStyle1.ForeColor = Color.FromArgb(208, 203, 148);
-			dataGridViewCellStyle1.SelectionBackColor = Color.FromArgb(60, 56, 54);
-			dataGridViewCellStyle1.SelectionForeColor = Color.FromArgb(208, 203, 148);
-			dataGridViewCellStyle1.WrapMode = DataGridViewTriState.True;
-			gridMaterials.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
+			dataGridViewCellStyle7.Alignment = DataGridViewContentAlignment.MiddleCenter;
+			dataGridViewCellStyle7.BackColor = Color.FromArgb(60, 56, 54);
+			dataGridViewCellStyle7.Font = new Font("Microsoft Sans Serif", 8.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
+			dataGridViewCellStyle7.ForeColor = Color.FromArgb(208, 203, 148);
+			dataGridViewCellStyle7.SelectionBackColor = Color.FromArgb(60, 56, 54);
+			dataGridViewCellStyle7.SelectionForeColor = Color.FromArgb(208, 203, 148);
+			dataGridViewCellStyle7.WrapMode = DataGridViewTriState.True;
+			gridMaterials.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle7;
 			gridMaterials.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
 			gridMaterials.Columns.AddRange(new DataGridViewColumn[] { itemIcon, item, amount });
-			dataGridViewCellStyle2.Alignment = DataGridViewContentAlignment.MiddleCenter;
-			dataGridViewCellStyle2.BackColor = Color.FromArgb(40, 40, 40);
-			dataGridViewCellStyle2.Font = new Font("Microsoft Sans Serif", 8.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
-			dataGridViewCellStyle2.ForeColor = Color.FromArgb(208, 203, 148);
-			dataGridViewCellStyle2.SelectionBackColor = Color.FromArgb(60, 56, 54);
-			dataGridViewCellStyle2.SelectionForeColor = Color.FromArgb(208, 203, 148);
-			dataGridViewCellStyle2.WrapMode = DataGridViewTriState.False;
-			gridMaterials.DefaultCellStyle = dataGridViewCellStyle2;
+			dataGridViewCellStyle8.Alignment = DataGridViewContentAlignment.MiddleCenter;
+			dataGridViewCellStyle8.BackColor = Color.FromArgb(40, 40, 40);
+			dataGridViewCellStyle8.Font = new Font("Microsoft Sans Serif", 8.25F, FontStyle.Regular, GraphicsUnit.Point, 0);
+			dataGridViewCellStyle8.ForeColor = Color.FromArgb(208, 203, 148);
+			dataGridViewCellStyle8.SelectionBackColor = Color.FromArgb(60, 56, 54);
+			dataGridViewCellStyle8.SelectionForeColor = Color.FromArgb(208, 203, 148);
+			dataGridViewCellStyle8.WrapMode = DataGridViewTriState.False;
+			gridMaterials.DefaultCellStyle = dataGridViewCellStyle8;
 			gridMaterials.EditMode = DataGridViewEditMode.EditOnEnter;
 			gridMaterials.EnableHeadersVisualStyles = false;
 			gridMaterials.GridColor = Color.FromArgb(91, 85, 76);
@@ -205,14 +205,14 @@ namespace LastChaos_ToolBoxNG
 			gridMaterials.MultiSelect = false;
 			gridMaterials.Name = "gridMaterials";
 			gridMaterials.RowHeadersBorderStyle = DataGridViewHeaderBorderStyle.Single;
-			dataGridViewCellStyle3.Alignment = DataGridViewContentAlignment.MiddleLeft;
-			dataGridViewCellStyle3.BackColor = Color.FromArgb(60, 56, 54);
-			dataGridViewCellStyle3.Font = new Font("Segoe UI", 9F);
-			dataGridViewCellStyle3.ForeColor = Color.FromArgb(208, 203, 148);
-			dataGridViewCellStyle3.SelectionBackColor = SystemColors.Highlight;
-			dataGridViewCellStyle3.SelectionForeColor = Color.FromArgb(208, 203, 148);
-			dataGridViewCellStyle3.WrapMode = DataGridViewTriState.True;
-			gridMaterials.RowHeadersDefaultCellStyle = dataGridViewCellStyle3;
+			dataGridViewCellStyle9.Alignment = DataGridViewContentAlignment.MiddleLeft;
+			dataGridViewCellStyle9.BackColor = Color.FromArgb(60, 56, 54);
+			dataGridViewCellStyle9.Font = new Font("Segoe UI", 9F);
+			dataGridViewCellStyle9.ForeColor = Color.FromArgb(208, 203, 148);
+			dataGridViewCellStyle9.SelectionBackColor = SystemColors.Highlight;
+			dataGridViewCellStyle9.SelectionForeColor = Color.FromArgb(208, 203, 148);
+			dataGridViewCellStyle9.WrapMode = DataGridViewTriState.True;
+			gridMaterials.RowHeadersDefaultCellStyle = dataGridViewCellStyle9;
 			gridMaterials.RowHeadersWidthSizeMode = DataGridViewRowHeadersWidthSizeMode.AutoSizeToAllHeaders;
 			gridMaterials.ScrollBars = ScrollBars.Vertical;
 			gridMaterials.Size = new Size(553, 142);
@@ -390,6 +390,7 @@ namespace LastChaos_ToolBoxNG
 			cbItemResultType.Anchor = AnchorStyles.Top | AnchorStyles.Right;
 			cbItemResultType.BackColor = Color.FromArgb(28, 30, 31);
 			cbItemResultType.DropDownStyle = ComboBoxStyle.DropDownList;
+			cbItemResultType.FlatStyle = FlatStyle.Flat;
 			cbItemResultType.ForeColor = Color.FromArgb(208, 203, 148);
 			cbItemResultType.FormattingEnabled = true;
 			cbItemResultType.Location = new Point(181, 56);
@@ -418,6 +419,7 @@ namespace LastChaos_ToolBoxNG
 			// 
 			cbJobSelector.BackColor = Color.FromArgb(28, 30, 31);
 			cbJobSelector.DropDownStyle = ComboBoxStyle.DropDownList;
+			cbJobSelector.FlatStyle = FlatStyle.Flat;
 			cbJobSelector.ForeColor = Color.FromArgb(208, 203, 148);
 			cbJobSelector.FormattingEnabled = true;
 			cbJobSelector.Location = new Point(230, 55);

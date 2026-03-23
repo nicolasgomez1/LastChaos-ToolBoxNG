@@ -47,7 +47,7 @@
 			panel3DView.Location = new Point(0, 0);
 			panel3DView.Margin = new Padding(4, 3, 4, 3);
 			panel3DView.Name = "panel3DView";
-			panel3DView.Size = new Size(315, 281);
+			panel3DView.Size = new Size(314, 281);
 			panel3DView.TabIndex = 0;
 			panel3DView.TabStop = true;
 			// 
@@ -72,7 +72,7 @@
 			label4.AutoSize = true;
 			label4.BackColor = Color.Black;
 			label4.ForeColor = Color.FromArgb(208, 203, 148);
-			label4.Location = new Point(91, 267);
+			label4.Location = new Point(90, 267);
 			label4.Margin = new Padding(4, 0, 4, 0);
 			label4.Name = "label4";
 			label4.Size = new Size(227, 15);
@@ -105,7 +105,7 @@
 			AutoScaleDimensions = new SizeF(7F, 15F);
 			AutoScaleMode = AutoScaleMode.Font;
 			BackColor = Color.Black;
-			ClientSize = new Size(315, 281);
+			ClientSize = new Size(314, 281);
 			Controls.Add(panel3DView);
 			Icon = Properties.Resources.NG;
 			KeyPreview = true;

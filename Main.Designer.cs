@@ -222,12 +222,12 @@ namespace LastChaos_ToolBoxNG
 			rtbConsole.BackColor = Color.FromArgb(28, 30, 31);
 			rtbConsole.BorderStyle = BorderStyle.None;
 			rtbConsole.Font = new Font("Consolas", 9.75F, FontStyle.Bold, GraphicsUnit.Point, 0);
-			rtbConsole.Location = new Point(0, 256);
+			rtbConsole.Location = new Point(0, 274);
 			rtbConsole.Margin = new Padding(4, 3, 4, 3);
 			rtbConsole.Name = "rtbConsole";
 			rtbConsole.ReadOnly = true;
 			rtbConsole.ScrollBars = RichTextBoxScrollBars.ForcedVertical;
-			rtbConsole.Size = new Size(1008, 259);
+			rtbConsole.Size = new Size(1008, 241);
 			rtbConsole.TabIndex = 2;
 			rtbConsole.Text = "";
 			rtbConsole.KeyDown += rtbConsole_KeyDown;
@@ -273,7 +273,7 @@ namespace LastChaos_ToolBoxNG
 			lbEditors.Location = new Point(0, 0);
 			lbEditors.Margin = new Padding(4, 3, 4, 3);
 			lbEditors.Name = "lbEditors";
-			lbEditors.Size = new Size(250, 256);
+			lbEditors.Size = new Size(250, 274);
 			lbEditors.TabIndex = 1;
 			lbEditors.KeyDown += lbEditors_KeyDown;
 			lbEditors.MouseUp += lbEditors_MouseUp;
@@ -333,8 +333,8 @@ namespace LastChaos_ToolBoxNG
 			Controls.Add(btnCompareFiles);
 			Controls.Add(btnControlPanel);
 			Controls.Add(rtbConsole);
-			Controls.Add(btnFileEncrypter);
 			Controls.Add(btnCheckUpdates);
+			Controls.Add(btnFileEncrypter);
 			Controls.Add(btnFileDecrypter);
 			Controls.Add(btnReloadSettings);
 			Controls.Add(btnExporter);
@@ -358,8 +358,8 @@ namespace LastChaos_ToolBoxNG
         private System.Windows.Forms.Button btnReloadSettings;
         private System.Windows.Forms.Timer Monitor;
         private System.Windows.Forms.RichTextBox rtbConsole;
-        private System.Windows.Forms.Button btnCompareFiles;
 		private System.Windows.Forms.Button btnCheckUpdates;
+		private System.Windows.Forms.Button btnCompareFiles;
 		private System.Windows.Forms.Button btnExporter;
 		private System.Windows.Forms.Button button1;
 		private System.Windows.Forms.Button btnFileDecrypter;

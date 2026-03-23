@@ -1284,7 +1284,7 @@ namespace LastChaos_ToolBoxNG
 			groupBox5.Controls.Add(tbDefense);
 			groupBox5.Controls.Add(label10);
 			groupBox5.ForeColor = Color.FromArgb(208, 203, 148);
-			groupBox5.Location = new Point(297, 55);
+			groupBox5.Location = new Point(298, 55);
 			groupBox5.Margin = new Padding(4, 3, 4, 3);
 			groupBox5.Name = "groupBox5";
 			groupBox5.Padding = new Padding(4, 3, 4, 3);
@@ -1421,7 +1421,7 @@ namespace LastChaos_ToolBoxNG
 			cbGradeSelector.Location = new Point(145, 55);
 			cbGradeSelector.Margin = new Padding(4, 3, 4, 3);
 			cbGradeSelector.Name = "cbGradeSelector";
-			cbGradeSelector.Size = new Size(144, 23);
+			cbGradeSelector.Size = new Size(145, 23);
 			cbGradeSelector.TabIndex = 16;
 			cbGradeSelector.SelectedIndexChanged += cbGradeSelector_SelectedIndexChanged;
 			// 
@@ -1459,7 +1459,7 @@ namespace LastChaos_ToolBoxNG
 			groupBox2.Margin = new Padding(4, 3, 4, 3);
 			groupBox2.Name = "groupBox2";
 			groupBox2.Padding = new Padding(4, 3, 4, 3);
-			groupBox2.Size = new Size(281, 80);
+			groupBox2.Size = new Size(282, 80);
 			groupBox2.TabIndex = 1000;
 			groupBox2.TabStop = false;
 			// 
@@ -1473,7 +1473,7 @@ namespace LastChaos_ToolBoxNG
 			cbNationSelector.Location = new Point(8, 22);
 			cbNationSelector.Margin = new Padding(4, 3, 4, 3);
 			cbNationSelector.Name = "cbNationSelector";
-			cbNationSelector.Size = new Size(265, 23);
+			cbNationSelector.Size = new Size(266, 23);
 			cbNationSelector.TabIndex = 11;
 			cbNationSelector.SelectedIndexChanged += cbNationSelector_SelectedIndexChanged;
 			// 
@@ -1486,7 +1486,7 @@ namespace LastChaos_ToolBoxNG
 			tbName.Location = new Point(52, 51);
 			tbName.Margin = new Padding(4, 3, 4, 3);
 			tbName.Name = "tbName";
-			tbName.Size = new Size(221, 23);
+			tbName.Size = new Size(222, 23);
 			tbName.TabIndex = 12;
 			tbName.TextChanged += tbName_TextChanged;
 			// 

@@ -3139,7 +3139,6 @@ namespace LastChaos_ToolBoxNG
 			// 
 			// tbDescription
 			// 
-			tbDescription.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left;
 			tbDescription.BackColor = Color.FromArgb(28, 30, 31);
 			tbDescription.BorderStyle = BorderStyle.FixedSingle;
 			tbDescription.ForeColor = Color.FromArgb(208, 203, 148);

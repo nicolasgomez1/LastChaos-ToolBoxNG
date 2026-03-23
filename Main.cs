@@ -226,7 +226,8 @@ namespace LastChaos_ToolBoxNG
 				{ "Title Editor",				() => new TitleEditor(this) },
 				{ "Item Set Editor",			() => new ItemSetEditor(this) },
 				{ "Package Item Event Editor",	() => new PackageItemEventEditor(this) },
-				{ "LacaBall Editor",			() => new LacaBallEditor(this) }
+				{ "LacaBall Editor",			() => new LacaBallEditor(this) },
+				{ "Quest Editor",				() => new QuestEditor(this) }
 			};
 
 			lbEditors.DataSource = pEditors.Keys.ToList();
@@ -274,7 +275,7 @@ namespace LastChaos_ToolBoxNG
 		private async void btnCheckUpdates_ClickAsync(object sender, EventArgs e)
 		{
 #if DEBUG
-			return; // API rate limit exceeded for 000.000.000.000... :$
+			//return; // API rate limit exceeded for 000.000.000.000... :$
 #endif
 			Logger(LogTypes.Message, "Main > Checking version, please wait...");
 
@@ -288,25 +289,27 @@ namespace LastChaos_ToolBoxNG
 					{
 						using (JsonDocument jsonData = JsonDocument.Parse(await httpResponse.Content.ReadAsStringAsync()))
 						{
-							JsonElement root = jsonData.RootElement[0];
+							JsonElement pRoot = jsonData.RootElement[0];
 							Assembly? pAssembly = Assembly.GetAssembly(typeof(Main));
-							int nRevisionVersion = Convert.ToInt32(root.GetProperty("tag_name").GetString());
+							int nRevisionVersion = Convert.ToInt32(pRoot.GetProperty("tag_name").GetString());
 
 							if (pAssembly?.GetName().Version?.Revision < nRevisionVersion)
 							{
-								if (MessageBox.Show($"Actual Version: {pAssembly?.GetName().Version?.Revision}\n\nNewer Version: {nRevisionVersion}\n\nChangeLog:\n{root.GetProperty("body").GetString()}\n\n Want upgrade?", "Update available!", MessageBoxButtons.YesNo) == DialogResult.Yes)
+								Logger(LogTypes.Message, $"Main > Update available!\nCurrent Version:\t{pAssembly?.GetName().Version?.Revision}\nNewer Version:\t{nRevisionVersion}\n\nChangeLog:\n{pRoot.GetProperty("body").GetString()}");
+
+								/*if (MessageBox.Show($"nCurrent Version: {pAssembly?.GetName().Version?.Revision}\nNewer Version: {nRevisionVersion}\n\nChangeLog:\n{pRoot.GetProperty("body").GetString()}\n\n Want upgrade?", "Update available!", MessageBoxButtons.YesNo) == DialogResult.Yes)
 								{
-									root = root.GetProperty("assets")[0];
+									pRoot = pRoot.GetProperty("assets")[0];
 
 									MessageBox_Progress pProgressDialog = new(this, "Downloading, Please Wait...", true);
 
-									using (HttpResponseMessage httpDownloadUrlResponse = await httpClient.GetAsync(root.GetProperty("browser_download_url").GetString()))
+									using (HttpResponseMessage httpDownloadUrlResponse = await httpClient.GetAsync(pRoot.GetProperty("browser_download_url").GetString()))
 									{
 										if (httpDownloadUrlResponse.IsSuccessStatusCode)
 										{
 											using (Stream Stream = await httpDownloadUrlResponse.Content.ReadAsStreamAsync())
 											{
-												string strFileName = root.GetProperty("name").GetString() ?? "LastChaos ToolBoxNG.exe"; // Hardcode!
+												string strFileName = pRoot.GetProperty("name").GetString() ?? "LastChaos ToolBoxNG.exe"; // Hardcode!
 												string strFolderPath = strFileName.Substring(0, strFileName.Length - 4);
 
 												using (FileStream fileStreamOutput = File.Create(strFileName))
@@ -350,7 +353,7 @@ namespace LastChaos_ToolBoxNG
 									}
 
 									pProgressDialog.Close();
-								}
+								}*/
 							}
 							else
 							{

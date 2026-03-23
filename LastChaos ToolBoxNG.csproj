@@ -7,7 +7,7 @@
     <Nullable>enable</Nullable>
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
-    <AssemblyVersion>2.0.0.10342</AssemblyVersion>
+    <AssemblyVersion>2.0.0.10355</AssemblyVersion>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <ApplicationIcon>Resources\NG.ico</ApplicationIcon>
     <NuGetAuditMode>direct</NuGetAuditMode>
@@ -67,6 +67,9 @@
       <SubType>Form</SubType>
     </Compile>
     <Compile Update="Editors\PackageItemEventEditor.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="Editors\QuestEditor.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Update="Editors\TitleEditor.cs" />
