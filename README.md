@@ -68,5 +68,5 @@ It provides the basics for creating tools to manage Databases and perhaps files 
 ## Control Panel
 ![2](https://github.com/user-attachments/assets/861eb420-034f-4aa9-917e-f5bd76a6b6e7)
 
-## Strings & Lods Expoter
+## Strings & Lods Exporter
 ![3](https://github.com/user-attachments/assets/cdcc24ea-4b86-4bc7-8a36-ca8cd1a77a2e)

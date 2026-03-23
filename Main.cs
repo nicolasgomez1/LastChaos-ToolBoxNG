@@ -275,7 +275,7 @@ namespace LastChaos_ToolBoxNG
 		private async void btnCheckUpdates_ClickAsync(object sender, EventArgs e)
 		{
 #if DEBUG
-			//return; // API rate limit exceeded for 000.000.000.000... :$
+			return; // API rate limit exceeded for 000.000.000.000... :$
 #endif
 			Logger(LogTypes.Message, "Main > Checking version, please wait...");
 
