@@ -2,6 +2,11 @@
 #define REWARDS_BY_DAMAGE // NOTE: Custom system made by NicolasG
 //#define USE_A_POS_H_COLUMN_IN_NPC_REGEN // NOTE: This columns is not used (at least in 2018 leak)
 
+// Adapted for the 1776 localhost schema. These custom systems require
+// t_npc.a_channel_flag and t_npc.a_reward_gold_* columns, which this database lacks.
+#undef NPC_CHANNEL
+#undef REWARDS_BY_DAMAGE
+
 using System.Drawing.Drawing2D;
 
 namespace LastChaos_ToolBoxNG
@@ -11,6 +16,7 @@ namespace LastChaos_ToolBoxNG
 		private readonly Main pMain;
 		private RenderDialog? pRenderDialog;
 		private bool bUserAction = false;
+		private bool bSettingSMCText = false;
 		private bool bUnsavedChanges = false;
 		private int nSearchPosition = 0;
 		private Main.ListBoxItem? pLastSelected;
@@ -18,8 +24,10 @@ namespace LastChaos_ToolBoxNG
 		private DataRow[]? pTempDropAllRows, pTempDropRaidRows, pTempRegenRows;
 		private string[]? strZones;
 		private ToolTip? pToolTip;
+		private ToolTip? pRegenToolTip;
 		private Dictionary<Control, ToolTip>? pToolTips = new();
 		private ContextMenuStrip? cmDropRaid;
+		private ContextMenuStrip? cmRegenSpots;
 		private int nLastSelectedRegenZone = -1;
 		private float fWorldRatio = 0f;
 		private bool bDelimitingArea = false, bDrawCoords = false, bZoomIn = false;
@@ -63,10 +71,17 @@ namespace LastChaos_ToolBoxNG
 			cbRenderDialog.Checked = pMain.pSettings.Show3DViewerDialog[this.Name];
 			/****************************************/
 			gridRegenSpots.TopLeftHeaderCell.Value = "N°";
+			gridRegenSpots.MouseDown += gridRegenSpots_MouseDown;
 			gridRegenSpots.MouseWheel += gridRegenSpots_MouseWheel;
 #if USE_A_POS_H_COLUMN_IN_NPC_REGEN
 			gridRegenSpots.Columns["posH"].Visible = true;
 #endif
+			pRegenToolTip = new ToolTip();
+			pRegenToolTip.SetToolTip(lbRegenZones, "Select the zone where this NPC should spawn. Zones marked with * already have spawn spots.");
+			pRegenToolTip.SetToolTip(pbWorldMap, "Move over the map and press P, or right-click the map and choose Add Regen Spot Here.");
+			pRegenToolTip.SetToolTip(gridRegenSpots, "Edit spawn rows here. Right-click for delete, or use Delete/Backspace on selected rows.");
+			pRegenToolTip.SetToolTip(tbSMC, "Paste a model path here. Full paths and Data\\... paths are converted to the NPC relative path.");
+
 			List<object> ptotalNumColumnData = new List<object>
 			{	// Hardcode!
 				new { Text = "-1 (Infinite)", Value = -1 },
@@ -143,8 +158,9 @@ namespace LastChaos_ToolBoxNG
 				if (!pRenderDialog.Visible)
 					pRenderDialog.Show();
 
-				if (File.Exists(pMain.pSettings.ClientPath + "\\Data\\" + tbSMC.Text))
-					pRenderDialog.SetModel(pMain.pSettings.ClientPath + "\\Data\\" + tbSMC.Text, "big", -1);
+				string strSMCPath = NormalizeSMCPathForDatabase(tbSMC.Text);
+				if (File.Exists(pMain.pSettings.ClientPath + "\\" + strSMCPath))
+					pRenderDialog.SetModel(pMain.pSettings.ClientPath + "\\" + strSMCPath, "big", -1);
 			}
 
 			pMain.pSettings.Show3DViewerDialog[this.Name] = bState;
@@ -704,30 +720,30 @@ namespace LastChaos_ToolBoxNG
 				return newRow;
 			}).ToArray();
 
-			if (pTempRegenRows.Length > 0)
+			lbRegenZones.BeginUpdate();
+
+			foreach (DataRow pRow in pMain.pTables.ZoneTable.Rows)
 			{
-				lbRegenZones.BeginUpdate();
+				int nZoneID = Convert.ToInt32(pRow["a_zone_index"]);
+				string strZoneName = pRow["a_name"].ToString() ?? string.Empty;
 
-				foreach (DataRow pRow in pMain.pTables.ZoneTable.Rows)
+				if (pTempRegenRows.AsEnumerable().Any(row => Convert.ToInt32(row["a_zone_num"]) == nZoneID))
+					strZoneName += "\t*";
+
+				lbRegenZones.Items.Add(new Main.ListBoxItem
 				{
-					int nZoneID = Convert.ToInt32(pRow["a_zone_index"]);
-					string strZoneName = pRow["a_name"].ToString() ?? string.Empty;
+					ID = nZoneID,
+					Text = $"{nZoneID} - {strZoneName}"
+				});
+			}
 
-					if (pTempRegenRows.AsEnumerable().Any(row => Convert.ToInt32(row["a_zone_num"]) == nZoneID))
-						strZoneName += "\t*";
+			lbRegenZones.EndUpdate();
 
-					lbRegenZones.Items.Add(new Main.ListBoxItem
-					{
-						ID = nZoneID,
-						Text = $"{nZoneID} - {strZoneName}"
-					});
-				}
+			lbRegenZones.SelectedIndex = -1;    // Reset
 
-				lbRegenZones.EndUpdate();
-
-				lbRegenZones.SelectedIndex = -1;    // Reset
-
-				if (nLastSelectedRegenZone != -1)
+			if (lbRegenZones.Items.Count > 0)
+			{
+				if (nLastSelectedRegenZone >= 0 && nLastSelectedRegenZone < lbRegenZones.Items.Count)
 					lbRegenZones.SelectedIndex = nLastSelectedRegenZone;
 				else
 					lbRegenZones.SelectedIndex = 0;
@@ -913,6 +929,18 @@ namespace LastChaos_ToolBoxNG
 					cmDropRaid.Dispose();
 					cmDropRaid = null;
 				}
+
+				if (cmRegenSpots != null)
+				{
+					cmRegenSpots.Dispose();
+					cmRegenSpots = null;
+				}
+
+				if (pRegenToolTip != null)
+				{
+					pRegenToolTip.Dispose();
+					pRegenToolTip = null;
+				}
 			}
 
 			if (bUnsavedChanges)
@@ -1042,9 +1070,9 @@ namespace LastChaos_ToolBoxNG
 			else
 				cbEnable.Checked = false;
 			/****************************************/
-			string strSMCPath = pTempNPCRow["a_file_smc"].ToString();
+			string strSMCPath = NormalizeSMCPathForDatabase(pTempNPCRow["a_file_smc"].ToString());
 
-			tbSMC.Text = strSMCPath.Replace("Data\\", "");
+			SetSMCPath(strSMCPath, false);
 
 			if (pMain.pSettings.Show3DViewerDialog[this.Name])
 			{
@@ -2345,19 +2373,98 @@ namespace LastChaos_ToolBoxNG
 			}
 		}
 
+		private string NormalizeSMCPathForDatabase(string? strPath)
+		{
+			string strSMCPath = (strPath ?? string.Empty).Trim().Trim('"').Replace('/', '\\');
+
+			if (string.IsNullOrWhiteSpace(strSMCPath))
+				return string.Empty;
+
+			string strClientPath = pMain.pSettings.ClientPath.TrimEnd('\\');
+
+			if (strSMCPath.StartsWith(strClientPath + "\\", StringComparison.OrdinalIgnoreCase))
+				strSMCPath = strSMCPath.Substring(strClientPath.Length + 1);
+
+			int nDataIndex = strSMCPath.IndexOf("\\Data\\", StringComparison.OrdinalIgnoreCase);
+			if (nDataIndex >= 0)
+				strSMCPath = strSMCPath.Substring(nDataIndex + 1);
+
+			while (strSMCPath.StartsWith("\\") || strSMCPath.StartsWith(".\\"))
+				strSMCPath = strSMCPath.TrimStart('\\').TrimStart('.', '\\');
+
+			if (!strSMCPath.StartsWith("Data\\", StringComparison.OrdinalIgnoreCase))
+				strSMCPath = "Data\\" + strSMCPath;
+
+			return strSMCPath;
+		}
+
+		private string GetSMCPathForDisplay(string strPath)
+		{
+			string strSMCPath = NormalizeSMCPathForDatabase(strPath);
+			const string strDataPrefix = "Data\\";
+
+			if (strSMCPath.StartsWith(strDataPrefix, StringComparison.OrdinalIgnoreCase))
+				return strSMCPath.Substring(strDataPrefix.Length);
+
+			return strSMCPath;
+		}
+
+		private void SetSMCPath(string? strPath, bool bMarkUnsaved)
+		{
+			string strDatabasePath = NormalizeSMCPathForDatabase(strPath);
+			string strDisplayPath = GetSMCPathForDisplay(strDatabasePath);
+
+			bSettingSMCText = true;
+			tbSMC.Text = strDisplayPath;
+			tbSMC.SelectionStart = tbSMC.TextLength;
+			tbSMC.SelectionLength = 0;
+			bSettingSMCText = false;
+
+			if (bMarkUnsaved && bUserAction)
+			{
+				pTempNPCRow["a_file_smc"] = strDatabasePath;
+
+				bUnsavedChanges = true;
+			}
+		}
+
 		private void tbSMC_DoubleClick(object sender, EventArgs e)
 		{
 			if (bUserAction)
 			{
 				OpenFileDialog pFileDialog = new OpenFileDialog { Title = "NPC Editor", Filter = "SMC Files|*.smc", InitialDirectory = pMain.pSettings.ClientPath + "\\Data" };
 				if (pFileDialog.ShowDialog() == DialogResult.OK)
-				{
-					tbSMC.Text = pFileDialog.FileName.Replace(pMain.pSettings.ClientPath + "\\", "");
+					SetSMCPath(pFileDialog.FileName, true);
+			}
+		}
 
-					pTempNPCRow["a_file_smc"] = tbSMC.Text;
+		private void tbSMC_TextChanged(object sender, EventArgs e)
+		{
+			if (bUserAction && !bSettingSMCText)
+			{
+				pTempNPCRow["a_file_smc"] = NormalizeSMCPathForDatabase(tbSMC.Text);
 
-					bUnsavedChanges = true;
-				}
+				bUnsavedChanges = true;
+			}
+		}
+
+		private void tbSMC_Leave(object sender, EventArgs e)
+		{
+			if (bUserAction)
+				SetSMCPath(tbSMC.Text, true);
+		}
+
+		private void tbSMC_KeyDown(object sender, KeyEventArgs e)
+		{
+			if (e.Control && e.KeyCode == Keys.A)
+			{
+				tbSMC.SelectAll();
+				e.SuppressKeyPress = true;
+			}
+			else if (e.Control && e.KeyCode == Keys.V && Clipboard.ContainsText())
+			{
+				SetSMCPath(Clipboard.GetText(), true);
+				e.SuppressKeyPress = true;
 			}
 		}
 
@@ -3653,7 +3760,7 @@ namespace LastChaos_ToolBoxNG
 		/****************************************/
 		private void tbWorldBossGoldMin_TextChanged(object sender, EventArgs e)
 		{
-			if (bUserAction)
+			if (bUserAction && pTempNPCRow?.Table.Columns.Contains("a_reward_gold_min") == true)
 			{
 				pTempNPCRow["a_reward_gold_min"] = tbWorldBossGoldMin.Text;
 
@@ -3663,7 +3770,7 @@ namespace LastChaos_ToolBoxNG
 
 		private void tbWorldBossGoldMax_TextChanged(object sender, EventArgs e)
 		{
-			if (bUserAction)
+			if (bUserAction && pTempNPCRow?.Table.Columns.Contains("a_reward_gold_max") == true)
 			{
 				pTempNPCRow["a_reward_gold_max"] = tbWorldBossGoldMax.Text;
 
@@ -3673,7 +3780,7 @@ namespace LastChaos_ToolBoxNG
 
 		private void tbWorldBossGoldMultiplier_TextChanged(object sender, EventArgs e)
 		{
-			if (bUserAction)
+			if (bUserAction && pTempNPCRow?.Table.Columns.Contains("a_reward_gold_multiplier") == true)
 			{
 				pTempNPCRow["a_reward_gold_multiplier"] = tbWorldBossGoldMultiplier.Text;
 
@@ -4388,10 +4495,142 @@ namespace LastChaos_ToolBoxNG
 			}
 		}
 
-		private PointF GetCorrectedCursorPosition(MouseEventArgs e) { return new PointF((e.X - fPanX) / fTemporalZoom, (e.Y - fPanY) / fTemporalZoom); }
+		private PointF GetCorrectedMapPosition(PointF pPosition) { return new PointF((pPosition.X - fPanX) / fTemporalZoom, (pPosition.Y - fPanY) / fTemporalZoom); }
+
+		private PointF GetCorrectedCursorPosition(MouseEventArgs e) { return GetCorrectedMapPosition(e.Location); }
+
+		private PointF ConvertMapPositionToRegenPosition(PointF pMapPosition)
+		{
+			float fX = (float)Math.Round(pMapPosition.X * (Defs.m_fZoomDetail / fWorldRatio), 2);
+			float fZ = (float)Math.Round(pMapPosition.Y * (Defs.m_fZoomDetail / fWorldRatio), 2);
+
+			if (fWorldRatio > 0.3333f)  // Hardcode!
+			{
+				fX *= 4;
+				fZ *= 4;
+			}
+
+			return new PointF(fX, fZ);
+		}
+
+		private void AddRegenSpotAtMapPosition(PointF pMapPosition)
+		{
+			if (pTempRegenRows == null || lbRegenZones.SelectedItem is not Main.ListBoxItem)
+			{
+				MessageBox.Show("Select an NPC and a zone before adding a Regen Spot.", "NPC Editor", MessageBoxButtons.OK, MessageBoxIcon.Information);
+				return;
+			}
+
+			if (fWorldRatio <= 0f)
+			{
+				MessageBox.Show("Select a valid World Ratio before adding a Regen Spot.", "NPC Editor", MessageBoxButtons.OK, MessageBoxIcon.Information);
+				return;
+			}
+
+			PointF pRegenPosition = ConvertMapPositionToRegenPosition(pMapPosition);
+			int nIndex = gridRegenSpots.Rows.Count;
+
+			gridRegenSpots.SuspendLayout();
+			bUserAction = false;
+
+#if USE_A_POS_H_COLUMN_IN_NPC_REGEN
+			AddRegenSpots(nIndex, pRegenPosition.X, pRegenPosition.Y, 0, 0, 0, 300, -1);
+#else
+			AddRegenSpots(nIndex, pRegenPosition.X, pRegenPosition.Y, 0, 0, 300, -1);
+#endif
+
+			gridRegenSpots.ClearSelection();
+			gridRegenSpots.Rows[nIndex].Selected = true;
+
+			gridRegenSpots.ResumeLayout();
+			pbWorldMap.Invalidate();
+			bUserAction = true;
+
+			UpdateTempRegenRows();
+		}
+
+		private void DeleteSelectedRegenSpots()
+		{
+			if (gridRegenSpots.SelectedRows.Count == 0)
+				return;
+
+			DialogResult pDialogReturn = MessageBox.Show("Delete selected Regen Spot(s)?", "NPC Editor", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+			if (pDialogReturn != DialogResult.Yes)
+				return;
+
+			gridRegenSpots.SuspendLayout();
+
+			foreach (DataGridViewRow pRow in gridRegenSpots.SelectedRows.Cast<DataGridViewRow>().OrderByDescending(row => row.Index))
+				gridRegenSpots.Rows.RemoveAt(pRow.Index);
+
+			int i = 1;
+			foreach (DataGridViewRow pRow in gridRegenSpots.Rows)
+			{
+				pRow.HeaderCell.Value = i.ToString();
+
+				i++;
+			}
+
+			gridRegenSpots.ResumeLayout();
+
+			bDelimitingArea = false;
+
+			pbWorldMap.Invalidate();
+
+			UpdateTempRegenRows();
+		}
+
+		private void ShowRegenContextMenu(Point pScreenPosition, PointF? pMapPosition)
+		{
+			cmRegenSpots ??= new ContextMenuStrip();
+			cmRegenSpots.Items.Clear();
+
+			ToolStripMenuItem addItem = new("Add Regen Spot Here");
+			addItem.Enabled = pMapPosition.HasValue && lbRegenZones.SelectedItem is Main.ListBoxItem && fWorldRatio > 0f;
+			addItem.Click += (_, _) => {
+				if (pMapPosition.HasValue)
+					AddRegenSpotAtMapPosition(pMapPosition.Value);
+			};
+
+			ToolStripMenuItem deleteItem = new("Delete Selected Regen Spot(s)");
+			deleteItem.Enabled = gridRegenSpots.SelectedRows.Count > 0;
+			deleteItem.Click += (_, _) => DeleteSelectedRegenSpots();
+
+			cmRegenSpots.Items.AddRange(new ToolStripItem[] { addItem, deleteItem });
+			cmRegenSpots.Show(pScreenPosition);
+		}
+
+		private void gridRegenSpots_MouseDown(object? sender, MouseEventArgs e)
+		{
+			if (e.Button != MouseButtons.Right)
+				return;
+
+			DataGridView.HitTestInfo pHit = gridRegenSpots.HitTest(e.X, e.Y);
+			if (pHit.RowIndex >= 0)
+			{
+				if (!gridRegenSpots.Rows[pHit.RowIndex].Selected)
+				{
+					gridRegenSpots.ClearSelection();
+					gridRegenSpots.Rows[pHit.RowIndex].Selected = true;
+				}
+
+				int nColumnIndex = pHit.ColumnIndex >= 0 ? pHit.ColumnIndex : 0;
+				gridRegenSpots.CurrentCell = gridRegenSpots.Rows[pHit.RowIndex].Cells[nColumnIndex];
+			}
+
+			ShowRegenContextMenu(gridRegenSpots.PointToScreen(e.Location), null);
+		}
 
 		private void pbWorldMap_MouseDown(object sender, MouseEventArgs e)
 		{
+			if (e.Button == MouseButtons.Right)
+			{
+				pbWorldMap.Focus();
+				bDelimitingArea = false;
+				ShowRegenContextMenu(pbWorldMap.PointToScreen(e.Location), GetCorrectedCursorPosition(e));
+				return;
+			}
+
 			if (e.Button == MouseButtons.Left)
 			{
 				pbWorldMap.Focus();
@@ -4601,67 +4840,11 @@ namespace LastChaos_ToolBoxNG
 				{
 					if (e.KeyCode == Keys.P)
 					{
-						PointF pPosition = new((pCurrentCursorPosition.X - fPanX) / fTemporalZoom, (pCurrentCursorPosition.Y - fPanY) / fTemporalZoom);
-						int nIndex = gridRegenSpots.Rows.Count;
-						float fX = (float)Math.Round(pPosition.X * (Defs.m_fZoomDetail / fWorldRatio), 2);
-						float fZ = (float)Math.Round(pPosition.Y * (Defs.m_fZoomDetail / fWorldRatio), 2);
-
-						if (fWorldRatio > 0.3333f)  // Hardcode!
-						{
-							fX *= 4;
-							fZ *= 4;
-						}
-
-						gridRegenSpots.SuspendLayout();
-
-						bUserAction = false;
-
-#if USE_A_POS_H_COLUMN_IN_NPC_REGEN
-						AddRegenSpots(nIndex, fX, fZ, 0, 0, 0, 300, -1);
-#else
-						AddRegenSpots(nIndex, fX, fZ, 0, 0, 300, -1);
-#endif
-						gridRegenSpots.ClearSelection();
-
-						gridRegenSpots.Rows[nIndex].Selected = true;
-
-						gridRegenSpots.ResumeLayout();
-
-						pbWorldMap.Invalidate();
-
-						bUserAction = true;
-
-						UpdateTempRegenRows();
+						AddRegenSpotAtMapPosition(GetCorrectedMapPosition(pCurrentCursorPosition));
 					}
 					else if (e.KeyCode == Keys.Delete || e.KeyCode == Keys.Back)
 					{
-						if (gridRegenSpots.SelectedRows.Count == 0)
-							return;
-
-						DialogResult pDialogReturn = MessageBox.Show("You want to Delete all Spots in the selected Area?", "NPC Editor", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
-						if (pDialogReturn != DialogResult.Yes)
-							return;
-
-						gridRegenSpots.SuspendLayout();
-
-						foreach (DataGridViewRow pRow in gridRegenSpots.SelectedRows)
-							gridRegenSpots.Rows.RemoveAt(pRow.Index);
-
-						int i = 1;
-						foreach (DataGridViewRow pRow in gridRegenSpots.Rows)
-						{
-							pRow.HeaderCell.Value = i.ToString();
-
-							i++;
-						}
-
-						gridRegenSpots.ResumeLayout();
-
-						bDelimitingArea = false;
-
-						pbWorldMap.Invalidate();
-
-						UpdateTempRegenRows();
+						DeleteSelectedRegenSpots();
 					}
 				}
 			}
@@ -4846,38 +5029,41 @@ namespace LastChaos_ToolBoxNG
 			{
 				strbuilderQuery.Append($"DELETE FROM {pMain.pSettings.DBData}.t_npc_regen WHERE a_npc_idx={nNPCID};\n");
 
-				StringBuilder strColumnsNames = new();
-				StringBuilder strColumnsValues = new();
-				HashSet<string> addedColumns = new();
-
-				foreach (DataRow pRow in pTempRegenRows)
+				if (pTempRegenRows.Length > 0)
 				{
-					strColumnsValues.Append("(");
+					StringBuilder strColumnsNames = new();
+					StringBuilder strColumnsValues = new();
+					HashSet<string> addedColumns = new();
 
-					foreach (DataColumn pCol in pRow.Table.Columns)
+					foreach (DataRow pRow in pTempRegenRows)
 					{
-						string strColumnName = pCol.ColumnName;
+						strColumnsValues.Append("(");
 
-						if (strColumnName == "a_index")
-							continue;
-
-						if (!addedColumns.Contains(strColumnName))
+						foreach (DataColumn pCol in pRow.Table.Columns)
 						{
-							strColumnsNames.Append(strColumnName + ", ");
-							addedColumns.Add(strColumnName);
+							string strColumnName = pCol.ColumnName;
+
+							if (strColumnName == "a_index")
+								continue;
+
+							if (!addedColumns.Contains(strColumnName))
+							{
+								strColumnsNames.Append(strColumnName + ", ");
+								addedColumns.Add(strColumnName);
+							}
+
+							strColumnsValues.Append($"{Convert.ToString(pRow[pCol], CultureInfo.InvariantCulture)}, ");
 						}
 
-						strColumnsValues.Append($"{Convert.ToString(pRow[pCol], CultureInfo.InvariantCulture)}, ");
+						strColumnsValues.Length -= 2;
+						strColumnsValues.Append("), ");
 					}
 
+					strColumnsNames.Length -= 2;
 					strColumnsValues.Length -= 2;
-					strColumnsValues.Append("), ");
+
+					strbuilderQuery.Append($"INSERT INTO {pMain.pSettings.DBData}.t_npc_regen ({strColumnsNames}) VALUES {strColumnsValues};\n");
 				}
-
-				strColumnsNames.Length -= 2;
-				strColumnsValues.Length -= 2;
-
-				strbuilderQuery.Append($"INSERT INTO {pMain.pSettings.DBData}.t_npc_regen ({strColumnsNames}) VALUES {strColumnsValues};\n");
 			}
 
 			// Check if NPC exist in Global Table, if exist, do a UPDATE. If not, do a INSERT.
@@ -4968,12 +5154,18 @@ namespace LastChaos_ToolBoxNG
 						foreach (DataRow pRow in pNPCDropRaidTableRows)
 							pRow.Delete();
 
+						int nNextDropRaidIndex = pMain.pTables.NPCDropRaidTable.AsEnumerable()
+							.Where(row => row.RowState != DataRowState.Deleted)
+							.Select(row => Convert.ToInt32(row["a_index"]))
+							.DefaultIfEmpty(0)
+							.Max() + 1;
+
 						foreach (DataRow pRow in pTempDropRaidRows)
 						{
 							DataRow newDataRow = pMain.pTables.NPCDropRaidTable.NewRow();
 							newDataRow.ItemArray = (object[])pRow.ItemArray.Clone();
 
-							newDataRow["a_index"] = pMain.pTables.NPCRegenTable.AsEnumerable().Max(row => Convert.ToInt32(row["a_index"])) + 1;	// This is needed here cuz a_index from t_npc_regen is AUTOINCREMENT
+							newDataRow["a_index"] = nNextDropRaidIndex++;
 
 							pMain.pTables.NPCDropRaidTable.Rows.Add(newDataRow);
 						}
@@ -4987,12 +5179,18 @@ namespace LastChaos_ToolBoxNG
 						foreach (DataRow pRow in pNPCRegenRows)
 							pRow.Delete();
 
+						int nNextRegenIndex = pMain.pTables.NPCRegenTable.AsEnumerable()
+							.Where(row => row.RowState != DataRowState.Deleted)
+							.Select(row => Convert.ToInt32(row["a_index"]))
+							.DefaultIfEmpty(0)
+							.Max() + 1;
+
 						foreach (DataRow pRow in pTempRegenRows)
 						{
 							DataRow newDataRow = pMain.pTables.NPCRegenTable.NewRow();
 							newDataRow.ItemArray = (object[])pRow.ItemArray.Clone();
 
-							newDataRow["a_index"] = pMain.pTables.NPCRegenTable.AsEnumerable().Max(r => r.Field<int>("a_index")) + 1;
+							newDataRow["a_index"] = nNextRegenIndex++;
 
 							pMain.pTables.NPCRegenTable.Rows.Add(newDataRow);
 						}

@@ -14,7 +14,8 @@ namespace LastChaos_ToolBoxNG
 		private bool bUnsavedChanges = false;
 		private int nSearchPosition = 0;
 		private Main.ListBoxItem? pLastSelected;
-		private DataRow pTempItemRow, pTempFortuneHeadRow;
+		private DataRow pTempItemRow = null!;
+		private DataRow? pTempFortuneHeadRow;
 		private DataRow[]? pTempFortuneDataRows;
 		private string[]? strZones;
 		private ToolTip? pToolTip;
@@ -1796,11 +1797,7 @@ namespace LastChaos_ToolBoxNG
 
 				strbuilderQuery.Append($"DELETE FROM {pMain.pSettings.DBData}.t_shopitem WHERE a_item_idx={nItemID};\n");
 
-				strbuilderQuery.Append($"DELETE FROM {pMain.pSettings.DBData}.t_promotion2 WHERE a_item_idx={nItemID};\n");
-
 				strbuilderQuery.Append($"DELETE FROM {pMain.pSettings.DBData}.t_moonstone_reward WHERE a_giftindex={nItemID};\n");
-
-				strbuilderQuery.Append($"DELETE FROM {pMain.pSettings.DBData}.t_lacaball WHERE a_tocken_index={nItemID} OR a_item_index={nItemID};\n");
 
 				strbuilderQuery.Append("CREATE TEMPORARY TABLE Temp_DropIDToDelete (a_drop_idx INT);\n" +
 					$"INSERT INTO Temp_DropIDToDelete(a_drop_idx) SELECT DISTINCT a_drop_idx FROM {pMain.pSettings.DBData}.t_drop_item_data WHERE a_item_idx={nItemID};\n" +
@@ -1822,13 +1819,8 @@ namespace LastChaos_ToolBoxNG
 					$"INSERT INTO Temp_CatalogIDToDelete (a_ctid) SELECT DISTINCT a_ctid FROM {pMain.pSettings.DBData}.t_ct_item WHERE a_item_idx={nItemID};\n" +
 					$"DELETE FROM {pMain.pSettings.DBData}.t_ct_item WHERE a_item_idx={nItemID};\n" +
 					$"UPDATE {pMain.pSettings.DBData}.t_catalog SET a_enable=0 WHERE a_ctid IN(SELECT a_ctid FROM Temp_CatalogIDToDelete);\n" +
-					"TRUNCATE TABLE Temp_CatalogIDToDelete;\n" +
-					$"INSERT INTO Temp_CatalogIDToDelete (a_ctid) SELECT DISTINCT a_ctid FROM {pMain.pSettings.DBData}.t_ct_item_hardcore WHERE a_item_idx={nItemID};\n" +
-					$"DELETE FROM {pMain.pSettings.DBData}.t_ct_item_hardcore WHERE a_item_idx={nItemID};\n" +
-					$"UPDATE {pMain.pSettings.DBData}.t_catalog_hardcore SET a_enable=0 WHERE a_ctid IN(SELECT a_ctid FROM Temp_CatalogIDToDelete);\n" +
 					"DROP TEMPORARY TABLE Temp_CatalogIDToDelete;\n");
 
-				strbuilderQuery.Append($"DELETE FROM {pMain.pSettings.DBData}.t_decompose WHERE a_item_idx={nItemID} OR a_result_item_idx LIKE CONCAT('% ', CAST({nItemID} AS CHAR), ' %') OR a_result_item_idx LIKE CONCAT(CAST({nItemID} AS CHAR), ' %') OR a_result_item_idx LIKE CONCAT('% ', CAST({nItemID} AS CHAR)) OR a_result_item_idx=CAST({nItemID} AS CHAR);\n");
 #if REWORKED_EXCHANGE_SYSTEM
 				strbuilderQuery.Append($"DELETE FROM {pMain.pSettings.DBData}.t_equipment_exchange WHERE a_items_idxs LIKE CONCAT('% ', CAST({nItemID} AS CHAR), ' %') OR a_items_idxs LIKE CONCAT(CAST({nItemID} AS CHAR), ' %') OR a_items_idxs LIKE CONCAT('% ', CAST({nItemID} AS CHAR)) OR a_items_idxs=CAST({nItemID} AS CHAR);\n");
 #endif
@@ -1836,8 +1828,6 @@ namespace LastChaos_ToolBoxNG
 				strbuilderQuery.Append($"UPDATE {pMain.pSettings.DBData}.t_key SET a_enable=0 WHERE a_rewards LIKE CONCAT('% ', CAST({nItemID} AS CHAR), ' %') OR a_rewards LIKE CONCAT(CAST({nItemID} AS CHAR), ' %') OR a_rewards LIKE CONCAT('% ', CAST({nItemID} AS CHAR)) OR a_rewards=CAST({nItemID} AS CHAR);\n");
 #endif
 				strbuilderQuery.Append($"UPDATE {pMain.pSettings.DBData}.t_set_item SET a_enable=0 WHERE a_item_idx LIKE CONCAT('% ', CAST({nItemID} AS CHAR), ' %') OR a_item_idx LIKE CONCAT(CAST({nItemID} AS CHAR), ' %') OR a_item_idx LIKE CONCAT('% ', CAST({nItemID} AS CHAR)) OR a_item_idx=CAST({nItemID} AS CHAR);\n");
-
-				strbuilderQuery.Append($"DELETE FROM {pMain.pSettings.DBData}.t_product WHERE a_product_item_idx LIKE CONCAT('% ', CAST({nItemID} AS CHAR), ' %') OR a_product_item_idx LIKE CONCAT(CAST({nItemID} AS CHAR), ' %') OR a_product_item_idx LIKE CONCAT('% ', CAST({nItemID} AS CHAR)) OR a_product_item_idx=CAST({nItemID} AS CHAR);\n");
 
 				// NOTE: This probably is so bad idea, but, who cares.
 				strbuilderQuery.Append($"UPDATE {pMain.pSettings.DBData}.t_lacarette SET a_enable=0 WHERE " +

@@ -74,13 +74,31 @@
 			}
 
 			cbFileSelector.EndUpdate();
-			cbFileSelector.SelectedIndex = 0;
+
+			if (cbFileSelector.Items.Count > 0)
+			{
+				cbFileSelector.SelectedIndex = 0;
+			}
+			else
+			{
+				pMain.Logger(LogTypes.Error, $"Icon Picker > No {strBtnType}*.png files found in Resources. Icon picking disabled.");
+				btnSelect.Enabled = false;
+				pbImageViewer.Image = strBtnType switch
+				{
+					"ComboBtn" => Properties.Resources.DefaultMonster,
+					"SkillBtn" => Properties.Resources.DefaultSkill,
+					_ => Properties.Resources.DefaultItem
+				};
+			}
 
 			(new ToolTip()).SetToolTip(pbImageViewer, "Can press Ctrl when do Left Click for instant Pick and Close");
 		}
 
 		private void IconPicker_MouseMove(object? sender, MouseEventArgs e)
 		{
+			if (dIconSize <= 0)
+				return;
+
 			dX = Math.Floor(e.X / dIconSize);
 			dY = Math.Floor(e.Y / dIconSize);
 
@@ -151,6 +169,9 @@
 
 		private void pbImageViewer_Click(object sender, EventArgs e)
 		{
+			if (dIconSize <= 0)
+				return;
+
 			ReturnValues[1] = dY.ToString();
 			ReturnValues[2] = dX.ToString();
 

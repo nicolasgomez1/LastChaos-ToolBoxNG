@@ -967,7 +967,8 @@
 		"MAKE_H_S",
 		"MAKE_POTINO",
 
-		"PROCESS_NPC"
+		"PROCESS_NPC",
+		"STAT_TRAINING"
 	};
 
 	public static readonly string[] NPCAIType =

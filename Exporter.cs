@@ -69,6 +69,18 @@ namespace LastChaos_ToolBoxNG
 			pMain = mainForm;
 		}
 
+		public async Task ExportSkillsLodAsync(bool exportToClientFolder = true)
+		{
+			ExportTasks.Clear();
+			rbExportToLocalFolder.Checked = !exportToClientFolder;
+			rbExportToClient.Checked = exportToClientFolder;
+
+			pMain.Logger(LogTypes.Message, "Exporting: Skills.lod file...");
+			ExportSKILLSAsync("Skills");
+			await Task.WhenAll(ExportTasks);
+			pMain.Logger(LogTypes.Success, "Skills.lod has been Exported.");
+		}
+
 		private void Exporter_Load(object sender, EventArgs e)
 		{
 			bool bState, bAllChecked = true;
@@ -1866,7 +1878,7 @@ namespace LastChaos_ToolBoxNG
 #if USE_ORIGINAL_SQL_REQUEST_AND_ORIGINAL_FILE_SERIALIZATION
 							strQuery = $"SELECT t1.a_item_idx AS itemindex FROM {pMain.pSettings.DBData}.t_shopitem t1, {pMain.pSettings.DBData}.t_item t2 WHERE NOT (t1.a_national & ({1L << nNationID})) AND t1.a_keeper_idx={pShopsRow["a_keeper_idx"]} AND t1.a_item_idx=t2.a_index ORDER BY t2.a_job_flag, t2.a_level, t2.a_type_idx, t2.a_subtype_idx, t2.a_index;";
 #else
-							strQuery = $"SELECT t1.a_item_idx AS itemindex, t1.a_item_plus AS itemplus FROM {pMain.pSettings.DBData}.t_shopitem t1, {pMain.pSettings.DBData}.t_item t2 WHERE NOT (t1.a_national & ({1L << nNationID})) AND t1.a_keeper_idx={pShopsRow["a_keeper_idx"]} AND t1.a_item_idx=t2.a_index ORDER BY t2.a_job_flag, t2.a_level, t2.a_type_idx, t2.a_subtype_idx, t2.a_index;";   // Hardcode!
+							strQuery = $"SELECT t1.a_item_idx AS itemindex, 0 AS itemplus FROM {pMain.pSettings.DBData}.t_shopitem t1, {pMain.pSettings.DBData}.t_item t2 WHERE NOT (t1.a_national & ({1L << nNationID})) AND t1.a_keeper_idx={pShopsRow["a_keeper_idx"]} AND t1.a_item_idx=t2.a_index ORDER BY t2.a_job_flag, t2.a_level, t2.a_type_idx, t2.a_subtype_idx, t2.a_index;";   // Adapted for schemas without t_shopitem.a_item_plus.
 #endif
 							pItemsTable = pMain.QuerySelect("utf8", strQuery, (pMain.pSettings.LogVerbose < 2 ? false : true));
 							if (pItemsTable != null)
@@ -2423,7 +2435,7 @@ namespace LastChaos_ToolBoxNG
 							}
 							
 							// Minimap Data
-							pNPCTable = pMain.QuerySelect("utf8", $"(SELECT t1.a_npc_idx npcindex, t1.a_y_layer, t1.a_pos_x, t1.a_pos_z FROM {pMain.pSettings.DBData}.t_npc_regen t1, {pMain.pSettings.DBData}.t_npc t2 WHERE t1.a_zone_num={nZoneID} AND t1.a_npc_idx=t2.a_index AND (t2.a_flag & {(1L << Array.IndexOf(Defs.NPCFlags, "DISPLAY_MAP"))})!=0 AND t2.a_enable=1) UNION (SELECT t3.a_keeper_idx npcindex, t3.a_y_layer, t3.a_pos_x, t3.a_pos_z FROM {pMain.pSettings.DBData}.t_shop t3, {pMain.pSettings.DBData}.t_npc t4 WHERE t3.a_zone_num={nZoneID} AND t3.a_keeper_idx=t4.a_index AND t4.a_enable=1) ORDER BY npcindex;", (pMain.pSettings.LogVerbose < 2 ? false : true));	 // Hardcode!
+							pNPCTable = pMain.QuerySelect("utf8", $"(SELECT t1.a_npc_idx npcindex, t1.a_y_layer, t1.a_pos_x, t1.a_pos_z FROM {pMain.pSettings.DBData}.t_npc_regen t1, {pMain.pSettings.DBData}.t_npc t2 WHERE t1.a_zone_num={nZoneID} AND t1.a_npc_idx=t2.a_index AND ((t2.a_flag & {(1L << Array.IndexOf(Defs.NPCFlags, "DISPLAY_MAP"))})!=0 OR EXISTS (SELECT 1 FROM {pMain.pSettings.DBData}.t_affinity_npc an WHERE an.a_npcidx=t1.a_npc_idx AND an.a_enable=1)) AND t2.a_enable=1) UNION (SELECT t3.a_keeper_idx npcindex, t3.a_y_layer, t3.a_pos_x, t3.a_pos_z FROM {pMain.pSettings.DBData}.t_shop t3, {pMain.pSettings.DBData}.t_npc t4 WHERE t3.a_zone_num={nZoneID} AND t3.a_keeper_idx=t4.a_index AND t4.a_enable=1) ORDER BY npcindex;", (pMain.pSettings.LogVerbose < 2 ? false : true));	 // Hardcode!
 							if (pNPCTable != null)
 							{
 								Stream.Write(Convert.ToInt32(pNPCTable.Rows.Count));
@@ -2471,10 +2483,10 @@ namespace LastChaos_ToolBoxNG
 				if (rbExportToLocalFolder.Checked)
 					strFilePath = "Data";
 
-				pNPCTable = pMain.QuerySelect("utf8", $"SELECT DISTINCT nr.a_zone_num, n.a_index FROM {pMain.pSettings.DBData}.t_npc_regen nr, {pMain.pSettings.DBData}.t_npc n WHERE nr.a_zone_num IN(0, 4, 7, 15, 23, 32, 39, 40) AND nr.a_npc_idx=n.a_index AND (n.a_flag & {(1L << Array.IndexOf(Defs.NPCFlags, "DISPLAY_MAP"))})>0 AND !(a_flag1 & {(1L << Array.IndexOf(Defs.NPCFlags1, "NOT_NPCPORTAL"))}) AND n.a_enable=1 ORDER BY nr.a_zone_num, n.a_index;");  // Hardcode!
+				pNPCTable = pMain.QuerySelect("utf8", $"SELECT DISTINCT nr.a_zone_num, n.a_index FROM {pMain.pSettings.DBData}.t_npc_regen nr, {pMain.pSettings.DBData}.t_npc n WHERE nr.a_npc_idx=n.a_index AND (((nr.a_zone_num IN(0, 4, 7, 15, 23, 32, 39, 40)) AND (n.a_flag & {(1L << Array.IndexOf(Defs.NPCFlags, "DISPLAY_MAP"))})>0 AND !(n.a_flag1 & {(1L << Array.IndexOf(Defs.NPCFlags1, "NOT_NPCPORTAL"))})) OR EXISTS (SELECT 1 FROM {pMain.pSettings.DBData}.t_affinity_npc an WHERE an.a_npcidx=nr.a_npc_idx AND an.a_enable=1)) AND n.a_enable=1 ORDER BY nr.a_zone_num, n.a_index;");  // Hardcode!
 				if (pNPCTable != null)
 				{
-					pShopTable = pMain.QuerySelect("utf8", $"SELECT DISTINCT shop_npc.a_zone_num, n.a_index FROM {pMain.pSettings.DBData}.t_npc AS n, {pMain.pSettings.DBData}.t_shop AS shop_npc WHERE shop_npc.a_zone_num IN(0, 4, 7, 15, 23, 32, 39, 40) AND n.a_index=shop_npc.a_keeper_idx AND (n.a_flag & {(1L << Array.IndexOf(Defs.NPCFlags, "DISPLAY_MAP"))}) AND !(a_flag1 & {(1L << Array.IndexOf(Defs.NPCFlags1, "NOT_NPCPORTAL"))}) AND n.a_enable=1;");  // Hardcode!
+					pShopTable = pMain.QuerySelect("utf8", $"SELECT DISTINCT shop_npc.a_zone_num, n.a_index FROM {pMain.pSettings.DBData}.t_npc AS n, {pMain.pSettings.DBData}.t_shop AS shop_npc WHERE n.a_index=shop_npc.a_keeper_idx AND (((shop_npc.a_zone_num IN(0, 4, 7, 15, 23, 32, 39, 40)) AND (n.a_flag & {(1L << Array.IndexOf(Defs.NPCFlags, "DISPLAY_MAP"))}) AND !(n.a_flag1 & {(1L << Array.IndexOf(Defs.NPCFlags1, "NOT_NPCPORTAL"))})) OR EXISTS (SELECT 1 FROM {pMain.pSettings.DBData}.t_affinity_npc an WHERE an.a_npcidx=shop_npc.a_keeper_idx AND an.a_enable=1)) AND n.a_enable=1;");  // Hardcode!
 					if (pShopTable != null)
 					{
 						if (!Directory.Exists(strFilePath))
