@@ -230,6 +230,7 @@ namespace LastChaos_ToolBoxNG
 				{ "UI XML Editor",				() => new UiXmlEditor(this) },
 				{ "Pet Fairy Skill Whitelist",	() => new PetFairySkillWhitelistEditor(this) },
 				{ "Pet Buff Editor",			() => new PetBuffEditor(this) },
+				{ "LacaBall Reward Editor",		() => new LacaBallEditor(this) },
 				{ "Treasure Map Editor",		() => new TreasureMapEditor(this) },
 				{ "Magic Editor",				() => new MagicEditor(this) },
 				{ "Monster Combo Editor",		() => new MonsterComboEditor(this) },
