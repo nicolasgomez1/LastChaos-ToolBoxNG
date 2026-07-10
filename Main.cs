@@ -226,6 +226,7 @@ namespace LastChaos_ToolBoxNG
 				{ "Shop Editor",				() => new ShopEditor(this) },
 				{ "Affinity Editor",			() => new AffinityEditor(this) },
 				{ "Item Collection Editor",		() => new ItemCollectionEditor(this) },
+				{ "Powerscore Reward Editor",		() => new PowerscoreRewardsEditor(this) },
 				{ "Gold Stat Training Editor",	() => new StatTrainingEditor(this) },
 				{ "UI XML Editor",				() => new UiXmlEditor(this) },
 				{ "Pet Fairy Skill Whitelist",	() => new PetFairySkillWhitelistEditor(this) },
