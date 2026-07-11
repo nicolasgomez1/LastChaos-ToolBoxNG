@@ -1,1051 +1,889 @@
-﻿//#define USE_ORIGINAL_LACABALL_TABLE_LOCATION_AND_NAME
-// WARNING NOTE: This Editor needs a primary key column called a_index in the lacaball table.
+using System.Data;
+using System.Text;
 
 namespace LastChaos_ToolBoxNG
 {
 	public partial class LacaBallEditor : Form
 	{
+		private const int DefaultTokenItemId = 5123;
+		private const int DefaultRewardItemId = 19;
+		private const int DefaultRewardRowsPerCourse = 5;
+
 		private readonly Main pMain;
-		private bool bHideAll = false;
-		private bool bUserAction = false;
+		private bool bLoading = false;
 		private bool bUnsavedChanges = false;
+		private bool bCurrentTableIsTemporary = false;
 		private int nSearchPosition = 0;
+		private int nOriginalTokenId = -1;
 		private Main.ListBoxItem? pLastSelected;
-		private DataRow[] pTempLacaBallTokenRows;   // Row 0 is the references for a_item_order, a_tocken_index, etc etc
-		private int nOriginalTokenID = -1;
-		private ContextMenuStrip? cmRewards;
+
+		private ListBox MainList = null!;
+		private TextBox tbSearch = null!;
+		private TextBox tbItemOrder = null!;
+		private Button btnTokenItem = null!;
+		private Button btnReload = null!;
+		private Button btnAddNew = null!;
+		private Button btnCopy = null!;
+		private Button btnDelete = null!;
+		private Button btnUpdate = null!;
+		private Button btnAddCourse = null!;
+		private Button btnAddReward = null!;
+		private Button btnChooseReward = null!;
+		private Button btnRemoveReward = null!;
+		private DataGridView gridRewards = null!;
 
 		public LacaBallEditor(Main mainForm)
 		{
-			InitializeComponent();
-
 			pMain = mainForm;
-			/****************************************/
-			gridRewards.TopLeftHeaderCell.Value = "N°";
-			gridRewards.TopLeftHeaderCell.ToolTipText = "Collapse / Expand All";
-		}
-
-		private (bool bProceed, bool bDeleteActual) CheckUnsavedChanges()
-		{
-			bool bProceed = true;
-			bool bDeleteActual = false;
-
-			if (bUnsavedChanges)
-			{
-				if (pMain.pTables.LacaBallTable?.Select("a_tocken_index=" + nOriginalTokenID).FirstOrDefault() != null) // the current selected LacaBall, it is not temporary.
-				{
-					DialogResult pDialogReturn = MessageBox.Show("There are unsaved changes. If you proceed, your changes will be discarded.\nDo you want to continue?", "LacaBall Editor", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
-					if (pDialogReturn != DialogResult.Yes)
-						bProceed = false;
-				}
-				else    // the current selected LacaBall is temporary.
-				{
-					DialogResult pDialogReturn = MessageBox.Show("The current Token is temporary, if you don't press Update. Do you want to continue and lose all the information regarding it?", "LacaBall Editor", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
-					if (pDialogReturn != DialogResult.Yes)
-						bProceed = false;
-					else if (pDialogReturn == DialogResult.Yes)
-						bDeleteActual = true;
-				}
-			}
-
-			return (bProceed, bDeleteActual);
-		}
-
-		private void AddToList(int nID, string strName, bool bIsTemp)
-		{
-			MainList.Items.Add(new Main.ListBoxItem
-			{
-				ID = nID,
-				Text = $"{nID} - {strName}"
-			});
-
-			if (bIsTemp)
-			{
-				LoadUIData(nID, false);
-
-				MainList.SelectedIndexChanged -= MainList_SelectedIndexChanged;
-				MainList.SelectedIndex = MainList.Items.Count - 1;
-				MainList.SelectedIndexChanged += MainList_SelectedIndexChanged;
-
-				pLastSelected = (Main.ListBoxItem?)MainList.SelectedItem;
-
-				bUnsavedChanges = true;
-			}
+			BuildUi();
 		}
 
 		private async Task LoadLacaBallDataAsync()
 		{
-			bool bRequestNeeded = false;
-			List<string> listQueryCompose =
-			[
-				"a_item_order",
-				"a_tocken_index",
-				"a_course_code",
-				"a_order",
-				"a_item_index",
-				"a_item_count",
-				"a_item_max",
-				"a_item_remain"
-			];
-
-			if (pMain.pTables.LacaBallTable == null)
+			DataTable? pNewTable = await Task.Run(() =>
 			{
-				bRequestNeeded = true;
-			}
-			else
-			{
-				foreach (string strColumnName in listQueryCompose.ToList())
-				{
-					if (!pMain.pTables.LacaBallTable.Columns.Contains(strColumnName))
-						bRequestNeeded = true;
-					else
-						listQueryCompose.Remove(strColumnName);
-				}
-			}
+				return pMain.QuerySelect(
+					pMain.pSettings.DBCharset,
+					$"SELECT a_item_order, a_tocken_index, a_course_code, a_order, a_item_index, a_item_count, a_item_max, a_item_remain FROM {pMain.pSettings.DBUser}.t_lcball ORDER BY a_item_order, a_tocken_index, a_course_code, a_order;"
+				);
+			});
 
-			if (bRequestNeeded)
-			{
-				DataTable? pNewTable = await Task.Run(() =>
-				{
-#if USE_ORIGINAL_LACABALL_TABLE_LOCATION_AND_NAME
-					return pMain.QuerySelect(pMain.pSettings.DBCharset, $"SELECT a_index, {string.Join(", ", listQueryCompose)} FROM {pMain.pSettings.DBUser}.t_lcball ORDER BY a_index;");
-#else
-					return pMain.QuerySelect(pMain.pSettings.DBCharset, $"SELECT a_index, {string.Join(", ", listQueryCompose)} FROM {pMain.pSettings.DBData}.t_lacaball ORDER BY a_index;");
-#endif
-				});
-
-				if (pMain.pTables.LacaBallTable == null)
-					pMain.pTables.LacaBallTable = pNewTable;
-				else
-					pMain.MergeDataTables(pNewTable, "a_index", ref pMain.pTables.LacaBallTable);
-			}
+			pMain.pTables.LacaBallTable?.Dispose();
+			pMain.pTables.LacaBallTable = pNewTable;
 		}
 
-		private async void LacaBallEditor_LoadAsync(object sender, EventArgs e)
+		private async void LacaBallEditor_LoadAsync(object? sender, EventArgs e)
 		{
-			MessageBox_Progress pProgressDialog = new(this, "Loading Data, Please Wait...");
-			/****************************************/
-#if DEBUG
-			Stopwatch stopwatch = Stopwatch.StartNew();
-#endif
+			MessageBox_Progress pProgressDialog = new(this, "Loading LacaBall data...");
+
 			await Task.WhenAll(
 				LoadLacaBallDataAsync(),
 				pMain.GenericLoadItemDataAsync()
 			);
-#if DEBUG
-			stopwatch.Stop();
-			pMain.Logger(LogTypes.Message, $"LacaBall & Items Data load took: {stopwatch.ElapsedMilliseconds}ms.");
-#endif
-			/****************************************/
-			if (pMain.pTables.LacaBallTable != null && pMain.pTables.ItemTable != null)
-			{
-				MainList.BeginUpdate();
-
-				int nRequiredItemID;
-				string strRequiredItemName = "ITEM NOT FOUND";
-
-				foreach (DataRow pRow in pMain.pTables.LacaBallTable.AsEnumerable().GroupBy(row => Convert.ToInt32(row["a_tocken_index"])).Select(group => group.First()).OrderBy(row => Convert.ToInt32(row["a_item_order"])).ThenByDescending(row => Convert.ToInt32(row["a_course_code"])))
-				{
-					nRequiredItemID = Convert.ToInt32(pRow["a_tocken_index"]);
-
-					DataRow? pItemRow = pMain.pTables.ItemTable.AsEnumerable().Where(row => Convert.ToInt32(row["a_index"]) == nRequiredItemID).FirstOrDefault();
-					if (pItemRow != null)
-						strRequiredItemName = pItemRow["a_name_" + pMain.pSettings.WorkLocale].ToString() ?? string.Empty;
-					else
-						pMain.Logger(LogTypes.Error, $"LacaBall Editor > Token: {nRequiredItemID} Error: a_tocken_index: {nRequiredItemID} not exist in t_item.");
-
-					AddToList(Convert.ToInt32(pRow["a_item_order"]), strRequiredItemName, false);
-				}
-
-				MainList.SelectedIndex = 0;
-				MainList.EndUpdate();
-			}
-			/****************************************/
-			(new ToolTip()).SetToolTip(btnReload, "Reload LacaBall & Items Data from Database");
-			/****************************************/
-			MainList.Enabled = true;
-
-			btnReload.Enabled = true;
-			btnAddNew.Enabled = true;
 
 			pProgressDialog.Close();
 
-			MainList.Focus();
-		}
-
-		DataGridViewRow CreateGroupRow(int nCourseCode) // NOTE: Cell 0 indicates Row is type Group. Cell 1 Indicates if Group Childs are Visible or Not.
-		{
-			DataGridViewRow pRow = new();
-
-			pRow.CreateCells(gridRewards);
-
-			pRow.HeaderCell.Value = "-";
-			pRow.HeaderCell.Tag = nCourseCode;
-			pRow.HeaderCell.ToolTipText = "Collapse/Expand Group";
-			pRow.Cells[0].Tag = "GROUP";
-			pRow.Cells[1].Tag = true;
-			pRow.ReadOnly = true;
-			pRow.Height = 26;
-
-			for (int i = 0; i < gridRewards.Columns.Count; i++)
+			if (pMain.pTables.LacaBallTable == null)
 			{
-				pRow.Cells[i].Style.BackColor = Color.FromArgb(91, 85, 76);
-				pRow.Cells[i].Style.SelectionBackColor = Color.FromArgb(91, 85, 76);
-				pRow.Cells[i].Style.Font = new Font(gridRewards.Font, FontStyle.Bold);
-				pRow.Cells[i].Style.Alignment = DataGridViewContentAlignment.MiddleLeft;
-				pRow.Cells[i].Value = (i == 0) ? new Bitmap(1, 1) : ((i == 1) ? $"Course N° {nCourseCode}" : null);
-				pRow.Cells[i].ToolTipText = "Collapse/Expand Group";
+				MessageBox.Show("Could not load ep4_db.t_lcball. Check database settings.", "LacaBall Editor", MessageBoxButtons.OK, MessageBoxIcon.Error);
+				return;
 			}
 
-			return pRow;
+			FillMainList();
+			SetLoadedState(true);
+
+			if (MainList.Items.Count > 0)
+				MainList.SelectedIndex = 0;
 		}
 
-		int GetGroupRowID(int nCurrentRowID)
+		private void FillMainList()
 		{
-			while (gridRewards.Rows[nCurrentRowID].Cells[0].Tag?.ToString() != "GROUP")
-				nCurrentRowID--;
+			MainList.BeginUpdate();
+			MainList.Items.Clear();
 
-			return nCurrentRowID;
+			foreach (DataRow pRow in GetTokenHeaderRows())
+				AddTokenToList(Convert.ToInt32(pRow["a_tocken_index"]), Convert.ToInt32(pRow["a_item_order"]));
+
+			MainList.EndUpdate();
 		}
 
-		private void LacaBallEditor_FormClosing(object sender, FormClosingEventArgs e)
+		private IEnumerable<DataRow> GetTokenHeaderRows()
 		{
-			void Clear()
+			if (pMain.pTables.LacaBallTable == null)
+				yield break;
+
+			foreach (DataRow pRow in pMain.pTables.LacaBallTable
+				.AsEnumerable()
+				.GroupBy(row => Convert.ToInt32(row["a_tocken_index"]))
+				.Select(group => group.OrderBy(row => Convert.ToInt32(row["a_item_order"])).First())
+				.OrderBy(row => Convert.ToInt32(row["a_item_order"]))
+				.ThenBy(row => Convert.ToInt32(row["a_tocken_index"])))
 			{
-				if (cmRewards != null)
-				{
-					cmRewards.Dispose();
-					cmRewards = null;
-				}
+				yield return pRow;
+			}
+		}
+
+		private void AddTokenToList(int nTokenId, int nItemOrder)
+		{
+			MainList.Items.Add(new Main.ListBoxItem
+			{
+				ID = nTokenId,
+				Text = $"{nItemOrder}: {GetItemText(nTokenId)}"
+			});
+		}
+
+		private void LoadUiData(int nTokenId)
+		{
+			if (pMain.pTables.LacaBallTable == null)
+				return;
+
+			bLoading = true;
+			gridRewards.Rows.Clear();
+
+			DataRow[] pRows = pMain.pTables.LacaBallTable
+				.AsEnumerable()
+				.Where(row => Convert.ToInt32(row["a_tocken_index"]) == nTokenId)
+				.OrderBy(row => Convert.ToInt32(row["a_course_code"]))
+				.ThenBy(row => Convert.ToInt32(row["a_order"]))
+				.ToArray();
+
+			if (pRows.Length == 0)
+			{
+				bLoading = false;
+				return;
 			}
 
-			if (bUnsavedChanges)
+			nOriginalTokenId = nTokenId;
+			bCurrentTableIsTemporary = false;
+			tbItemOrder.Text = pRows.Min(row => Convert.ToInt32(row["a_item_order"])).ToString();
+			SetTokenButton(nTokenId);
+
+			foreach (DataRow pRow in pRows)
 			{
-				DialogResult pDialogReturn = MessageBox.Show("You have unsaved changes. Do you want to discard them and exit?", "LacaBall Editor", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
-				if (pDialogReturn == DialogResult.No)
-					e.Cancel = true;
-				else
-					Clear();
+				AddRewardRow(
+					Convert.ToInt32(pRow["a_course_code"]),
+					Convert.ToInt32(pRow["a_order"]),
+					Convert.ToInt32(pRow["a_item_index"]),
+					Convert.ToInt64(pRow["a_item_count"]),
+					Convert.ToInt64(pRow["a_item_max"]),
+					Convert.ToInt64(pRow["a_item_remain"])
+				);
+			}
+
+			bUnsavedChanges = false;
+			btnUpdate.Enabled = false;
+			bLoading = false;
+		}
+
+		private void LoadTemporaryTable(int nTokenId, int nItemOrder, IEnumerable<LcBallRewardRow>? rows = null)
+		{
+			bLoading = true;
+			nOriginalTokenId = -1;
+			bCurrentTableIsTemporary = true;
+			tbItemOrder.Text = nItemOrder.ToString();
+			SetTokenButton(nTokenId);
+			gridRewards.Rows.Clear();
+
+			if (rows == null)
+			{
+				for (int i = 0; i < DefaultRewardRowsPerCourse; i++)
+					AddRewardRow(0, i, DefaultRewardItemId, 1, 1, 1);
 			}
 			else
 			{
-				Clear();
+				foreach (LcBallRewardRow row in rows)
+					AddRewardRow(row.Course, row.Order, row.ItemId, row.Count, row.Max, row.Remain);
 			}
+
+			bLoading = false;
+			MarkDirty();
 		}
 
-		private void LoadUIData(int nItemOrder, bool bLoadFrompLacaBallTable)
+		private void AddRewardRow(int nCourse, int nOrder, int nItemId, long lCount, long lMax, long lRemain)
 		{
-			bUserAction = false;
-			/****************************************/
-			// Reset Controls
-			btnRequiredItem.Image = null;
-			/****************************************/
-			if (bLoadFrompLacaBallTable && pMain.pTables.LacaBallTable != null)
-			{
-				pTempLacaBallTokenRows = pMain.pTables.LacaBallTable.AsEnumerable().Where(row => Convert.ToInt32(row["a_item_order"]) == nItemOrder).Select(row => {
-					DataRow newRow = pMain.pTables.LacaBallTable.NewRow();
-					newRow.ItemArray = (object[])row.ItemArray.Clone();
-					return newRow;
-				}).ToArray();
-			}
-			/****************************************/
-			// General
-			nOriginalTokenID = Convert.ToInt32(pTempLacaBallTokenRows[0]["a_tocken_index"]);
-			string strRequiredItemName = nOriginalTokenID.ToString();
-			DataRow? pItemRow;
-
-			if (nOriginalTokenID > 0)
-			{
-				pItemRow = pMain.pTables.ItemTable?.AsEnumerable().Where(row => Convert.ToInt32(row["a_index"]) == nOriginalTokenID).FirstOrDefault();
-				if (pItemRow != null)
-				{
-					strRequiredItemName += $" - {pItemRow["a_name_" + pMain.pSettings.WorkLocale]}";
-
-					btnRequiredItem.Image = new Bitmap(pMain.GetIcon("ItemBtn", pItemRow["a_texture_id"].ToString(), Convert.ToInt32(pItemRow["a_texture_row"]), Convert.ToInt32(pItemRow["a_texture_col"])), new Size(24, 24));
-#if USE_a_job_AND_a_item_type_TABLE
-					cbItemResultType.SelectedIndex = Convert.ToInt32(pItemRow["a_subtype_idx"]);
-#endif
-				}
-			}
-
-			btnRequiredItem.Text = strRequiredItemName;
-			/****************************************/
-			gridRewards.Rows.Clear();
-
-			gridRewards.SuspendLayout();
-
-			int nRewardCount = 1, nAddedCourseCode = -1;
-
-			foreach (DataRow pRow in pTempLacaBallTokenRows)
-			{
-				// Group Header
-				int nCouseCode = Convert.ToInt32(pRow["a_course_code"]);
-
-				if (nAddedCourseCode != nCouseCode)
-				{
-					gridRewards.Rows.Add(CreateGroupRow(nCouseCode));
-
-					nRewardCount = 1;
-					nAddedCourseCode = nCouseCode;
-				}
-
-				// Rewards of the Group/Course Code
-				int nRewardID, nGroupRowIndex = gridRewards.Rows.Count;
-				string strRewardItemName;
-
-				gridRewards.Rows.Insert(nGroupRowIndex);
-
-				gridRewards.Rows[nGroupRowIndex].HeaderCell.Value = nRewardCount.ToString();
-
-				nRewardID = Convert.ToInt32(pRow["a_item_index"]);
-				strRewardItemName = nRewardID.ToString();
-
-				if (nRewardID > 0)
-				{
-					pItemRow = pMain.pTables.ItemTable?.AsEnumerable().Where(row => Convert.ToInt32(row["a_index"]) == nRewardID).FirstOrDefault();
-					if (pItemRow != null)
-					{
-						strRewardItemName += $" - {pItemRow["a_name_" + pMain.pSettings.WorkLocale]}";
-
-						gridRewards.Rows[nGroupRowIndex].Cells["itemIcon"].Value = new Bitmap(pMain.GetIcon("ItemBtn", pItemRow["a_texture_id"].ToString(), Convert.ToInt32(pItemRow["a_texture_row"]), Convert.ToInt32(pItemRow["a_texture_col"])), new Size(24, 24));
-					}
-				}
-
-				gridRewards.Rows[nGroupRowIndex].Cells["item"].Value = strRewardItemName;
-				gridRewards.Rows[nGroupRowIndex].Cells["item"].Tag = nRewardID;
-				gridRewards.Rows[nGroupRowIndex].Cells["count"].Value = pRow["a_item_count"];
-
-				if (nRewardID == Defs.NAS_ITEM_DB_INDEX)
-				{
-					gridRewards.Rows[nGroupRowIndex].Cells["count"].Style.ForeColor = pMain.GetGoldColor(Convert.ToInt64(pRow["a_item_count"]));
-					gridRewards.Rows[nGroupRowIndex].Cells["count"].Style.BackColor = Color.FromArgb(166, 166, 166);
-				}
-
-				gridRewards.Rows[nGroupRowIndex].Cells["max"].Value = pRow["a_item_max"];
-				gridRewards.Rows[nGroupRowIndex].Cells["remain"].Value = pRow["a_item_remain"];
-
-				nRewardCount++;
-				nGroupRowIndex++;
-			}
-
-			gridRewards.ResumeLayout();
-			/****************************************/
-			bUserAction = true;
-
-			btnUpdate.Enabled = true;
-
-			btnCopy.Enabled = true;
-			btnDelete.Enabled = true;
+			int nRow = gridRewards.Rows.Add();
+			gridRewards.Rows[nRow].Cells["course"].Value = nCourse;
+			gridRewards.Rows[nRow].Cells["order"].Value = nOrder;
+			gridRewards.Rows[nRow].Cells["itemIcon"].Value = GetItemIcon(nItemId);
+			gridRewards.Rows[nRow].Cells["item"].Value = GetItemText(nItemId);
+			gridRewards.Rows[nRow].Cells["item"].Tag = nItemId;
+			gridRewards.Rows[nRow].Cells["count"].Value = lCount;
+			gridRewards.Rows[nRow].Cells["max"].Value = lMax;
+			gridRewards.Rows[nRow].Cells["remain"].Value = lRemain;
 		}
 
-		private void tbSearch_TextChanged(object sender, EventArgs e) { nSearchPosition = 0; }
+		private bool CheckUnsavedChanges()
+		{
+			if (!bUnsavedChanges)
+				return true;
 
-		private void tbSearch_KeyDown(object sender, KeyEventArgs e) { nSearchPosition = pMain.SearchInListBox(tbSearch, e, MainList, nSearchPosition); }
+			DialogResult pDialogReturn = MessageBox.Show("There are unsaved changes. If you proceed, your changes will be discarded.\nDo you want to continue?", "LacaBall Editor", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+			if (pDialogReturn != DialogResult.Yes)
+				return false;
+
+			if (bCurrentTableIsTemporary)
+				RemoveTemporaryListItem();
+
+			bUnsavedChanges = false;
+			btnUpdate.Enabled = false;
+			return true;
+		}
+
+		private void RemoveTemporaryListItem()
+		{
+			int nTokenId = GetCurrentTokenId();
+
+			for (int i = MainList.Items.Count - 1; i >= 0; i--)
+			{
+				if (MainList.Items[i] is Main.ListBoxItem item && item.ID == nTokenId)
+					MainList.Items.RemoveAt(i);
+			}
+
+			bCurrentTableIsTemporary = false;
+		}
+
+		private void MarkDirty()
+		{
+			if (bLoading)
+				return;
+
+			bUnsavedChanges = true;
+			btnUpdate.Enabled = true;
+		}
+
+		private int GetCurrentTokenId()
+		{
+			return Convert.ToInt32(btnTokenItem.Tag ?? -1);
+		}
+
+		private void SetTokenButton(int nTokenId)
+		{
+			btnTokenItem.Tag = nTokenId;
+			btnTokenItem.Text = GetItemText(nTokenId);
+			btnTokenItem.Image = GetItemIcon(nTokenId);
+		}
+
+		private int GetNextItemOrder()
+		{
+			if (pMain.pTables.LacaBallTable == null || pMain.pTables.LacaBallTable.Rows.Count == 0)
+				return 0;
+
+			return pMain.pTables.LacaBallTable.AsEnumerable().Max(row => Convert.ToInt32(row["a_item_order"])) + 1;
+		}
+
+		private int GetNextCourseCode()
+		{
+			if (gridRewards.Rows.Count == 0)
+				return 0;
+
+			return gridRewards.Rows
+				.Cast<DataGridViewRow>()
+				.Select(row => TryGetIntCell(row, "course", out int nCourse) ? nCourse : 0)
+				.DefaultIfEmpty(0)
+				.Max() + 1;
+		}
+
+		private int GetNextOrderInCourse(int nCourse)
+		{
+			return gridRewards.Rows
+				.Cast<DataGridViewRow>()
+				.Where(row => TryGetIntCell(row, "course", out int nRowCourse) && nRowCourse == nCourse)
+				.Select(row => TryGetIntCell(row, "order", out int nOrder) ? nOrder : -1)
+				.DefaultIfEmpty(-1)
+				.Max() + 1;
+		}
+
+		private bool TokenExists(int nTokenId, int nIgnoredOriginalTokenId)
+		{
+			if (pMain.pTables.LacaBallTable == null)
+				return false;
+
+			return pMain.pTables.LacaBallTable
+				.AsEnumerable()
+				.Any(row =>
+					Convert.ToInt32(row["a_tocken_index"]) == nTokenId &&
+					Convert.ToInt32(row["a_tocken_index"]) != nIgnoredOriginalTokenId
+				);
+		}
+
+		private bool TryComposeRows(out LcBallSaveData saveData)
+		{
+			saveData = new LcBallSaveData();
+
+			saveData.TokenId = GetCurrentTokenId();
+			saveData.OriginalTokenId = nOriginalTokenId;
+
+			if (saveData.TokenId <= 0)
+			{
+				MessageBox.Show("Please choose the item consumed to play this LacaBall table.", "LacaBall Editor", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+				return false;
+			}
+
+			if (TokenExists(saveData.TokenId, saveData.OriginalTokenId))
+			{
+				MessageBox.Show("That consumed item already has a LacaBall reward table. Choose a different item or edit the existing table.", "LacaBall Editor", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+				return false;
+			}
+
+			if (!int.TryParse(tbItemOrder.Text, out saveData.ItemOrder) || saveData.ItemOrder < 0)
+			{
+				MessageBox.Show("Display order must be 0 or higher.", "LacaBall Editor", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+				return false;
+			}
+
+			foreach (DataGridViewRow pRow in gridRewards.Rows)
+			{
+				if (!TryGetIntCell(pRow, "course", out int nCourse) || nCourse < 0 || nCourse > 127)
+				{
+					MessageBox.Show("Course must be between 0 and 127.", "LacaBall Editor", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+					return false;
+				}
+
+				if (!TryGetIntCell(pRow, "order", out int nOrder) || nOrder < 0 || nOrder > 127)
+				{
+					MessageBox.Show("Slot/order must be between 0 and 127.", "LacaBall Editor", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+					return false;
+				}
+
+				int nItemId = Convert.ToInt32(pRow.Cells["item"].Tag ?? 0);
+				if (nItemId <= 0)
+				{
+					MessageBox.Show("Every reward row needs a valid item.", "LacaBall Editor", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+					return false;
+				}
+
+				if (!TryGetUnsignedIntCell(pRow, "count", out long lCount) ||
+					!TryGetUnsignedIntCell(pRow, "max", out long lMax) ||
+					!TryGetUnsignedIntCell(pRow, "remain", out long lRemain))
+				{
+					MessageBox.Show("Reward count/max/remaining values must be unsigned 32-bit numbers.", "LacaBall Editor", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+					return false;
+				}
+
+				if (lRemain > lMax)
+				{
+					DialogResult pDialogReturn = MessageBox.Show("One reward has Remaining above Max. Save anyway?", "LacaBall Editor", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+					if (pDialogReturn != DialogResult.Yes)
+						return false;
+				}
+
+				saveData.Rows.Add(new LcBallRewardRow(nCourse, nOrder, nItemId, lCount, lMax, lRemain));
+			}
+
+			if (saveData.Rows.Count == 0)
+			{
+				MessageBox.Show("Please add at least one reward row.", "LacaBall Editor", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+				return false;
+			}
+
+			IEnumerable<IGrouping<string, LcBallRewardRow>> duplicateGroups = saveData.Rows
+				.GroupBy(row => $"{row.Course}:{row.Order}")
+				.Where(group => group.Count() > 1);
+
+			if (duplicateGroups.Any())
+			{
+				MessageBox.Show("Two or more reward rows use the same Course + Slot/order. Each row needs a unique pair.", "LacaBall Editor", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+				return false;
+			}
+
+			saveData.Rows = saveData.Rows
+				.OrderBy(row => row.Course)
+				.ThenBy(row => row.Order)
+				.ToList();
+
+			return true;
+		}
+
+		private bool SaveRows(LcBallSaveData saveData)
+		{
+			StringBuilder strQuery = new();
+			strQuery.Append("START TRANSACTION;\n");
+
+			if (saveData.OriginalTokenId > 0)
+				strQuery.Append($"DELETE FROM {pMain.pSettings.DBUser}.t_lcball WHERE a_tocken_index={saveData.OriginalTokenId};\n");
+
+			if (saveData.OriginalTokenId != saveData.TokenId)
+				strQuery.Append($"DELETE FROM {pMain.pSettings.DBUser}.t_lcball WHERE a_tocken_index={saveData.TokenId};\n");
+
+			strQuery.Append($"INSERT INTO {pMain.pSettings.DBUser}.t_lcball (a_item_order, a_tocken_index, a_course_code, a_order, a_item_index, a_item_count, a_item_max, a_item_remain) VALUES ");
+
+			foreach (LcBallRewardRow row in saveData.Rows)
+			{
+				strQuery.Append($"({saveData.ItemOrder}, {saveData.TokenId}, {row.Course}, {row.Order}, {row.ItemId}, {row.Count}, {row.Max}, {row.Remain}),");
+			}
+
+			strQuery.Length--;
+			strQuery.Append(";\nCOMMIT;");
+
+			return pMain.QueryUpdateInsertDelete(pMain.pSettings.DBCharset, strQuery.ToString(), out long _);
+		}
+
+		private async Task ReloadAfterSaveAsync(int nTokenId)
+		{
+			await LoadLacaBallDataAsync();
+			FillMainList();
+
+			for (int i = 0; i < MainList.Items.Count; i++)
+			{
+				if (MainList.Items[i] is Main.ListBoxItem item && item.ID == nTokenId)
+				{
+					MainList.SelectedIndex = i;
+					break;
+				}
+			}
+
+			bCurrentTableIsTemporary = false;
+			bUnsavedChanges = false;
+			btnUpdate.Enabled = false;
+		}
+
+		private void ChooseTokenItem()
+		{
+			ItemPicker pItemSelector = new(pMain, this, GetCurrentTokenId() > 0 ? GetCurrentTokenId() : DefaultTokenItemId, false);
+			if (pItemSelector.ShowDialog() != DialogResult.OK)
+				return;
+
+			int nItemId = Convert.ToInt32(pItemSelector.ReturnValues[0]);
+			SetTokenButton(nItemId);
+			MarkDirty();
+		}
+
+		private void ChooseRewardItem()
+		{
+			if (gridRewards.CurrentRow == null)
+				return;
+
+			int nItemId = Convert.ToInt32(gridRewards.CurrentRow.Cells["item"].Tag ?? DefaultRewardItemId);
+			ItemPicker pItemSelector = new(pMain, this, nItemId, false);
+			if (pItemSelector.ShowDialog() != DialogResult.OK)
+				return;
+
+			nItemId = Convert.ToInt32(pItemSelector.ReturnValues[0]);
+			gridRewards.CurrentRow.Cells["itemIcon"].Value = GetItemIcon(nItemId);
+			gridRewards.CurrentRow.Cells["item"].Value = GetItemText(nItemId);
+			gridRewards.CurrentRow.Cells["item"].Tag = nItemId;
+			MarkDirty();
+		}
+
+		private string GetItemText(int nItemId)
+		{
+			if (nItemId <= 0)
+				return "0 - No item";
+
+			DataRow? pItemRow = pMain.pTables.ItemTable?.Select("a_index=" + nItemId).FirstOrDefault();
+			if (pItemRow == null)
+				return $"{nItemId} - ITEM NOT FOUND";
+
+			return $"{nItemId} - {pItemRow["a_name_" + pMain.pSettings.WorkLocale]}";
+		}
+
+		private Image? GetItemIcon(int nItemId)
+		{
+			if (nItemId <= 0)
+				return null;
+
+			DataRow? pItemRow = pMain.pTables.ItemTable?.Select("a_index=" + nItemId).FirstOrDefault();
+			if (pItemRow == null)
+				return null;
+
+			Bitmap? pIcon = pMain.GetIcon("ItemBtn", pItemRow["a_texture_id"].ToString(), Convert.ToInt32(pItemRow["a_texture_row"]), Convert.ToInt32(pItemRow["a_texture_col"]));
+			if (pIcon == null)
+				return null;
+
+			return new Bitmap(pIcon, new Size(24, 24));
+		}
+
+		private static bool TryGetIntCell(DataGridViewRow pRow, string strCell, out int nValue)
+		{
+			return int.TryParse(pRow.Cells[strCell].Value?.ToString(), out nValue);
+		}
+
+		private static bool TryGetUnsignedIntCell(DataGridViewRow pRow, string strCell, out long lValue)
+		{
+			if (!long.TryParse(pRow.Cells[strCell].Value?.ToString(), out lValue))
+				return false;
+
+			return lValue >= 0 && lValue <= uint.MaxValue;
+		}
+
+		private void SetLoadedState(bool bLoaded)
+		{
+			MainList.Enabled = bLoaded;
+			btnReload.Enabled = bLoaded;
+			btnAddNew.Enabled = bLoaded;
+			btnCopy.Enabled = bLoaded && MainList.Items.Count > 0;
+			btnDelete.Enabled = bLoaded && MainList.Items.Count > 0;
+			btnTokenItem.Enabled = bLoaded;
+			gridRewards.Enabled = bLoaded;
+			btnAddCourse.Enabled = bLoaded;
+			btnAddReward.Enabled = bLoaded;
+			btnChooseReward.Enabled = bLoaded;
+			btnRemoveReward.Enabled = bLoaded;
+		}
+
+		private void BuildUi()
+		{
+			Text = "LacaBall Reward Editor";
+			Name = "LacaBallEditor";
+			StartPosition = FormStartPosition.CenterScreen;
+			BackColor = Color.FromArgb(40, 40, 40);
+			ForeColor = Color.FromArgb(208, 203, 148);
+			MinimumSize = new Size(1160, 650);
+			ClientSize = new Size(1200, 690);
+			Icon = Properties.Resources.NG;
+
+			tbSearch = CreateTextBox(new Point(12, 12), new Size(300, 23));
+			tbSearch.Anchor = AnchorStyles.Top | AnchorStyles.Left;
+			tbSearch.TextChanged += (_sender, _args) => nSearchPosition = 0;
+			tbSearch.KeyDown += (_sender, args) => nSearchPosition = pMain.SearchInListBox(tbSearch, args, MainList, nSearchPosition);
+
+			MainList = new ListBox
+			{
+				BackColor = Color.FromArgb(28, 30, 31),
+				ForeColor = Color.FromArgb(208, 203, 148),
+				BorderStyle = BorderStyle.FixedSingle,
+				Enabled = false,
+				Location = new Point(12, 42),
+				Size = new Size(300, 575),
+				Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left
+			};
+			MainList.SelectedIndexChanged += MainList_SelectedIndexChanged;
+
+			btnReload = CreateButton("Reload", new Point(12, 632), new Size(70, 28));
+			btnReload.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+			btnReload.Enabled = false;
+			btnReload.Click += btnReload_Click;
+
+			btnAddNew = CreateButton("Add New", new Point(90, 632), new Size(70, 28));
+			btnAddNew.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+			btnAddNew.Enabled = false;
+			btnAddNew.Click += btnAddNew_Click;
+
+			btnCopy = CreateButton("Copy", new Point(168, 632), new Size(70, 28));
+			btnCopy.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+			btnCopy.Enabled = false;
+			btnCopy.Click += btnCopy_Click;
+
+			btnDelete = CreateButton("Delete", new Point(246, 632), new Size(66, 28));
+			btnDelete.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+			btnDelete.Enabled = false;
+			btnDelete.Click += btnDelete_Click;
+
+			GroupBox gbToken = CreateGroupBox("Consumed item / token table", new Point(324, 12), new Size(860, 118));
+			gbToken.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+
+			Label lblToken = CreateLabel("Item consumed to play", new Point(12, 31), new Size(140, 20));
+			btnTokenItem = CreateButton("Choose token item", new Point(160, 24), new Size(510, 30));
+			btnTokenItem.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+			btnTokenItem.ImageAlign = ContentAlignment.MiddleLeft;
+			btnTokenItem.TextAlign = ContentAlignment.MiddleCenter;
+			btnTokenItem.Enabled = false;
+			btnTokenItem.Tag = -1;
+			btnTokenItem.Click += (_sender, _args) => ChooseTokenItem();
+
+			Label lblOrder = CreateLabel("Top strip order", new Point(12, 70), new Size(140, 20));
+			tbItemOrder = CreateTextBox(new Point(160, 67), new Size(100, 23));
+			tbItemOrder.TextChanged += (_sender, _args) => MarkDirty();
+
+			btnUpdate = CreateButton("Save this LacaBall table", new Point(530, 65), new Size(340, 30));
+			btnUpdate.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+			btnUpdate.Enabled = false;
+			btnUpdate.Click += btnUpdate_Click;
+
+			gbToken.Controls.AddRange([lblToken, btnTokenItem, lblOrder, tbItemOrder, btnUpdate]);
+
+			GroupBox gbRewards = CreateGroupBox("Rewards by course and slot", new Point(324, 142), new Size(860, 475));
+			gbRewards.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+
+			gridRewards = CreateGrid(new Point(10, 24), new Size(840, 390));
+			gridRewards.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+			gridRewards.Columns.Add(new DataGridViewTextBoxColumn { Name = "course", HeaderText = "Course", Width = 70, AutoSizeMode = DataGridViewAutoSizeColumnMode.None });
+			gridRewards.Columns.Add(new DataGridViewTextBoxColumn { Name = "order", HeaderText = "Slot/order", Width = 80, AutoSizeMode = DataGridViewAutoSizeColumnMode.None });
+			gridRewards.Columns.Add(new DataGridViewImageColumn { Name = "itemIcon", HeaderText = "", Width = 34, AutoSizeMode = DataGridViewAutoSizeColumnMode.None });
+			gridRewards.Columns.Add(new DataGridViewTextBoxColumn { Name = "item", HeaderText = "Reward item", ReadOnly = true, AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill });
+			gridRewards.Columns.Add(new DataGridViewTextBoxColumn { Name = "count", HeaderText = "Count", Width = 95, AutoSizeMode = DataGridViewAutoSizeColumnMode.None });
+			gridRewards.Columns.Add(new DataGridViewTextBoxColumn { Name = "max", HeaderText = "Total/max", Width = 95, AutoSizeMode = DataGridViewAutoSizeColumnMode.None });
+			gridRewards.Columns.Add(new DataGridViewTextBoxColumn { Name = "remain", HeaderText = "Remaining", Width = 95, AutoSizeMode = DataGridViewAutoSizeColumnMode.None });
+			gridRewards.CellDoubleClick += (_sender, _args) => ChooseRewardItem();
+			gridRewards.CellValueChanged += (_sender, _args) => MarkDirty();
+
+			btnAddCourse = CreateButton("Add course with 5 rewards", new Point(10, 428), new Size(170, 28));
+			btnAddCourse.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+			btnAddCourse.Enabled = false;
+			btnAddCourse.Click += btnAddCourse_Click;
+
+			btnAddReward = CreateButton("Add reward row", new Point(188, 428), new Size(120, 28));
+			btnAddReward.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+			btnAddReward.Enabled = false;
+			btnAddReward.Click += btnAddReward_Click;
+
+			btnChooseReward = CreateButton("Choose selected reward", new Point(316, 428), new Size(160, 28));
+			btnChooseReward.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+			btnChooseReward.Enabled = false;
+			btnChooseReward.Click += (_sender, _args) => ChooseRewardItem();
+
+			btnRemoveReward = CreateButton("Remove selected row", new Point(484, 428), new Size(150, 28));
+			btnRemoveReward.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
+			btnRemoveReward.Enabled = false;
+			btnRemoveReward.Click += btnRemoveReward_Click;
+
+			Label lblHelp = CreateLabel("The client UI displays up to 5 reward rows per course. Max/remaining are stock limits used by the server.", new Point(645, 424), new Size(200, 42));
+			lblHelp.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
+
+			gbRewards.Controls.AddRange([gridRewards, btnAddCourse, btnAddReward, btnChooseReward, btnRemoveReward, lblHelp]);
+
+			Controls.AddRange([tbSearch, MainList, btnReload, btnAddNew, btnCopy, btnDelete, gbToken, gbRewards]);
+
+			Load += LacaBallEditor_LoadAsync;
+			FormClosing += LacaBallEditor_FormClosing;
+		}
+
+		private static Button CreateButton(string strText, Point pLocation, Size pSize)
+		{
+			Button btn = new()
+			{
+				Text = strText,
+				Location = pLocation,
+				Size = pSize,
+				BackColor = Color.FromArgb(40, 40, 40),
+				ForeColor = Color.FromArgb(208, 203, 148),
+				FlatStyle = FlatStyle.Flat,
+				UseVisualStyleBackColor = false
+			};
+
+			btn.FlatAppearance.BorderColor = Color.FromArgb(91, 85, 76);
+			btn.FlatAppearance.MouseDownBackColor = Color.FromArgb(40, 40, 40);
+			btn.FlatAppearance.MouseOverBackColor = Color.FromArgb(60, 56, 54);
+			return btn;
+		}
+
+		private static TextBox CreateTextBox(Point pLocation, Size pSize)
+		{
+			return new TextBox
+			{
+				Location = pLocation,
+				Size = pSize,
+				BackColor = Color.FromArgb(28, 30, 31),
+				ForeColor = Color.FromArgb(208, 203, 148),
+				BorderStyle = BorderStyle.FixedSingle
+			};
+		}
+
+		private static Label CreateLabel(string strText, Point pLocation, Size pSize)
+		{
+			return new Label
+			{
+				Text = strText,
+				Location = pLocation,
+				Size = pSize,
+				ForeColor = Color.FromArgb(208, 203, 148),
+				BackColor = Color.Transparent
+			};
+		}
+
+		private static GroupBox CreateGroupBox(string strText, Point pLocation, Size pSize)
+		{
+			return new GroupBox
+			{
+				Text = strText,
+				Location = pLocation,
+				Size = pSize,
+				ForeColor = Color.FromArgb(208, 203, 148),
+				BackColor = Color.FromArgb(40, 40, 40)
+			};
+		}
+
+		private static DataGridView CreateGrid(Point pLocation, Size pSize)
+		{
+			DataGridView grid = new()
+			{
+				Location = pLocation,
+				Size = pSize,
+				AllowUserToAddRows = false,
+				AllowUserToDeleteRows = false,
+				AllowUserToResizeRows = false,
+				AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill,
+				BackgroundColor = Color.FromArgb(28, 30, 31),
+				BorderStyle = BorderStyle.None,
+				ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.Single,
+				DefaultCellStyle = new DataGridViewCellStyle
+				{
+					BackColor = Color.FromArgb(40, 40, 40),
+					ForeColor = Color.FromArgb(208, 203, 148),
+					SelectionBackColor = Color.FromArgb(60, 56, 54),
+					SelectionForeColor = Color.FromArgb(208, 203, 148),
+					Alignment = DataGridViewContentAlignment.MiddleCenter
+				},
+				EnableHeadersVisualStyles = false,
+				GridColor = Color.FromArgb(91, 85, 76),
+				MultiSelect = false,
+				RowHeadersVisible = false,
+				SelectionMode = DataGridViewSelectionMode.FullRowSelect
+			};
+
+			grid.ColumnHeadersDefaultCellStyle = new DataGridViewCellStyle
+			{
+				BackColor = Color.FromArgb(60, 56, 54),
+				ForeColor = Color.FromArgb(208, 203, 148),
+				SelectionBackColor = Color.FromArgb(60, 56, 54),
+				SelectionForeColor = Color.FromArgb(208, 203, 148),
+				Alignment = DataGridViewContentAlignment.MiddleCenter
+			};
+
+			return grid;
+		}
 
 		private void MainList_SelectedIndexChanged(object? sender, EventArgs e)
 		{
-			if (MainList.SelectedItem is not Main.ListBoxItem pSelectedItem)
+			if (bLoading || MainList.SelectedItem is not Main.ListBoxItem pSelectedItem)
 				return;
 
-			var (bProceed, bDeleteActual) = CheckUnsavedChanges();
-
-			if (bProceed)
-			{
-				if (bDeleteActual)
-				{
-					int nPrevObjectID = MainList.SelectedIndex <= 0 ? 0 : MainList.SelectedIndex - 1;
-
-					MainList.Items.RemoveAt(MainList.Items.Count - 1);
-
-					object nSelected = MainList.Items[nPrevObjectID];
-
-					LoadUIData(((Main.ListBoxItem)nSelected).ID, true);
-
-					MainList.SelectedIndexChanged -= MainList_SelectedIndexChanged;
-					MainList.SelectedItem = nSelected;
-					MainList.SelectedIndexChanged += MainList_SelectedIndexChanged;
-
-					bUnsavedChanges = false;
-				}
-				else
-				{
-					bUnsavedChanges = false;
-
-					LoadUIData(pSelectedItem.ID, true);
-				}
-			}
-			else
+			if (!CheckUnsavedChanges())
 			{
 				MainList.SelectedIndexChanged -= MainList_SelectedIndexChanged;
 				MainList.SelectedItem = pLastSelected;
 				MainList.SelectedIndexChanged += MainList_SelectedIndexChanged;
-			}
-
-			pLastSelected = pSelectedItem;
-		}
-
-		private void btnReload_Click(object sender, EventArgs e)
-		{
-			btnReload.Enabled = false;
-
-			nSearchPosition = 0;
-
-			pMain.pTables.LacaBallTable?.Dispose();
-			pMain.pTables.LacaBallTable = null;
-
-			pMain.pTables.ItemTable?.Dispose();
-			pMain.pTables.ItemTable = null;
-
-			LacaBallEditor_LoadAsync(sender, e);
-		}
-
-		private (int nItemID, string strItemName) AskForItemIndex()
-		{
-			ItemPicker pItemSelector = new(pMain, this, Convert.ToInt32(pTempLacaBallTokenRows[0]["a_tocken_index"]), false);
-			if (pItemSelector.ShowDialog() != DialogResult.OK)
-				return (-1, "NONE");
-
-			int nNewTokenID = Convert.ToInt32(pItemSelector.ReturnValues[0]);
-
-			if (!pMain.pTables.LacaBallTable.AsEnumerable().Any(row => Convert.ToInt32(row["a_tocken_index"]) == nNewTokenID))
-			{
-				return (nNewTokenID, pItemSelector.ReturnValues[1].ToString() ?? string.Empty);
-			}
-			else
-			{
-				pMain.Logger(LogTypes.Error, "LacaBall Editor > Cannot duplicate an Item for a Token.");
-
-				return AskForItemIndex();
-			}
-		}
-
-		private void btnAddNew_Click(object sender, EventArgs e)
-		{
-			bool bSuccess = true;
-			var (bProceed, bDeleteActual) = CheckUnsavedChanges();
-
-			if (bProceed)
-			{
-				int i, nNewIndexID = 0, nNewTokenID, nNewTokenItemOrder = 0;
-
-				var (nItemID, strItemName) = AskForItemIndex();
-				if (nItemID == -1)
-					return;
-				else
-					nNewTokenID = nItemID;
-
-				DataRow pNewRow;
-
-				List<string> listIntColumns =
-				[
-					"a_index",
-					"a_item_order",
-					"a_tocken_index",
-					"a_item_index",
-					"a_item_count",
-					"a_item_max",
-					"a_item_remain"
-				];
-
-				List<string> listTinyIntColumns =
-				[
-					"a_course_code",
-					"a_order"
-				];
-
-				if (pMain.pTables.LacaBallTable == null)
-				{
-					DataTable pLacaBallTableStruct = new();
-
-					foreach (string strColumnName in listIntColumns)
-						pLacaBallTableStruct.Columns.Add(strColumnName, typeof(int));
-
-					foreach (string strColumnName in listTinyIntColumns)
-						pLacaBallTableStruct.Columns.Add(strColumnName, typeof(sbyte));
-
-					pNewRow = pLacaBallTableStruct.NewRow();
-
-					pLacaBallTableStruct.Dispose();
-				}
-				else
-				{
-					pNewRow = pMain.pTables.LacaBallTable.NewRow();
-
-					nNewIndexID = pMain.pTables.LacaBallTable.AsEnumerable().Max(row => Convert.ToInt32(row["a_index"])) + 1;
-					nNewTokenItemOrder = pMain.pTables.LacaBallTable.AsEnumerable().Max(row => Convert.ToInt32(row["a_item_order"])) + 1;
-				}
-
-				List<object> listDefaultValue =
-				[
-					nNewIndexID,	// a_index
-					nNewTokenItemOrder,	// a_item_order
-					nNewTokenID,	// a_tocken_index
-					43,	// a_item_index
-					1,	// a_item_count
-					1,	// a_item_max
-					1,	// a_item_remain
-					0,	// a_course_code
-					0	// a_order
-				];
-
-				i = 0;
-				foreach (string strColumnName in listIntColumns.Concat(listTinyIntColumns))
-				{
-					pNewRow[strColumnName] = listDefaultValue[i];
-
-					i++;
-				}
-
-				try
-				{
-					pTempLacaBallTokenRows = [pNewRow];
-				}
-				catch (Exception ex)
-				{
-					string strError = $"LacaBall Editor > Token: {nNewTokenID} Something got wrong. Please restart the application ({ex.Message}).";
-
-					pMain.Logger(LogTypes.Error, strError);
-
-					MessageBox.Show(strError, "LacaBall Editor", MessageBoxButtons.OK, MessageBoxIcon.Error);
-
-					bSuccess = false;
-				}
-				finally
-				{
-					if (bSuccess)
-					{
-						if (bDeleteActual)
-							MainList.Items.RemoveAt(MainList.SelectedIndex);
-
-						AddToList(nNewTokenItemOrder, strItemName, true);
-					}
-				}
-			}
-		}
-
-		private void btnCopy_Click(object sender, EventArgs e)
-		{
-			var (bProceed, bDeleteActual) = CheckUnsavedChanges();
-
-			if (bDeleteActual)
-			{
-				MessageBox.Show("You cannot copy this Token. Because it's temporary.", "LacaBall Editor", MessageBoxButtons.YesNo, MessageBoxIcon.Error);
 				return;
 			}
 
-			if (bProceed)
-			{
-				var (nNewTokenID, strItemName) = AskForItemIndex();
-
-				if (nNewTokenID == -1)
-					return;
-
-				int nNewTokenItemOrder = pMain.pTables.LacaBallTable.AsEnumerable().Max(row => Convert.ToInt32(row["a_item_order"])) + 1;
-
-				pTempLacaBallTokenRows = pMain.pTables.LacaBallTable.AsEnumerable().Where(row => Convert.ToInt32(row["a_tocken_index"]) == nOriginalTokenID).Select(row => {
-					DataRow newRow = pMain.pTables.LacaBallTable.NewRow();
-					newRow.ItemArray = (object[])row.ItemArray.Clone();
-					return newRow;
-				}).ToArray();
-
-				foreach (DataRow pRow in pTempLacaBallTokenRows)
-				{
-					pRow["a_tocken_index"] = nNewTokenID;
-					pRow["a_item_order"] = nNewTokenItemOrder;
-				}
-
-				AddToList(nNewTokenItemOrder, strItemName, true);
-			}
+			LoadUiData(pSelectedItem.ID);
+			pLastSelected = pSelectedItem;
 		}
 
-		private void btnDelete_Click(object sender, EventArgs e)
+		private async void btnReload_Click(object? sender, EventArgs e)
 		{
-			bool bSuccess = true;
+			if (!CheckUnsavedChanges())
+				return;
 
-			if (pMain.pTables.LacaBallTable?.Select("a_tocken_index=" + nOriginalTokenID).FirstOrDefault() != null)
-			{
-#if USE_ORIGINAL_LACABALL_TABLE_LOCATION_AND_NAME
-				if (!(bSuccess = pMain.QueryUpdateInsertDelete(pMain.pSettings.DBCharset, $"DELETE FROM {pMain.pSettings.DBUser}.t_lcball WHERE a_tocken_index={nOriginalTokenID};", out long _)))
-#else
-				if (!(bSuccess = pMain.QueryUpdateInsertDelete(pMain.pSettings.DBCharset, $"DELETE FROM {pMain.pSettings.DBData}.t_lacaball WHERE a_tocken_index={nOriginalTokenID};", out long _)))
-#endif
-				{
-					string strError = $"LacaBall Editor > Token: {nOriginalTokenID} Something got wrong while trying to execute the MySQL Transaction. Changes not applied.";
+			SetLoadedState(false);
+			await LoadLacaBallDataAsync();
+			FillMainList();
+			SetLoadedState(true);
 
-					pMain.Logger(LogTypes.Error, strError);
-
-					MessageBox.Show(strError, "LacaBall Editor", MessageBoxButtons.OK, MessageBoxIcon.Error);
-				}
-			}
-
-			if (bSuccess)
-			{
-				try
-				{
-					if (pMain.pTables.LacaBallTable != null)
-					{
-						DataRow[] pRows = pMain.pTables.LacaBallTable.Select("a_tocken_index=" + nOriginalTokenID);
-
-						if (pRows.Length > 0)
-						{
-							foreach (DataRow pRow in pRows)
-								pMain.pTables.LacaBallTable.Rows.Remove(pRow);
-						}
-					}
-				}
-				catch (Exception ex)
-				{
-					string strError = $"LacaBall Editor > Token: {nOriginalTokenID} Changes applied in DataBase, but something got wrong while transferring temp data to main tables. Please restart the application ({ex.Message}).";
-
-					pMain.Logger(LogTypes.Error, strError);
-
-					MessageBox.Show(strError, "LacaBall Editor", MessageBoxButtons.OK, MessageBoxIcon.Error);
-
-					bSuccess = false;
-				}
-				finally
-				{
-					if (bSuccess)
-					{
-						int nPrevObjectID = MainList.SelectedIndex <= 0 ? 0 : MainList.SelectedIndex - 1;
-
-						MainList.Items.Remove(MainList.SelectedItem);
-
-						MessageBox.Show("Token Deleted successfully!", "LacaBall Editor", MessageBoxButtons.OK);
-
-						MainList.SelectedIndex = nPrevObjectID;
-
-						bUnsavedChanges = false;
-					}
-				}
-			}
-		}
-		/****************************************/
-		private void btnRequiredItem_Click(object sender, EventArgs e)
-		{
-			if (bUserAction)
-			{
-				ItemPicker pItemSelector = new(pMain, this, Convert.ToInt32(pTempLacaBallTokenRows[0]["a_tocken_index"]), false);
-				if (pItemSelector.ShowDialog() != DialogResult.OK)
-					return;
-
-				int nRequiredItemID = Convert.ToInt32(pItemSelector.ReturnValues[0]);
-				if (nRequiredItemID > 0)
-				{
-					btnRequiredItem.Image = new Bitmap(pMain.GetIcon("ItemBtn", pItemSelector.ReturnValues[3].ToString(), Convert.ToInt32(pItemSelector.ReturnValues[4]), Convert.ToInt32(pItemSelector.ReturnValues[5])), new Size(24, 24));
-					btnRequiredItem.Text = $"{nRequiredItemID} - {pItemSelector.ReturnValues[1]}";
-
-					foreach (DataRow pRow in pTempLacaBallTokenRows)
-						pRow["a_tocken_index"] = nRequiredItemID;
-
-					bUnsavedChanges = true;
-				}
-			}
+			if (MainList.Items.Count > 0)
+				MainList.SelectedIndex = 0;
 		}
 
-		private void gridRewards_CellValueChanged(object? sender, DataGridViewCellEventArgs e)
+		private void btnAddNew_Click(object? sender, EventArgs e)
 		{
-			if (bUserAction && gridRewards.Rows[e.RowIndex].Cells[0].Tag?.ToString() != "GROUP")
-			{
-				if (Convert.ToInt32(gridRewards.Rows[e.RowIndex].Cells["item"].Tag) == Defs.NAS_ITEM_DB_INDEX)
-				{
-					gridRewards.Rows[e.RowIndex].Cells["count"].Style.ForeColor = pMain.GetGoldColor(Convert.ToInt64(gridRewards.Rows[e.RowIndex].Cells["count"].Value));
-					gridRewards.Rows[e.RowIndex].Cells["count"].Style.BackColor = Color.FromArgb(166, 166, 166);
-				}
+			if (!CheckUnsavedChanges())
+				return;
 
-				bUnsavedChanges = true;
+			ItemPicker pItemSelector = new(pMain, this, DefaultTokenItemId, false);
+			if (pItemSelector.ShowDialog() != DialogResult.OK)
+				return;
+
+			int nTokenId = Convert.ToInt32(pItemSelector.ReturnValues[0]);
+			if (TokenExists(nTokenId, -1))
+			{
+				MessageBox.Show("That consumed item already has a LacaBall reward table.", "LacaBall Editor", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+				return;
 			}
+
+			int nOrder = GetNextItemOrder();
+			AddTokenToList(nTokenId, nOrder);
+			MainList.SelectedIndex = MainList.Items.Count - 1;
+			LoadTemporaryTable(nTokenId, nOrder);
 		}
 
-		private void ChangeGroupVisibleState(int nRowID)
+		private void btnCopy_Click(object? sender, EventArgs e)
 		{
-			bool bVisible = Convert.ToBoolean(gridRewards.Rows[nRowID].Cells[1].Tag);
+			if (!CheckUnsavedChanges() || MainList.SelectedItem is not Main.ListBoxItem pSelectedItem)
+				return;
 
-			gridRewards.SuspendLayout();
+			ItemPicker pItemSelector = new(pMain, this, DefaultTokenItemId, false);
+			if (pItemSelector.ShowDialog() != DialogResult.OK)
+				return;
 
-			int i = 1;
-			while (nRowID + i < gridRewards.Rows.Count && gridRewards.Rows[nRowID + i].Cells[0].Tag?.ToString() != "GROUP")
+			int nTokenId = Convert.ToInt32(pItemSelector.ReturnValues[0]);
+			if (TokenExists(nTokenId, -1))
 			{
-				gridRewards.Rows[nRowID + i].Visible = !bVisible;
-
-				i++;
+				MessageBox.Show("That consumed item already has a LacaBall reward table.", "LacaBall Editor", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+				return;
 			}
 
-			if (i > 1)  // At least the group have one child to Hide or Show
-			{
-				gridRewards.Rows[nRowID].Cells[1].Tag = !bVisible;
-				gridRewards.Rows[nRowID].HeaderCell.Value = bVisible ? "+" : "-";
-			}
+			List<LcBallRewardRow> rows = gridRewards.Rows.Cast<DataGridViewRow>()
+				.Select(row => new LcBallRewardRow(
+					Convert.ToInt32(row.Cells["course"].Value),
+					Convert.ToInt32(row.Cells["order"].Value),
+					Convert.ToInt32(row.Cells["item"].Tag),
+					Convert.ToInt64(row.Cells["count"].Value),
+					Convert.ToInt64(row.Cells["max"].Value),
+					Convert.ToInt64(row.Cells["remain"].Value)
+				))
+				.ToList();
 
-			gridRewards.ResumeLayout();
+			int nOrder = GetNextItemOrder();
+			AddTokenToList(nTokenId, nOrder);
+			MainList.SelectedIndex = MainList.Items.Count - 1;
+			LoadTemporaryTable(nTokenId, nOrder, rows);
 		}
 
-		private void gridRewards_CellMouseClick(object sender, DataGridViewCellMouseEventArgs e)
+		private void btnDelete_Click(object? sender, EventArgs e)
 		{
-			if (bUserAction)
+			if (MainList.SelectedItem is not Main.ListBoxItem pSelectedItem)
+				return;
+
+			DialogResult pDialogReturn = MessageBox.Show($"Delete LacaBall table for {pSelectedItem.Text}?", "LacaBall Editor", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+			if (pDialogReturn != DialogResult.Yes)
+				return;
+
+			if (!bCurrentTableIsTemporary && !pMain.QueryUpdateInsertDelete(pMain.pSettings.DBCharset, $"DELETE FROM {pMain.pSettings.DBUser}.t_lcball WHERE a_tocken_index={pSelectedItem.ID};", out long _))
 			{
-				if (e.Button == MouseButtons.Left)
-				{
-					if (e.RowIndex == -1 && e.ColumnIndex == -1)    // Collapse / Expand All
-					{
-						gridRewards.SuspendLayout();
-
-						int i = 0;
-						foreach (DataGridViewRow row in gridRewards.Rows)
-						{
-							if (row.Cells[0].Tag?.ToString() != "GROUP")
-							{
-								row.Visible = bHideAll;
-							}
-							else
-							{
-								if (row.Index + 1 < gridRewards.Rows.Count && gridRewards.Rows[row.Index + 1].Cells[0].Tag?.ToString() != "GROUP")  // At least the group have one child to Hide or Show
-								{
-									row.Cells[1].Tag = bHideAll;
-									row.HeaderCell.Value = bHideAll ? "-" : "+";
-								}
-							}
-
-							i++;
-						}
-
-						gridRewards.ResumeLayout();
-
-						bHideAll = !bHideAll;
-					}
-					else if (e.RowIndex >= 0 && gridRewards.Rows[e.RowIndex].Cells[0].Tag?.ToString() == "GROUP")   // Collapse/Expand this Group
-					{
-						ChangeGroupVisibleState(e.RowIndex);
-					}
-					else if (e.ColumnIndex == 1 && e.RowIndex >= 0)    // Item Selector
-					{
-						int nItemID = Convert.ToInt32(gridRewards.Rows[e.RowIndex].Cells["item"].Tag);
-
-						ItemPicker pItemSelector = new(pMain, this, nItemID, false);
-						if (pItemSelector.ShowDialog() != DialogResult.OK)
-							return;
-
-						nItemID = Convert.ToInt32(pItemSelector.ReturnValues[0]);
-						if (nItemID > 0)
-						{
-							gridRewards.Rows[e.RowIndex].Cells["itemIcon"].Value = new Bitmap(pMain.GetIcon("ItemBtn", pItemSelector.ReturnValues[3].ToString(), Convert.ToInt32(pItemSelector.ReturnValues[4]), Convert.ToInt32(pItemSelector.ReturnValues[5])), new Size(24, 24));
-							gridRewards.Rows[e.RowIndex].Cells["item"].Value = $"{nItemID} - {pItemSelector.ReturnValues[1]}";
-							gridRewards.Rows[e.RowIndex].Cells["item"].Tag = nItemID;
-
-							if (nItemID == Defs.NAS_ITEM_DB_INDEX)
-							{
-								gridRewards.Rows[e.RowIndex].Cells["count"].Style.ForeColor = pMain.GetGoldColor(Convert.ToInt64(gridRewards.Rows[e.RowIndex].Cells["count"].Value));
-								gridRewards.Rows[e.RowIndex].Cells["count"].Style.BackColor = Color.FromArgb(166, 166, 166);
-							}
-							else
-							{
-								gridRewards.Rows[e.RowIndex].Cells["count"].Style.ForeColor = Color.FromArgb(208, 203, 148);
-								gridRewards.Rows[e.RowIndex].Cells["count"].Style.BackColor = Color.FromArgb(40, 40, 40);
-							}
-						}
-					}
-				}
-				else if (e.Button == MouseButtons.Right && e.ColumnIndex == -1) // Only in Header Cell
-				{
-					bool bIsHeader = e.RowIndex == -1;
-					bool bIsGroupHeader = !bIsHeader && gridRewards.Rows[e.RowIndex].Cells[0].Tag?.ToString() == "GROUP";
-
-					ToolStripMenuItem addItem = new(bIsHeader ? "Add New Course" : "Add New");
-					addItem.Click += (_, _) =>
-					{
-						if (bIsHeader)
-						{
-							int nRow = gridRewards.Rows.Count - 1;
-							while (gridRewards.Rows[nRow].Cells[0].Tag?.ToString() != "GROUP")
-								nRow--;
-
-							gridRewards.Rows.Add(CreateGroupRow(Convert.ToInt32(gridRewards.Rows[nRow].HeaderCell.Tag) + 1));
-
-							bUnsavedChanges = true;
-						}
-						else
-						{
-							ItemPicker pItemSelector = new(pMain, this, 0, false);
-							if (pItemSelector.ShowDialog() != DialogResult.OK)
-								return;
-
-							int nItemID = Convert.ToInt32(pItemSelector.ReturnValues[0]);
-							if (nItemID > 0)
-							{
-								int nDefaultAmount = 1;
-								int nDefaultMax = 1;
-								int nDefaultRemain = 1;
-
-								if (!Convert.ToBoolean(gridRewards.Rows[e.RowIndex].Cells[1].Tag))
-									ChangeGroupVisibleState(e.RowIndex);
-
-								int nRow = e.RowIndex + 1;
-								int nNumber = nRow;
-
-								while (nRow < gridRewards.Rows.Count && gridRewards.Rows[nRow].Cells[0].Tag?.ToString() != "GROUP")
-									nRow++;
-
-								gridRewards.Rows.Insert(nRow);
-
-								gridRewards.Rows[nRow].HeaderCell.Value = (nRow - nNumber + 1).ToString();
-
-								gridRewards.Rows[nRow].Cells["itemIcon"].Value = new Bitmap(pMain.GetIcon("ItemBtn", pItemSelector.ReturnValues[3].ToString(), Convert.ToInt32(pItemSelector.ReturnValues[4]), Convert.ToInt32(pItemSelector.ReturnValues[5])), new Size(24, 24));
-								gridRewards.Rows[nRow].Cells["item"].Value = $"{nItemID} - {pItemSelector.ReturnValues[1]}";
-								gridRewards.Rows[nRow].Cells["item"].Tag = nItemID;
-
-								if (nItemID == Defs.NAS_ITEM_DB_INDEX)
-								{
-									gridRewards.Rows[nRow].Cells["count"].Style.ForeColor = pMain.GetGoldColor(Convert.ToInt64(gridRewards.Rows[e.RowIndex].Cells["count"].Value));
-									gridRewards.Rows[nRow].Cells["count"].Style.BackColor = Color.FromArgb(166, 166, 166);
-								}
-
-								gridRewards.Rows[nRow].Cells["count"].Value = nDefaultAmount;
-								gridRewards.Rows[nRow].Cells["max"].Value = nDefaultMax;
-								gridRewards.Rows[nRow].Cells["remain"].Value = nDefaultRemain;
-
-								gridRewards.FirstDisplayedScrollingRowIndex = e.RowIndex;
-								gridRewards.Rows[nRow].Selected = true;
-							}
-						}
-					};
-
-					ToolStripMenuItem deleteItem = new(bIsGroupHeader ? "Delete Course" : "Delete") { Enabled = !bIsHeader };
-					deleteItem.Click += (_, _) =>
-					{
-						if (bIsGroupHeader)
-						{
-							gridRewards.SuspendLayout();
-
-							bool bDeleting = true;
-							int nRow = e.RowIndex;
-
-							while (nRow < gridRewards.Rows.Count)
-							{
-								if (bDeleting)
-								{
-									gridRewards.Rows.RemoveAt(e.RowIndex);
-
-									if (e.RowIndex == gridRewards.Rows.Count)
-										break;
-
-									if (gridRewards.Rows[e.RowIndex].Cells[0].Tag?.ToString() == "GROUP")
-										bDeleting = false;
-								}
-								else
-								{
-									if (gridRewards.Rows[nRow].Cells[0].Tag?.ToString() == "GROUP")
-									{
-										int nCourseCode = Convert.ToInt32(gridRewards.Rows[nRow].HeaderCell.Tag) - 1;
-
-										gridRewards.Rows[nRow].HeaderCell.Tag = nCourseCode;
-										gridRewards.Rows[nRow].Cells[1].Value = $"Course N° {nCourseCode}";
-									}
-
-									nRow++;
-								}
-							}
-
-							gridRewards.ResumeLayout();
-						}
-						else
-						{
-							int nGroupRowIndex = GetGroupRowID(e.RowIndex);
-
-							gridRewards.SuspendLayout();
-
-							gridRewards.Rows.RemoveAt(e.RowIndex);
-
-							int i = 1;
-							while (nGroupRowIndex + i < gridRewards.Rows.Count && gridRewards.Rows[nGroupRowIndex + i].Cells[0].Tag?.ToString() != "GROUP")
-							{
-								gridRewards.Rows[nGroupRowIndex + i].HeaderCell.Value = i.ToString();
-
-								i++;
-							}
-
-							gridRewards.ResumeLayout();
-						}
-					};
-
-					ToolStripMenuItem deleteAllItems = new("Delete All from this Course") { Enabled = !bIsHeader && bIsGroupHeader };
-					deleteAllItems.Click += (_, _) =>
-					{
-						DialogResult pDialogReturn = MessageBox.Show($"You sure want to Delete All the Rewards of {gridRewards.Rows[e.RowIndex].Cells[1].Value}?", "LacaBall Editor", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
-						if (pDialogReturn == DialogResult.No)
-							return;
-
-						gridRewards.SuspendLayout();
-
-						while (e.RowIndex + 1 < gridRewards.Rows.Count && gridRewards.Rows[e.RowIndex + 1].Cells[0].Tag?.ToString() != "GROUP")
-							gridRewards.Rows.RemoveAt(e.RowIndex + 1);
-
-						gridRewards.ResumeLayout();
-
-						gridRewards.Rows[e.RowIndex].Cells[1].Tag = true;
-						gridRewards.Rows[e.RowIndex].HeaderCell.Value = "-";
-
-						bUnsavedChanges = true;
-					};
-
-					cmRewards = new ContextMenuStrip();
-					cmRewards.Items.AddRange(addItem, deleteItem, deleteAllItems);
-					cmRewards.Show(Cursor.Position);
-				}
+				MessageBox.Show("Delete failed. Check Logs.log for the MySQL error.", "LacaBall Editor", MessageBoxButtons.OK, MessageBoxIcon.Error);
+				return;
 			}
+
+			MainList.Items.Remove(pSelectedItem);
+			gridRewards.Rows.Clear();
+
+			if (MainList.Items.Count > 0)
+				MainList.SelectedIndex = 0;
 		}
 
-		private void btnUpdate_Click(object sender, EventArgs e)
+		private async void btnUpdate_Click(object? sender, EventArgs e)
 		{
-			bool bSuccess = true;
-			DataRow[] pTempRewardsRows = null;
-			int i = 0;
-			int nTokenID = Convert.ToInt32(pTempLacaBallTokenRows[0]["a_tocken_index"]);
-			int nTokenOrder = Convert.ToInt32(pTempLacaBallTokenRows[0]["a_item_order"]);
-			int nNewIndexID = pMain.pTables.LacaBallTable.AsEnumerable().Max(row => Convert.ToInt32(row["a_index"])) + 1;
-			StringBuilder strbuilderQuery = new();
+			if (!TryComposeRows(out LcBallSaveData saveData))
+				return;
 
-			// Init transaction.
-			strbuilderQuery.Append("START TRANSACTION;\n");
-
-			if (gridRewards.Rows.Count > 0)
+			if (!SaveRows(saveData))
 			{
-				List<DataRow> pTempRewardsList = new();
-
-				foreach (DataGridViewRow row in gridRewards.Rows)
-				{
-					if (row.Cells[0].Tag?.ToString() != "GROUP")
-					{
-						DataRow pRow = pMain.pTables.LacaBallTable?.NewRow();
-
-						pRow["a_index"] = nNewIndexID + i;
-						pRow["a_item_order"] = nTokenOrder;
-						pRow["a_tocken_index"] = nTokenID; // Put NEW Token ID
-						pRow["a_course_code"] = GetGroupRowID(row.Index);
-						pRow["a_order"] = i;
-						pRow["a_item_index"] = row.Cells["item"].Tag;
-						pRow["a_item_count"] = row.Cells["count"].Value;
-						pRow["a_item_max"] = row.Cells["max"].Value;
-						pRow["a_item_remain"] = row.Cells["remain"].Value;
-
-						pTempRewardsList.Add(pRow);
-
-						i++;
-					}
-				}
-
-				pTempRewardsRows = pTempRewardsList.ToArray();
-#if USE_ORIGINAL_LACABALL_TABLE_LOCATION_AND_NAME
-				strbuilderQuery.Append($"DELETE FROM {pMain.pSettings.DBUser}.t_lcball WHERE a_tocken_index={nOriginalTokenID};\n");
-#else
-				strbuilderQuery.Append($"DELETE FROM {pMain.pSettings.DBData}.t_lacaball WHERE a_tocken_index={nOriginalTokenID};\n");
-#endif
-				// Compose t_shopitem INSERT Query.
-				StringBuilder strColumnsNames = new();
-				StringBuilder strColumnsValues = new();
-				HashSet<string> addedColumns = new();
-
-				foreach (DataRow pRow in pTempRewardsRows)
-				{
-					strColumnsValues.Append("(");
-
-					foreach (DataColumn pCol in pRow.Table.Columns)
-					{
-						string strColumnName = pCol.ColumnName;
-
-						if (!addedColumns.Contains(strColumnName))
-						{
-							strColumnsNames.Append(strColumnName + ", ");
-							addedColumns.Add(strColumnName);
-						}
-
-						strColumnsValues.Append(pRow[pCol] + ", ");
-					}
-
-					strColumnsValues.Length -= 2;
-
-					strColumnsValues.Append("), ");
-				}
-
-				strColumnsNames.Length -= 2;
-				strColumnsValues.Length -= 2;
-#if USE_ORIGINAL_LACABALL_TABLE_LOCATION_AND_NAME
-				strbuilderQuery.Append($"INSERT INTO {pMain.pSettings.DBUser}.t_lcball ({strColumnsNames}) VALUES {strColumnsValues};\n");
-#else
-				strbuilderQuery.Append($"INSERT INTO {pMain.pSettings.DBData}.t_lacaball ({strColumnsNames}) VALUES {strColumnsValues};\n");
-#endif
+				MessageBox.Show("Save failed. Check Logs.log for the MySQL error.", "LacaBall Editor", MessageBoxButtons.OK, MessageBoxIcon.Error);
+				return;
 			}
 
-			if (pMain.QueryUpdateInsertDelete(pMain.pSettings.DBCharset, strbuilderQuery.Append("COMMIT;").ToString(), out long _))
-			{
-				try
-				{
-					if (pTempRewardsRows != null && pTempRewardsRows.Length > 0)
-					{
-						DataRow[] pLacaBallTableRowsOld = pMain.pTables.LacaBallTable?.Select("a_tocken_index=" + nOriginalTokenID);
-						foreach (DataRow row in pLacaBallTableRowsOld)
-							row.Delete();
+			bUnsavedChanges = false;
+			btnUpdate.Enabled = false;
+			await ReloadAfterSaveAsync(saveData.TokenId);
+			MessageBox.Show("LacaBall reward table saved successfully.", "LacaBall Editor", MessageBoxButtons.OK);
+		}
 
-						if (nTokenID != nOriginalTokenID)
-						{
-							DataRow[] pLacaBallTableRowsNew = pMain.pTables.LacaBallTable?.Select("a_tocken_index=" + nTokenID);
-							foreach (DataRow row in pLacaBallTableRowsNew)
-								row.Delete();
-						}
+		private void btnAddCourse_Click(object? sender, EventArgs e)
+		{
+			int nCourse = GetNextCourseCode();
 
-						foreach (DataRow pRow in pTempRewardsRows)
-						{
-							DataRow? newDataRow = pMain.pTables.LacaBallTable?.NewRow();
-							newDataRow.ItemArray = (object[])pRow.ItemArray.Clone();
-							pMain.pTables.LacaBallTable?.Rows.Add(newDataRow);
-						}
+			for (int i = 0; i < DefaultRewardRowsPerCourse; i++)
+				AddRewardRow(nCourse, i, DefaultRewardItemId, 1, 1, 1);
 
-						pMain.pTables.LacaBallTable?.AcceptChanges();
-					}
-				}
-				catch (Exception ex)
-				{
-					string strError = $"LacaBall Editor > Token: {nOriginalTokenID} Changes applied in DataBase, but something got wrong while transferring temp data to main tables. Please restart the application ({ex.Message}).";
+			MarkDirty();
+		}
 
-					pMain.Logger(LogTypes.Error, strError);
+		private void btnAddReward_Click(object? sender, EventArgs e)
+		{
+			int nCourse = 0;
+			if (gridRewards.CurrentRow != null && TryGetIntCell(gridRewards.CurrentRow, "course", out int nSelectedCourse))
+				nCourse = nSelectedCourse;
 
-					MessageBox.Show(strError, "LacaBall Editor", MessageBoxButtons.OK, MessageBoxIcon.Error);
+			AddRewardRow(nCourse, GetNextOrderInCourse(nCourse), DefaultRewardItemId, 1, 1, 1);
+			MarkDirty();
+		}
 
-					bSuccess = false;
-				}
-				finally
-				{
-					if (bSuccess)
-					{
-						int nSelectedIndex = MainList.SelectedIndex;
-						Main.ListBoxItem pSelectedItem = (Main.ListBoxItem)MainList.Items[nSelectedIndex];
-						pSelectedItem.ID = nTokenOrder;
+		private void btnRemoveReward_Click(object? sender, EventArgs e)
+		{
+			if (gridRewards.CurrentRow == null)
+				return;
 
-						DataRow pItemRow = pMain.pTables.ItemTable?.AsEnumerable().Where(row => Convert.ToInt32(row["a_index"]) == nTokenID).FirstOrDefault();
-						string strTokenName = "ITEM NOT FOUND";
+			gridRewards.Rows.Remove(gridRewards.CurrentRow);
+			MarkDirty();
+		}
 
-						if (pItemRow != null)
-							strTokenName = pItemRow["a_name_" + pMain.pSettings.WorkLocale].ToString();
+		private void LacaBallEditor_FormClosing(object? sender, FormClosingEventArgs e)
+		{
+			if (!bUnsavedChanges)
+				return;
 
-						pSelectedItem.Text = $"{nTokenOrder} - {strTokenName}";
+			DialogResult pDialogReturn = MessageBox.Show("You have unsaved changes. Do you want to discard them and exit?", "LacaBall Editor", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+			e.Cancel = pDialogReturn != DialogResult.Yes;
+		}
 
-						MainList.SelectedIndexChanged -= MainList_SelectedIndexChanged;
-						MainList.Items[nSelectedIndex] = pSelectedItem;
-						MainList.SelectedIndexChanged += MainList_SelectedIndexChanged;
+		private readonly record struct LcBallRewardRow(int Course, int Order, int ItemId, long Count, long Max, long Remain);
 
-						MessageBox.Show("Changes applied successfully!", "LacaBall Editor", MessageBoxButtons.OK);
-
-						bUnsavedChanges = false;
-					}
-				}
-			}
-			else
-			{
-				string strError = $"LacaBall Editor > Token: {nOriginalTokenID} Something got wrong while trying to execute the MySQL Transaction. Changes not applied.";
-
-				pMain.Logger(LogTypes.Error, strError);
-
-				MessageBox.Show(strError, "LacaBall Editor", MessageBoxButtons.OK, MessageBoxIcon.Error);
-			}
+		private sealed class LcBallSaveData
+		{
+			public int OriginalTokenId;
+			public int TokenId;
+			public int ItemOrder;
+			public List<LcBallRewardRow> Rows = new();
 		}
 	}
 }

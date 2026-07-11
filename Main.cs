@@ -19,8 +19,14 @@ namespace LastChaos_ToolBoxNG
 		private Timer mouseTimer = new();
 		private static readonly object LogLock = new();
 		private static readonly Font pConsoleFont = new("Consolas", 9f, FontStyle.Bold);
-		private static readonly StreamWriter pStreamWriter = new("Logs.log", true) { AutoFlush = false };
+		private static readonly StreamWriter pStreamWriter = OpenLogWriter();
 		private Dictionary<string, Func<Form>> pEditors = new();
+
+		private static StreamWriter OpenLogWriter()
+		{
+			FileStream stream = new("Logs.log", FileMode.Append, FileAccess.Write, FileShare.ReadWrite);
+			return new(stream) { AutoFlush = false };
+		}
 
 		// Public Vals
 		public sealed class MainTables : IDisposable
@@ -212,21 +218,33 @@ namespace LastChaos_ToolBoxNG
 			pEditors = new Dictionary<string, Func<Form>>
 			{	// Add Editors or Tools Here ↓
 				{ "Item Editor",				() => new ItemEditor(this) },
+				{ "Good/Evil Reward Editor",	() => new GoodEvilEditor(this) },
 				{ "Option Editor",				() => new OptionEditor(this) },
 				{ "Rare Option Editor",			() => new RareOptionEditor(this) },
 				{ "Crafting Editor",			() => new CraftingEditor(this) },
-				{ "Daily Reward Editor",		() => new DailyRewardEditor(this) },
 				{ "NPC Editor",					() => new NPCEditor(this) },
 				{ "Shop Editor",				() => new ShopEditor(this) },
+				{ "Affinity Editor",			() => new AffinityEditor(this) },
+				{ "Item Collection Editor",		() => new ItemCollectionEditor(this) },
+				{ "Equipment Collection Editor",	() => new EquipmentCollectionEditor(this) },
+				{ "Achievement Editor",			() => new AchievementEditor(this) },
+				{ "Powerscore Reward Editor",		() => new PowerscoreRewardsEditor(this) },
+				{ "Gold Stat Training Editor",	() => new StatTrainingEditor(this) },
+				{ "Jewel Dust Exchange Editor",	() => new JewelDustExchangeEditor(this) },
+				{ "Jewel Dust Upgrade Chain Editor",	() => new JewelDustTrainingEditor(this) },
+				{ "Starting Items Editor",		() => new StartingItemsEditor(this) },
+				{ "Mercenary Summon Editor",	() => new MercenaryEditor(this) },
+				{ "Treasure Box Chain Editor",	() => new TreasureBoxChainEditor(this) },
+				{ "UI XML Editor",				() => new UiXmlEditor(this) },
+				{ "Pet Fairy Skill Whitelist",	() => new PetFairySkillWhitelistEditor(this) },
+				{ "Pet Buff Editor",			() => new PetBuffEditor(this) },
+				{ "LacaBall Reward Editor",		() => new LacaBallEditor(this) },
 				{ "Treasure Map Editor",		() => new TreasureMapEditor(this) },
-				{ "OX Editor",					() => new OXEditor(this) },
 				{ "Magic Editor",				() => new MagicEditor(this) },
 				{ "Monster Combo Editor",		() => new MonsterComboEditor(this) },
 				{ "Moonstone Editor",			() => new MoonstoneEditor(this) },
 				{ "Title Editor",				() => new TitleEditor(this) },
 				{ "Item Set Editor",			() => new ItemSetEditor(this) },
-				{ "Package Item Event Editor",	() => new PackageItemEventEditor(this) },
-				{ "LacaBall Editor",			() => new LacaBallEditor(this) },
 				{ "Quest Editor",				() => new QuestEditor(this) }
 			};
 
@@ -988,25 +1006,81 @@ namespace LastChaos_ToolBoxNG
 			if (strBtnType == "Elemental")
 				strComposePath = $"Resources\\{strBtnType}.png";
 
+			Bitmap? pSourceBitmap = null;
+
 			if (File.Exists(strComposePath))
 			{
-				using (Image pImage = Image.FromFile(strComposePath))
-				{
-					// Create new Bitmap
-					Bitmap pBitmap = new(nSize, nSize);
-					// Generate Bitmap content
-					using (Graphics pGraphics = Graphics.FromImage(pBitmap))
-						pGraphics.DrawImage(pImage, new Rectangle(0, 0, nSize, nSize), new Rectangle(nCol * nSize, nRow * nSize, nSize, nSize), GraphicsUnit.Pixel);
+				using Image pImage = Image.FromFile(strComposePath);
+				pSourceBitmap = new Bitmap(pImage);
+			}
+			else if (strBtnType != "Elemental")
+			{
+				string strTexPath = Path.Combine(pSettings.ClientPath, "Data", "Interface", strBtnType + strImage + ".tex");
 
-					return pBitmap;
+				if (File.Exists(strTexPath))
+					pSourceBitmap = TexImageLoader.Load(strTexPath);
+			}
+
+			if (pSourceBitmap != null)
+			{
+				using (pSourceBitmap)
+				{
+					int nSourceSize = GetIconSourceSize(strBtnType, pSourceBitmap);
+					Rectangle pSourceRectangle = new(nCol * nSourceSize, nRow * nSourceSize, nSourceSize, nSourceSize);
+
+					if (pSourceRectangle.Right <= pSourceBitmap.Width && pSourceRectangle.Bottom <= pSourceBitmap.Height)
+					{
+						Bitmap pBitmap = new(nSize, nSize);
+						using Graphics pGraphics = Graphics.FromImage(pBitmap);
+						pGraphics.DrawImage(pSourceBitmap, new Rectangle(0, 0, nSize, nSize), pSourceRectangle, GraphicsUnit.Pixel);
+
+						return pBitmap;
+					}
+
+					Logger(LogTypes.Error, $"Main > Icon cell out of range: {strBtnType}{strImage} row {nRow} col {nCol}.");
 				}
 			}
-			else
-			{
-				Logger(LogTypes.Error, "Main > Error while trying to get Icon Path: " + strComposePath);
 
-				return null;
+			Logger(LogTypes.Error, "Main > Error while trying to get Icon Path: " + strComposePath);
+
+			string? strFallbackPath = strBtnType switch
+			{
+				"ItemBtn" => "Resources\\DefaultItem.png",
+				"SkillBtn" => "Resources\\DefaultSkill.png",
+				_ => null
+			};
+
+			if (strFallbackPath != null && File.Exists(strFallbackPath))
+			{
+				using (Image pFallback = Image.FromFile(strFallbackPath))
+					return new Bitmap(pFallback, new Size(nSize, nSize));
 			}
+
+			Bitmap pMissingBitmap = new(nSize, nSize);
+			using (Graphics pGraphics = Graphics.FromImage(pMissingBitmap))
+			{
+				pGraphics.Clear(Color.FromArgb(48, 48, 48));
+				using Pen pPen = new(Color.FromArgb(130, 130, 130));
+				pGraphics.DrawRectangle(pPen, 0, 0, nSize - 1, nSize - 1);
+				pGraphics.DrawLine(pPen, 0, 0, nSize - 1, nSize - 1);
+				pGraphics.DrawLine(pPen, nSize - 1, 0, 0, nSize - 1);
+			}
+
+			return pMissingBitmap;
+		}
+
+		private static int GetIconSourceSize(string strBtnType, Image pImage)
+		{
+			if (strBtnType == "Elemental")
+				return 38;
+
+			if (strBtnType == "ComboBtn")
+				return 50;
+
+			if ((strBtnType == "ItemBtn" || strBtnType == "SkillBtn") && pImage.Width < 512)
+				return 16;
+
+			return 32;
 		}
 
 		public (Bitmap, float) GetWorldMap(string strMapID)

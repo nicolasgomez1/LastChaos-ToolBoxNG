@@ -883,7 +883,7 @@ namespace LastChaos_ToolBoxNG
 			groupBox9.Size = new Size(1341, 540);
 			groupBox9.TabIndex = 1223;
 			groupBox9.TabStop = false;
-			groupBox9.Text = "Regen Spots Data";
+			groupBox9.Text = "Regen Spots Data (select zone, press P or right-click map to add)";
 			// 
 			// gridRegenSpots
 			// 
@@ -9286,10 +9286,12 @@ namespace LastChaos_ToolBoxNG
 			tbSMC.Location = new Point(207, 5);
 			tbSMC.Margin = new Padding(4, 3, 4, 3);
 			tbSMC.Name = "tbSMC";
-			tbSMC.ReadOnly = true;
 			tbSMC.Size = new Size(238, 23);
 			tbSMC.TabIndex = 10;
 			tbSMC.DoubleClick += (this.tbSMC_DoubleClick);
+			tbSMC.KeyDown += (this.tbSMC_KeyDown);
+			tbSMC.Leave += (this.tbSMC_Leave);
+			tbSMC.TextChanged += (this.tbSMC_TextChanged);
 			// 
 			// cbEnable
 			// 

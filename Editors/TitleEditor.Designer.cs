@@ -263,7 +263,7 @@ namespace LastChaos_ToolBoxNG
 			groupBox6.Size = new Size(802, 167);
 			groupBox6.TabIndex = 1055;
 			groupBox6.TabStop = false;
-			groupBox6.Text = "Options Data";
+			groupBox6.Text = "Options Data (raw values)";
 			// 
 			// cbOptionLevel4
 			// 
@@ -305,7 +305,7 @@ namespace LastChaos_ToolBoxNG
 			label29.Name = "label29";
 			label29.Size = new Size(34, 15);
 			label29.TabIndex = 1148;
-			label29.Text = "Level";
+			label29.Text = "Value";
 			label29.TextAlign = ContentAlignment.MiddleRight;
 			// 
 			// label23
@@ -345,7 +345,7 @@ namespace LastChaos_ToolBoxNG
 			label16.Name = "label16";
 			label16.Size = new Size(34, 15);
 			label16.TabIndex = 1132;
-			label16.Text = "Level";
+			label16.Text = "Value";
 			label16.TextAlign = ContentAlignment.MiddleRight;
 			// 
 			// label30
@@ -412,7 +412,7 @@ namespace LastChaos_ToolBoxNG
 			label17.Name = "label17";
 			label17.Size = new Size(34, 15);
 			label17.TabIndex = 1144;
-			label17.Text = "Level";
+			label17.Text = "Value";
 			label17.TextAlign = ContentAlignment.MiddleRight;
 			// 
 			// cbOptionID1
@@ -455,7 +455,7 @@ namespace LastChaos_ToolBoxNG
 			label5.Name = "label5";
 			label5.Size = new Size(34, 15);
 			label5.TabIndex = 1136;
-			label5.Text = "Level";
+			label5.Text = "Value";
 			label5.TextAlign = ContentAlignment.MiddleRight;
 			// 
 			// label18
@@ -522,7 +522,7 @@ namespace LastChaos_ToolBoxNG
 			label4.Name = "label4";
 			label4.Size = new Size(34, 15);
 			label4.TabIndex = 1140;
-			label4.Text = "Level";
+			label4.Text = "Value";
 			label4.TextAlign = ContentAlignment.MiddleRight;
 			// 
 			// cbOptionID2

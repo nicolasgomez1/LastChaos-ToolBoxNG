@@ -1,6 +1,11 @@
 ﻿#define REQUIRED_QUEST_TO_USE_SYSTEM // NOTE: Custom system made by NicolasG, disable that if don't use it.
 #define ITEM_PLUS_SYSTEM // NOTE: Custom system made by NicolasG, disable that if don't use it.
 
+// Adapted for the 1776 localhost schema. These custom systems require
+// t_shop.a_required_quest and t_shopitem.a_item_plus, which this database lacks.
+#undef REQUIRED_QUEST_TO_USE_SYSTEM
+#undef ITEM_PLUS_SYSTEM
+
 namespace LastChaos_ToolBoxNG
 {
 	public partial class ShopEditor : Form

@@ -94,7 +94,7 @@
 		["NPCNAME"] = new StringType("strNPCName", "SELECT DISTINCT", "t_npc", ["a_index", "a_name", "a_descr"], "WHERE a_enable=1"),
 		["RAREOPTION"] = new StringType("strRareOption", "SELECT", "t_rareoption", ["a_index", "a_prefix"], ""),
 		["RAREOPTION"] = new StringType("strRareOption", "SELECT", "t_rareoption", ["a_index", "a_prefix"], ""),
-		["OPTION"] = new StringType("strOption", "SELECT", "t_option", ["a_index", "a_name"], ""),
+		["OPTION"] = new StringType("strOption", "SELECT", "t_option", ["a_type", "a_name"], ""),
 		["ITEMCOLLECTION"] = new StringType("strItemCollection", "SELECT", "t_item_collection", ["a_theme", "a_theme_string", "a_desc_string"], ""),
 		["SETITEM"] = new StringType("strSetItem", "SELECT", "t_set_item", ["a_set_idx", "a_set_name"], "WHERE a_enable=1"),
 		["ITEM"] = new StringType("strItem", "SELECT", "t_item", ["a_index", "a_name", "a_descr"], "WHERE a_enable=1"),
@@ -265,7 +265,8 @@
 		"8 - Accesory 2",
 		"9 - Accesory 3",
 		"10 - Pet",
-		"11 - Backpack | Wings"
+		"11 - Backpack | Wings",
+		"12 - Accessory Anywhere"
 	};
 
 	public static readonly Dictionary<string, List<string>> SyndicateTypesNGrades = new Dictionary<string, List<string>>
@@ -525,10 +526,15 @@
 		"CLIENT_4",
 		"CLIENT_5",
 		"CLIENT_6",
-		// NicolasG Custom
-		"SUSTAINER",
-		"REGEN_EP"
-	};
+		"DOUBLE_ITEM_DROP",
+		"DOUBLE_GOLD_DROP",
+		"PRIMARY_ITEM_DROP_UP_RATE",
+		"HAND_APPEARANCE_RATE",
+		"P2_PET_EXP_UP_RATE",
+	// NicolasG Custom
+	"SUSTAINER",
+	"REGEN_EP"
+};
 
 	public static readonly Dictionary<string, List<string>> MagicTypesAndSubTypes = new Dictionary<string, List<string>>
 	{
@@ -967,7 +973,9 @@
 		"MAKE_H_S",
 		"MAKE_POTINO",
 
-		"PROCESS_NPC"
+		"PROCESS_NPC",
+		"STAT_TRAINING",
+		"JEWEL_DUST_TRAINING"
 	};
 
 	public static readonly string[] NPCAIType =

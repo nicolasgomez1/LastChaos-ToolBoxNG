@@ -14,12 +14,29 @@ namespace LastChaos_ToolBoxNG
 		private bool bUnsavedChanges = false;
 		private int nSearchPosition = 0;
 		private Main.ListBoxItem? pLastSelected;
-		private DataRow pTempItemRow, pTempFortuneHeadRow;
+		private DataRow pTempItemRow = null!;
+		private DataRow? pTempFortuneHeadRow;
 		private DataRow[]? pTempFortuneDataRows;
 		private string[]? strZones;
 		private ToolTip? pToolTip;
 		private Dictionary<Control, ToolTip>? pToolTips = new();
+		private ToolTip? pItemBehaviorToolTip;
 		private ContextMenuStrip? cmFortune, cmCommonInput;
+		private CheckBox cbPlayerTradeable = null!;
+		private CheckBox cbItemStorable = null!;
+		private CheckBox cbSellableToNpc = null!;
+		private CheckBox cbItemDeletable = null!;
+		private ComboBox cbExpGainLevel = null!;
+		private Button btnApplyExpGain = null!;
+		private Label lbExpGainCurrent = null!;
+		private bool bSyncingItemBehaviorControls = false;
+		private const string ITEM_FLAG_EXCHANGE = "EXCHANGE";
+		private const string ITEM_FLAG_TRADE = "TRADE";
+		private const string ITEM_FLAG_NOT_DELETE = "BORKEN";
+		private const string ITEM_FLAG_NO_STASH = "NO_STASH";
+		private const string ITEM_FLAG_SELLER = "SELLER";
+		private const string ITEM_FLAG_ORIGIN = "ORIGIN";
+		private const int OPTION_EXP_UP_RATE = 82;
 
 		public ItemEditor(Main mainForm)
 		{
@@ -42,11 +59,111 @@ namespace LastChaos_ToolBoxNG
 			tbAllowedZoneFlag.Visible = true;
 #endif
 			pMain = mainForm;
+			InitializeItemBehaviorControls();
 			/****************************************/
 			gridFortune.TopLeftHeaderCell.Value = "N°";
 			//gridFortune.CellValueChanged += gridFortune_CellValueChanged;
 			/****************************************/
 			cbRenderDialog.Checked = pMain.pSettings.Show3DViewerDialog[this.Name];
+		}
+
+		private void InitializeItemBehaviorControls()
+		{
+			int nShiftDown = 68;
+			foreach (Control pControl in new Control[] { groupBox4, groupBox5, groupBox6, groupBox8, groupBox9, groupBox3, groupBox7, gbFortune })
+				pControl.Top += nShiftDown;
+
+			cbPlayerTradeable = CreateItemBehaviorCheckBox("cbPlayerTradeable", "Tradeable with players", 629);
+			cbItemStorable = CreateItemBehaviorCheckBox("cbItemStorable", "Storable", 796);
+			cbSellableToNpc = CreateItemBehaviorCheckBox("cbSellableToNpc", "Sellable to NPC", 891);
+			cbItemDeletable = CreateItemBehaviorCheckBox("cbItemDeletable", "Can be deleted", 1019);
+
+			GeneralPanel.Controls.Add(cbPlayerTradeable);
+			GeneralPanel.Controls.Add(cbItemStorable);
+			GeneralPanel.Controls.Add(cbSellableToNpc);
+			GeneralPanel.Controls.Add(cbItemDeletable);
+			InitializeExperienceGainControls();
+
+			pItemBehaviorToolTip = new ToolTip();
+			pItemBehaviorToolTip.SetToolTip(cbPlayerTradeable, "Toggles the EXCHANGE item flag used by normal player-to-player trade.");
+			pItemBehaviorToolTip.SetToolTip(cbItemStorable, "Toggles the NO_STASH item flag. Checked means NO_STASH is cleared.");
+			pItemBehaviorToolTip.SetToolTip(cbSellableToNpc, "Toggles NPC shop selling. Checked sets TRADE and clears SELLER.");
+			pItemBehaviorToolTip.SetToolTip(cbItemDeletable, "Toggles the legacy BORKEN/NOT_DELETE flag. Checked means the item can be deleted from inventory.");
+			pItemBehaviorToolTip.SetToolTip(cbExpGainLevel, "Selects the EXP(%) option level from t_option.");
+			pItemBehaviorToolTip.SetToolTip(btnApplyExpGain, "Writes EXP gain % into an existing EXP origin option slot, or the first free origin option slot.");
+		}
+
+		private CheckBox CreateItemBehaviorCheckBox(string strName, string strText, int nLeft)
+		{
+			CheckBox pCheckBox = new()
+			{
+				AutoSize = true,
+				ForeColor = Color.FromArgb(208, 203, 148),
+				Location = new Point(nLeft, 96),
+				Margin = new Padding(4, 3, 4, 3),
+				Name = strName,
+				Size = new Size(120, 19),
+				TabIndex = 1032,
+				Text = strText,
+				UseVisualStyleBackColor = true
+			};
+
+			pCheckBox.CheckedChanged += ItemBehaviorCheckBox_CheckedChanged;
+			return pCheckBox;
+		}
+
+		private void InitializeExperienceGainControls()
+		{
+			Label lbExpGain = new()
+			{
+				AutoSize = true,
+				ForeColor = Color.FromArgb(208, 203, 148),
+				Location = new Point(629, 124),
+				Name = "lbExpGain",
+				Text = "EXP gain %"
+			};
+
+			cbExpGainLevel = new ComboBox()
+			{
+				BackColor = Color.FromArgb(28, 30, 31),
+				DropDownStyle = ComboBoxStyle.DropDownList,
+				FlatStyle = FlatStyle.Flat,
+				ForeColor = Color.FromArgb(208, 203, 148),
+				FormattingEnabled = true,
+				Location = new Point(706, 120),
+				Name = "cbExpGainLevel",
+				Size = new Size(120, 23)
+			};
+
+			btnApplyExpGain = new Button()
+			{
+				BackColor = Color.FromArgb(40, 40, 40),
+				FlatStyle = FlatStyle.Flat,
+				ForeColor = Color.FromArgb(208, 203, 148),
+				Location = new Point(834, 118),
+				Name = "btnApplyExpGain",
+				Size = new Size(112, 27),
+				Text = "Apply to Origin",
+				UseVisualStyleBackColor = false
+			};
+			btnApplyExpGain.FlatAppearance.BorderColor = Color.FromArgb(91, 85, 76);
+			btnApplyExpGain.FlatAppearance.MouseDownBackColor = Color.FromArgb(40, 40, 40);
+			btnApplyExpGain.FlatAppearance.MouseOverBackColor = Color.FromArgb(60, 56, 54);
+			btnApplyExpGain.Click += btnApplyExpGain_Click;
+
+			lbExpGainCurrent = new Label()
+			{
+				AutoSize = true,
+				ForeColor = Color.FromArgb(208, 203, 148),
+				Location = new Point(954, 124),
+				Name = "lbExpGainCurrent",
+				Text = "Current: none"
+			};
+
+			GeneralPanel.Controls.Add(lbExpGain);
+			GeneralPanel.Controls.Add(cbExpGainLevel);
+			GeneralPanel.Controls.Add(btnApplyExpGain);
+			GeneralPanel.Controls.Add(lbExpGainCurrent);
 		}
 
 		private void contextMenuStrip1_Opening(object sender, CancelEventArgs e)
@@ -784,13 +901,15 @@ namespace LastChaos_ToolBoxNG
 				pMain.GenericLoadSkillLevelDataAsync(),
 				LoadSpecialSkillDataAsync(),
 				LoadRareOptionDataAsync(),
+				pMain.GenericLoadOptionDataAsync(),
 				pMain.GenericLoadStringDataAsync(),
 				LoadFortuneDataAsync()
 			);
 #if DEBUG
 			stopwatch.Stop();
-			pMain.Logger(LogTypes.Message, $"Items, Zones, Skills, Skills Levels, Special Skill, Rare Options, Strings & Fortune Data load took: {stopwatch.ElapsedMilliseconds}ms.");
+			pMain.Logger(LogTypes.Message, $"Items, Zones, Skills, Skills Levels, Special Skill, Rare Options, Options, Strings & Fortune Data load took: {stopwatch.ElapsedMilliseconds}ms.");
 #endif
+			PopulateExpGainLevelCombo(cbExpGainLevel, pMain.pTables.OptionTable);
 			/****************************************/
 			if (pMain.pTables.ItemTable != null)
 			{
@@ -813,7 +932,7 @@ namespace LastChaos_ToolBoxNG
 			}
 			/****************************************/
 			pToolTip = new ToolTip();
-			pToolTip.SetToolTip(btnReload, "Reload Items, Zones, Skills, Skills Levels, Special Skills, Rare Options, Strings & Fortune Data from Database");	// Not dispose onreload
+			pToolTip.SetToolTip(btnReload, "Reload Items, Zones, Skills, Skills Levels, Special Skills, Rare Options, Options, Strings & Fortune Data from Database");	// Not dispose onreload
 			pToolTip.SetToolTip(tbSMC, "Double Click to edit");
 			/****************************************/
 			MainList.Enabled = true;
@@ -834,6 +953,8 @@ namespace LastChaos_ToolBoxNG
 					toolTip.Dispose();
 
 				pToolTips = null;
+				pItemBehaviorToolTip?.Dispose();
+				pItemBehaviorToolTip = null;
 
 				if (pRenderDialog != null)
 				{
@@ -970,7 +1091,9 @@ namespace LastChaos_ToolBoxNG
 			else
 				cbCastleType.SelectedIndex = nCastleType;
 			/****************************************/
-			if (nWearingPosition < -1 || nWearingPosition >= Defs.ItemWearingPositions.Length)
+			int nWearingPositionIndex = nWearingPosition + 1;
+
+			if (nWearingPositionIndex < 0 || nWearingPositionIndex >= cbWearingPositionSelector.Items.Count)
 			{
 				cbWearingPositionSelector.Enabled = false;
 				cbWearingPositionSelector.Text = "";
@@ -979,13 +1102,8 @@ namespace LastChaos_ToolBoxNG
 			}
 			else
 			{
-				if (nWearingPosition == -1)
-					nWearingPosition = 0;
-				else
-					nWearingPosition++;
-
 				cbWearingPositionSelector.Enabled = true;
-				cbWearingPositionSelector.SelectedIndex = nWearingPosition;
+				cbWearingPositionSelector.SelectedIndex = nWearingPositionIndex;
 			}
 			/****************************************/
 			btnClassFlag.Text = pTempItemRow["a_job_flag"].ToString();
@@ -1033,23 +1151,10 @@ namespace LastChaos_ToolBoxNG
 			/****************************************/
 			string strItemFlag = pTempItemRow["a_flag"].ToString();
 
-			btnItemFlag.Text = strItemFlag;
-
-			strTooltip = new StringBuilder();
 			long lItemFlag = Convert.ToInt64(strItemFlag);
 
-			for (int i = 0; i < Defs.ItemFlags.Length; i++)
-			{
-				if ((lItemFlag & 1L << i) != 0)
-					strTooltip.Append(Defs.ItemFlags[i] + "\n");
-			}
-
-			if (lItemFlag > 0 && strTooltip.Length <= 0)
-				pMain.Logger(LogTypes.Error, $"Item Editor > Item: {nItemID} Error: a_flag out of range.");
-
-			pToolTip = new ToolTip();
-			pToolTip.SetToolTip(btnItemFlag, strTooltip.ToString());
-			pToolTips[btnItemFlag] = pToolTip;
+			UpdateItemFlagDisplay(lItemFlag, nItemID);
+			SyncItemBehaviorControls(lItemFlag);
 			/****************************************/
 			int nType = Convert.ToInt32(pTempItemRow["a_type_idx"]);
 
@@ -1216,12 +1321,155 @@ namespace LastChaos_ToolBoxNG
 			if (bLoadFrompItemTable)
 				LoadFortuneData(nItemID);
 
+			SyncExpGainControlsFromItem();
 			bUserAction = true;
 
 			btnUpdate.Enabled = true;
 
 			btnCopy.Enabled = true;
 			btnDelete.Enabled = true;
+		}
+
+		private void PopulateExpGainLevelCombo(ComboBox cbLevel, DataTable? pOptionTable)
+		{
+			cbLevel.Items.Clear();
+			cbLevel.Enabled = false;
+
+			DataRow? pExpOptionRow = pOptionTable?.Select("a_type=" + OPTION_EXP_UP_RATE).FirstOrDefault();
+			if (pExpOptionRow == null)
+			{
+				lbExpGainCurrent.Text = "EXP option missing";
+				return;
+			}
+
+			string[] strLevels = pExpOptionRow["a_level"].ToString()?.Split(' ', StringSplitOptions.RemoveEmptyEntries) ?? Array.Empty<string>();
+			for (int i = 0; i < strLevels.Length; i++)
+			{
+				if (!int.TryParse(strLevels[i], out int nPercent) || nPercent <= 0)
+					continue;
+
+				cbLevel.Items.Add(new Main.ComboBoxItem
+				{
+					Value = i + 1,
+					DisplayText = $"{i + 1} - {nPercent}%"
+				});
+			}
+
+			cbLevel.Enabled = cbLevel.Items.Count > 0;
+
+			if (cbLevel.Items.Count > 0 && cbLevel.SelectedIndex == -1)
+				cbLevel.SelectedIndex = 0;
+		}
+
+		private void SyncExpGainControlsFromItem()
+		{
+			if (cbExpGainLevel.Items.Count <= 0 || pTempItemRow == null)
+			{
+				btnApplyExpGain.Enabled = false;
+				lbExpGainCurrent.Text = "Current: none";
+				return;
+			}
+
+			btnApplyExpGain.Enabled = true;
+			int nSlot = FindExpGainOriginSlot();
+
+			if (nSlot < 0)
+			{
+				lbExpGainCurrent.Text = "Current: none";
+				return;
+			}
+
+			int nLevel = GetRowInt(pTempItemRow, "a_rare_prob_" + nSlot);
+			SelectComboByValue(cbExpGainLevel, nLevel);
+			lbExpGainCurrent.Text = $"Current: slot {nSlot}, level {nLevel}";
+		}
+
+		private int FindExpGainOriginSlot()
+		{
+			for (int i = 1; i <= 6; i++)
+			{
+				if (GetRowInt(pTempItemRow, "a_rare_index_" + i, -1) == OPTION_EXP_UP_RATE)
+					return i;
+			}
+
+			return -1;
+		}
+
+		private int FindFreeOriginOptionSlot()
+		{
+			for (int i = 1; i <= 6; i++)
+			{
+				if (GetRowInt(pTempItemRow, "a_rare_index_" + i, -1) < 0)
+					return i;
+			}
+
+			return -1;
+		}
+
+		private void btnApplyExpGain_Click(object? sender, EventArgs e)
+		{
+			if (!bUserAction || pTempItemRow == null)
+				return;
+
+			if (cbExpGainLevel.SelectedItem is not Main.ComboBoxItem pSelectedLevel)
+			{
+				MessageBox.Show("Select an EXP gain level first.", "Item Editor", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+				return;
+			}
+
+			int nSlot = FindExpGainOriginSlot();
+			bool bUsingExistingSlot = nSlot > 0;
+
+			if (nSlot < 0)
+				nSlot = FindFreeOriginOptionSlot();
+
+			if (nSlot < 0)
+			{
+				MessageBox.Show("No free origin option slot is available. Clear one of origin option slots 1-6 first, or edit the item manually.", "Item Editor", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+				return;
+			}
+
+			int nLevel = pSelectedLevel.Value;
+			pTempItemRow["a_rare_index_" + nSlot] = OPTION_EXP_UP_RATE;
+			pTempItemRow["a_rare_prob_" + nSlot] = nLevel;
+
+			if (GetRowInt(pTempItemRow, "a_origin_variation" + nSlot) <= 0)
+				pTempItemRow["a_origin_variation" + nSlot] = 100;
+
+			long lFlag = Convert.ToInt64(pTempItemRow["a_flag"]);
+			SetItemFlag(ref lFlag, ITEM_FLAG_ORIGIN, true);
+			SetItemFlagValue(lFlag, true);
+
+			((TextBox)Controls.Find("tbRareIndex" + nSlot, true)[0]).Text = OPTION_EXP_UP_RATE.ToString();
+			((TextBox)Controls.Find("tbRareProb" + nSlot, true)[0]).Text = nLevel.ToString();
+			((TextBox)Controls.Find("tbVariation" + nSlot, true)[0]).Text = pTempItemRow["a_origin_variation" + nSlot].ToString();
+
+			bUnsavedChanges = true;
+			SyncExpGainControlsFromItem();
+			SetSetDataTexts();
+
+			string strSlotText = bUsingExistingSlot ? "updated" : "added";
+			MessageBox.Show($"EXP gain % {strSlotText} in origin option slot {nSlot}. Save the item to write it to the database.", "Item Editor", MessageBoxButtons.OK, MessageBoxIcon.Information);
+		}
+
+		private static int GetRowInt(DataRow pRow, string strColumnName, int nFallback = 0)
+		{
+			if (pRow.Table.Columns.Contains(strColumnName) && int.TryParse(pRow[strColumnName]?.ToString(), out int nValue))
+				return nValue;
+
+			return nFallback;
+		}
+
+		private static void SelectComboByValue(ComboBox cbObj, int nValue)
+		{
+			for (int i = 0; i < cbObj.Items.Count; i++)
+			{
+				if (cbObj.Items[i] is Main.ComboBoxItem pItem && pItem.Value == nValue)
+				{
+					cbObj.SelectedIndex = i;
+					return;
+				}
+			}
 		}
 
 		private void tbSearch_TextChanged(object sender, EventArgs e) { nSearchPosition = 0; }
@@ -1296,6 +1544,9 @@ namespace LastChaos_ToolBoxNG
 
 				pMain.pTables.RareOptionTable?.Dispose();
 				pMain.pTables.RareOptionTable = null;
+
+				pMain.pTables.OptionTable?.Dispose();
+				pMain.pTables.OptionTable = null;
 
 				pMain.pTables.StringTable?.Dispose();
 				pMain.pTables.StringTable = null;
@@ -1422,6 +1673,8 @@ namespace LastChaos_ToolBoxNG
 
 				List<string> listVarcharColumns =   // Here add all varchar columns.
 				[
+					"a_name",
+					"a_descr",
 					"a_file_smc",
 					"a_effect_name",
 					"a_attack_effect_name",
@@ -1579,6 +1832,8 @@ namespace LastChaos_ToolBoxNG
 #if ENABLE_SECOND_SKILL_TO_CRAFT
 					0,	// a_need_sskill_level2
 #endif
+					strName,	// a_name
+					"Created with NicolasG LastChaos ToolBox",	// a_descr
 					"Item\\Common\\ITEM_treasure02.smc",	// a_file_smc
 					"",	// a_effect_name
 					"",	// a_attack_effect_name
@@ -1608,7 +1863,8 @@ namespace LastChaos_ToolBoxNG
 				i = 0;
 				foreach (string strColumnName in listUIntColumns.Concat(listIntColumns).Concat(listUTinyIntColumns).Concat(listTinyIntColumns).Concat(listVarcharColumns).Concat(listBigIntColumns).Concat(listSmallIntColumns))
 				{
-					pNewRow[strColumnName] = listDefaultValue[i];
+					if (pNewRow.Table.Columns.Contains(strColumnName))
+						pNewRow[strColumnName] = listDefaultValue[i];
 
 					i++;
 				}
@@ -1697,7 +1953,7 @@ namespace LastChaos_ToolBoxNG
 			}
 		}
 
-		private void btnDelete_Click(object sender, EventArgs e)
+		private async void btnDelete_Click(object sender, EventArgs e)
 		{
 			bool bSuccess = true;
 			int nItemID = Convert.ToInt32(pTempItemRow["a_index"]);
@@ -1796,11 +2052,7 @@ namespace LastChaos_ToolBoxNG
 
 				strbuilderQuery.Append($"DELETE FROM {pMain.pSettings.DBData}.t_shopitem WHERE a_item_idx={nItemID};\n");
 
-				strbuilderQuery.Append($"DELETE FROM {pMain.pSettings.DBData}.t_promotion2 WHERE a_item_idx={nItemID};\n");
-
 				strbuilderQuery.Append($"DELETE FROM {pMain.pSettings.DBData}.t_moonstone_reward WHERE a_giftindex={nItemID};\n");
-
-				strbuilderQuery.Append($"DELETE FROM {pMain.pSettings.DBData}.t_lacaball WHERE a_tocken_index={nItemID} OR a_item_index={nItemID};\n");
 
 				strbuilderQuery.Append("CREATE TEMPORARY TABLE Temp_DropIDToDelete (a_drop_idx INT);\n" +
 					$"INSERT INTO Temp_DropIDToDelete(a_drop_idx) SELECT DISTINCT a_drop_idx FROM {pMain.pSettings.DBData}.t_drop_item_data WHERE a_item_idx={nItemID};\n" +
@@ -1822,13 +2074,8 @@ namespace LastChaos_ToolBoxNG
 					$"INSERT INTO Temp_CatalogIDToDelete (a_ctid) SELECT DISTINCT a_ctid FROM {pMain.pSettings.DBData}.t_ct_item WHERE a_item_idx={nItemID};\n" +
 					$"DELETE FROM {pMain.pSettings.DBData}.t_ct_item WHERE a_item_idx={nItemID};\n" +
 					$"UPDATE {pMain.pSettings.DBData}.t_catalog SET a_enable=0 WHERE a_ctid IN(SELECT a_ctid FROM Temp_CatalogIDToDelete);\n" +
-					"TRUNCATE TABLE Temp_CatalogIDToDelete;\n" +
-					$"INSERT INTO Temp_CatalogIDToDelete (a_ctid) SELECT DISTINCT a_ctid FROM {pMain.pSettings.DBData}.t_ct_item_hardcore WHERE a_item_idx={nItemID};\n" +
-					$"DELETE FROM {pMain.pSettings.DBData}.t_ct_item_hardcore WHERE a_item_idx={nItemID};\n" +
-					$"UPDATE {pMain.pSettings.DBData}.t_catalog_hardcore SET a_enable=0 WHERE a_ctid IN(SELECT a_ctid FROM Temp_CatalogIDToDelete);\n" +
 					"DROP TEMPORARY TABLE Temp_CatalogIDToDelete;\n");
 
-				strbuilderQuery.Append($"DELETE FROM {pMain.pSettings.DBData}.t_decompose WHERE a_item_idx={nItemID} OR a_result_item_idx LIKE CONCAT('% ', CAST({nItemID} AS CHAR), ' %') OR a_result_item_idx LIKE CONCAT(CAST({nItemID} AS CHAR), ' %') OR a_result_item_idx LIKE CONCAT('% ', CAST({nItemID} AS CHAR)) OR a_result_item_idx=CAST({nItemID} AS CHAR);\n");
 #if REWORKED_EXCHANGE_SYSTEM
 				strbuilderQuery.Append($"DELETE FROM {pMain.pSettings.DBData}.t_equipment_exchange WHERE a_items_idxs LIKE CONCAT('% ', CAST({nItemID} AS CHAR), ' %') OR a_items_idxs LIKE CONCAT(CAST({nItemID} AS CHAR), ' %') OR a_items_idxs LIKE CONCAT('% ', CAST({nItemID} AS CHAR)) OR a_items_idxs=CAST({nItemID} AS CHAR);\n");
 #endif
@@ -1836,8 +2083,6 @@ namespace LastChaos_ToolBoxNG
 				strbuilderQuery.Append($"UPDATE {pMain.pSettings.DBData}.t_key SET a_enable=0 WHERE a_rewards LIKE CONCAT('% ', CAST({nItemID} AS CHAR), ' %') OR a_rewards LIKE CONCAT(CAST({nItemID} AS CHAR), ' %') OR a_rewards LIKE CONCAT('% ', CAST({nItemID} AS CHAR)) OR a_rewards=CAST({nItemID} AS CHAR);\n");
 #endif
 				strbuilderQuery.Append($"UPDATE {pMain.pSettings.DBData}.t_set_item SET a_enable=0 WHERE a_item_idx LIKE CONCAT('% ', CAST({nItemID} AS CHAR), ' %') OR a_item_idx LIKE CONCAT(CAST({nItemID} AS CHAR), ' %') OR a_item_idx LIKE CONCAT('% ', CAST({nItemID} AS CHAR)) OR a_item_idx=CAST({nItemID} AS CHAR);\n");
-
-				strbuilderQuery.Append($"DELETE FROM {pMain.pSettings.DBData}.t_product WHERE a_product_item_idx LIKE CONCAT('% ', CAST({nItemID} AS CHAR), ' %') OR a_product_item_idx LIKE CONCAT(CAST({nItemID} AS CHAR), ' %') OR a_product_item_idx LIKE CONCAT('% ', CAST({nItemID} AS CHAR)) OR a_product_item_idx=CAST({nItemID} AS CHAR);\n");
 
 				// NOTE: This probably is so bad idea, but, who cares.
 				strbuilderQuery.Append($"UPDATE {pMain.pSettings.DBData}.t_lacarette SET a_enable=0 WHERE " +
@@ -1999,7 +2244,11 @@ namespace LastChaos_ToolBoxNG
 
 						MainList.Items.Remove(MainList.SelectedItem);
 
-						MessageBox.Show("Item Deleted successfully!", "Item Editor", MessageBoxButtons.OK);
+						bool bExported = await TryExportItemClientLodsAsync(nItemID);
+						string strMessage = bExported
+							? "Item deleted successfully! ItemAll.lod and strItem .lod have been exported to the client folder."
+							: "Item deleted successfully, but one or more client .lod exports failed. Check the Toolbox log before testing in-game.";
+						MessageBox.Show(strMessage, "Item Editor", MessageBoxButtons.OK, bExported ? MessageBoxIcon.Information : MessageBoxIcon.Warning);
 
 						MainList.SelectedIndex = nPrevObjectID;
 
@@ -2270,6 +2519,107 @@ namespace LastChaos_ToolBoxNG
 #endif
 		}
 
+		private void ItemBehaviorCheckBox_CheckedChanged(object? sender, EventArgs e)
+		{
+			if (!bUserAction || bSyncingItemBehaviorControls)
+				return;
+
+			long lFlag = Convert.ToInt64(pTempItemRow["a_flag"]);
+
+			if (sender == cbPlayerTradeable)
+			{
+				SetItemFlag(ref lFlag, ITEM_FLAG_EXCHANGE, cbPlayerTradeable.Checked);
+				if (cbPlayerTradeable.Checked)
+					SetItemFlag(ref lFlag, ITEM_FLAG_SELLER, false);
+			}
+			else if (sender == cbItemStorable)
+			{
+				SetItemFlag(ref lFlag, ITEM_FLAG_NO_STASH, !cbItemStorable.Checked);
+			}
+			else if (sender == cbSellableToNpc)
+			{
+				SetItemFlag(ref lFlag, ITEM_FLAG_TRADE, cbSellableToNpc.Checked);
+				if (cbSellableToNpc.Checked)
+					SetItemFlag(ref lFlag, ITEM_FLAG_SELLER, false);
+			}
+			else if (sender == cbItemDeletable)
+			{
+				SetItemFlag(ref lFlag, ITEM_FLAG_NOT_DELETE, !cbItemDeletable.Checked);
+			}
+
+			SetItemFlagValue(lFlag, true);
+			bUnsavedChanges = true;
+			SetSetDataTexts();
+		}
+
+		private void SetItemFlagValue(long lFlag, bool bUpdateBehaviorControls)
+		{
+			pTempItemRow["a_flag"] = lFlag;
+			UpdateItemFlagDisplay(lFlag);
+
+			if (bUpdateBehaviorControls)
+				SyncItemBehaviorControls(lFlag);
+		}
+
+		private void UpdateItemFlagDisplay(long lFlag, int? nItemID = null)
+		{
+			btnItemFlag.Text = lFlag.ToString();
+
+			StringBuilder strTooltip = new();
+
+			for (int i = 0; i < Defs.ItemFlags.Length; i++)
+			{
+				if ((lFlag & 1L << i) != 0)
+					strTooltip.Append(Defs.ItemFlags[i] + "\n");
+			}
+
+			if (nItemID.HasValue && lFlag > 0 && strTooltip.Length <= 0)
+				pMain.Logger(LogTypes.Error, $"Item Editor > Item: {nItemID.Value} Error: a_flag out of range.");
+
+			if (pToolTips != null && pToolTips.TryGetValue(btnItemFlag, out ToolTip? pExistingToolTip))
+				pExistingToolTip.Dispose();
+
+			pToolTip = new ToolTip();
+			pToolTip.SetToolTip(btnItemFlag, strTooltip.ToString());
+			pToolTips![btnItemFlag] = pToolTip;
+		}
+
+		private void SyncItemBehaviorControls(long lFlag)
+		{
+			bSyncingItemBehaviorControls = true;
+
+			cbPlayerTradeable.Checked = HasItemFlag(lFlag, ITEM_FLAG_EXCHANGE);
+			cbItemStorable.Checked = !HasItemFlag(lFlag, ITEM_FLAG_NO_STASH);
+			cbSellableToNpc.Checked = HasItemFlag(lFlag, ITEM_FLAG_TRADE) && !HasItemFlag(lFlag, ITEM_FLAG_SELLER);
+			cbItemDeletable.Checked = !HasItemFlag(lFlag, ITEM_FLAG_NOT_DELETE);
+
+			bSyncingItemBehaviorControls = false;
+		}
+
+		private static bool HasItemFlag(long lFlag, string strFlagName)
+		{
+			long lMask = GetItemFlagMask(strFlagName);
+			return lMask != 0 && (lFlag & lMask) != 0;
+		}
+
+		private static void SetItemFlag(ref long lFlag, string strFlagName, bool bEnabled)
+		{
+			long lMask = GetItemFlagMask(strFlagName);
+			if (lMask == 0)
+				return;
+
+			if (bEnabled)
+				lFlag |= lMask;
+			else
+				lFlag &= ~lMask;
+		}
+
+		private static long GetItemFlagMask(string strFlagName)
+		{
+			int nIndex = Array.IndexOf(Defs.ItemFlags, strFlagName);
+			return nIndex >= 0 ? 1L << nIndex : 0;
+		}
+
 		private void btnItemFlag_Click(object sender, EventArgs e)
 		{
 			if (bUserAction)
@@ -2280,19 +2630,7 @@ namespace LastChaos_ToolBoxNG
 
 				long lFlag = pFlagSelector.ReturnValues;
 
-				btnItemFlag.Text = lFlag.ToString();
-
-				StringBuilder strTooltip = new();
-
-				for (int i = 0; i < Defs.ItemFlags.Length; i++)
-				{
-					if ((lFlag & 1L << i) != 0)
-						strTooltip.Append(Defs.ItemFlags[i] + "\n");
-				}
-
-				pToolTips[btnItemFlag].SetToolTip(btnItemFlag, strTooltip.ToString());
-
-				pTempItemRow["a_flag"] = lFlag;
+				SetItemFlagValue(lFlag, true);
 
 				bUnsavedChanges = true;
 			}
@@ -2349,7 +2687,7 @@ namespace LastChaos_ToolBoxNG
 				int nType = cbWearingPositionSelector.SelectedIndex;
 				if (nType != -1)
 				{
-					pTempItemRow["a_wearing"] = nType;
+					pTempItemRow["a_wearing"] = nType - 1;
 
 					bUnsavedChanges = true;
 				}
@@ -2941,7 +3279,7 @@ namespace LastChaos_ToolBoxNG
 			}
 		}
 		/****************************************/
-		private void btnUpdate_Click(object sender, EventArgs e)
+		private async void btnUpdate_Click(object sender, EventArgs e)
 		{
 			bool bSuccess = true;
 			int i = 0, nItemID = Convert.ToInt32(pTempItemRow["a_index"]);
@@ -3142,7 +3480,11 @@ namespace LastChaos_ToolBoxNG
 						MainList.Items[nSelectedIndex] = pSelectedItem;
 						MainList.SelectedIndexChanged += MainList_SelectedIndexChanged;
 
-						MessageBox.Show("Changes applied successfully!", "Item Editor", MessageBoxButtons.OK);
+						bool bExported = await TryExportItemClientLodsAsync(nItemID);
+						string strMessage = bExported
+							? "Changes applied successfully! ItemAll.lod and strItem .lod have been exported to the client folder."
+							: "Changes applied successfully, but one or more client .lod exports failed. Check the Toolbox log before testing in-game.";
+						MessageBox.Show(strMessage, "Item Editor", MessageBoxButtons.OK, bExported ? MessageBoxIcon.Information : MessageBoxIcon.Warning);
 
 						bUnsavedChanges = false;
 					}
@@ -3156,6 +3498,35 @@ namespace LastChaos_ToolBoxNG
 
 				MessageBox.Show(strError, "Item Editor", MessageBoxButtons.OK, MessageBoxIcon.Error);
 			}
+		}
+
+		private async Task<bool> TryExportItemClientLodsAsync(int nItemID)
+		{
+			bool bSuccess = true;
+
+			using Exporter pExporter = new(pMain);
+
+			try
+			{
+				await pExporter.ExportItemsLodAsync(true);
+			}
+			catch (Exception ex)
+			{
+				pMain.Logger(LogTypes.Error, $"Item Editor > Item: {nItemID} changed, but ItemAll.lod export failed: {ex.Message}");
+				bSuccess = false;
+			}
+
+			try
+			{
+				await pExporter.ExportItemStringsLodAsync(true);
+			}
+			catch (Exception ex)
+			{
+				pMain.Logger(LogTypes.Error, $"Item Editor > Item: {nItemID} changed, but strItem .lod export failed: {ex.Message}");
+				bSuccess = false;
+			}
+
+			return bSuccess;
 		}
 	}
 }
