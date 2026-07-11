@@ -766,7 +766,7 @@
 			}
 		}
 		/****************************************/
-		private void btnUpdate_Click(object sender, EventArgs e)
+		private async void btnUpdate_Click(object sender, EventArgs e)
 		{
 			bool bSuccess = true;
 			int nItemID = Convert.ToInt32(pTempOptionRow["a_index"]);
@@ -862,7 +862,11 @@
 						MainList.Items[nSelectedIndex] = pSelectedItem;
 						MainList.SelectedIndexChanged += MainList_SelectedIndexChanged;
 
-						MessageBox.Show("Changes applied successfully!", "Option Editor", MessageBoxButtons.OK);
+						bool bExported = await TryExportOptionClientLodsAsync(nItemID);
+						string strMessage = bExported
+							? "Changes applied successfully! Option.lod and strOption .lod have been exported to the client."
+							: "Changes applied successfully, but one or more option .lod exports failed. Check the Toolbox log before testing in-game.";
+						MessageBox.Show(strMessage, "Option Editor", MessageBoxButtons.OK, bExported ? MessageBoxIcon.Information : MessageBoxIcon.Warning);
 
 						bUnsavedChanges = false;
 					}
@@ -876,6 +880,34 @@
 
 				MessageBox.Show(strError, "Option Editor", MessageBoxButtons.OK, MessageBoxIcon.Error);
 			}
+		}
+
+		private async Task<bool> TryExportOptionClientLodsAsync(int nOptionID)
+		{
+			bool bSuccess = true;
+			using Exporter pExporter = new(pMain);
+
+			try
+			{
+				await pExporter.ExportOptionsLodAsync(true);
+			}
+			catch (Exception ex)
+			{
+				pMain.Logger(LogTypes.Error, $"Option Editor > Option: {nOptionID} saved, but Option.lod export failed: {ex.Message}");
+				bSuccess = false;
+			}
+
+			try
+			{
+				await pExporter.ExportOptionStringsLodAsync(true);
+			}
+			catch (Exception ex)
+			{
+				pMain.Logger(LogTypes.Error, $"Option Editor > Option: {nOptionID} saved, but strOption .lod export failed: {ex.Message}");
+				bSuccess = false;
+			}
+
+			return bSuccess;
 		}
 	}
 }

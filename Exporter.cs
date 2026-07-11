@@ -16,7 +16,7 @@ namespace LastChaos_ToolBoxNG
 		private static readonly List<string[]> DataLodTypes = new List<string[]>
 		{
 			// NOTE: Change file names (Second string) to match with your source files.
-			new string[2] { "ITEMS",             "Items" },
+			new string[2] { "ITEMS",             "ItemAll" },
 			new string[2] { "MOONSTONES",        "MoonStones" },
 			new string[2] { "LACARETTES",        "Lacarettes" },
 			new string[2] { "CATALOGS",          "Catalog" },
@@ -34,8 +34,8 @@ namespace LastChaos_ToolBoxNG
 			new string[2] { "RAREOPTIONS",       "RareOptions" },
 			new string[2] { "BIGPETS",           "BigPets" },
 			new string[2] { "MOBS",              "Mobs" },
-			new string[2] { "OPTIONS",           "Options" },
-			new string[2] { "TITLES",            "Titles" },
+			new string[2] { "OPTIONS",           "Option" },
+			new string[2] { "TITLES",            "titletool" },
 			new string[2] { "MAPS",              "Maps" },
 			new string[2] { "NPCHELP",           "NPCHelp" },
 			new string[2] { "AFFINITIES",        "Affinity" },
@@ -79,6 +79,144 @@ namespace LastChaos_ToolBoxNG
 			ExportSKILLSAsync("Skills");
 			await Task.WhenAll(ExportTasks);
 			pMain.Logger(LogTypes.Success, "Skills.lod has been Exported.");
+		}
+
+		public async Task ExportItemsLodAsync(bool exportToClientFolder = true)
+		{
+			ExportTasks.Clear();
+			rbExportToLocalFolder.Checked = !exportToClientFolder;
+			rbExportToClient.Checked = exportToClientFolder;
+
+			pMain.Logger(LogTypes.Message, "Exporting: ItemAll.lod file...");
+			ExportITEMSAsync("ItemAll");
+			await Task.WhenAll(ExportTasks);
+			pMain.Logger(LogTypes.Success, "ItemAll.lod has been Exported.");
+		}
+
+		public async Task ExportItemStringsLodAsync(bool exportToClientFolder = true)
+		{
+			ExportTasks.Clear();
+			rbExportToLocalFolder.Checked = !exportToClientFolder;
+			rbExportToClient.Checked = exportToClientFolder;
+
+			if (!Defs.StringTypes.TryGetValue("ITEM", out Defs.StringType? itemStringType))
+				throw new InvalidOperationException("ITEM string export definition is missing.");
+
+			List<string> nations = GetConfiguredStringExportNations();
+			if (nations.Count == 0)
+				throw new InvalidOperationException("No supported nation is configured for item string export.");
+
+			foreach (string nation in nations)
+				ExportStringsAsync(itemStringType, nation);
+
+			await Task.WhenAll(ExportTasks);
+			pMain.Logger(LogTypes.Success, "strItem .lod file(s) have been Exported.");
+		}
+
+		public async Task ExportOptionsLodAsync(bool exportToClientFolder = true)
+		{
+			ExportTasks.Clear();
+			rbExportToLocalFolder.Checked = !exportToClientFolder;
+			rbExportToClient.Checked = exportToClientFolder;
+
+			pMain.Logger(LogTypes.Message, "Exporting: Option.lod file...");
+			ExportOPTIONSAsync("Option");
+			await Task.WhenAll(ExportTasks);
+			pMain.Logger(LogTypes.Success, "Option.lod has been Exported.");
+		}
+
+		public async Task ExportOptionStringsLodAsync(bool exportToClientFolder = true)
+		{
+			ExportTasks.Clear();
+			rbExportToLocalFolder.Checked = !exportToClientFolder;
+			rbExportToClient.Checked = exportToClientFolder;
+
+			if (!Defs.StringTypes.TryGetValue("OPTION", out Defs.StringType? optionStringType))
+				throw new InvalidOperationException("OPTION string export definition is missing.");
+
+			List<string> nations = GetConfiguredStringExportNations();
+			if (nations.Count == 0)
+				throw new InvalidOperationException("No supported nation is configured for option string export.");
+
+			foreach (string nation in nations)
+				ExportStringsAsync(optionStringType, nation);
+
+			await Task.WhenAll(ExportTasks);
+			pMain.Logger(LogTypes.Success, "strOption .lod file(s) have been Exported.");
+		}
+
+		public async Task ExportTitlesLodAsync(bool exportToClientFolder = true)
+		{
+			ExportTasks.Clear();
+			rbExportToLocalFolder.Checked = !exportToClientFolder;
+			rbExportToClient.Checked = exportToClientFolder;
+
+			pMain.Logger(LogTypes.Message, "Exporting: titletool.lod file...");
+			ExportTITLESAsync("titletool");
+			await Task.WhenAll(ExportTasks);
+			pMain.Logger(LogTypes.Success, "titletool.lod has been Exported.");
+		}
+
+		private List<string> GetConfiguredStringExportNations()
+		{
+			HashSet<string> nations = new();
+
+			if (pMain.pSettings.NationSupported != null)
+			{
+				foreach (string nation in pMain.pSettings.NationSupported)
+				{
+					string key = NormalizeNationKey(nation);
+					if (key.Length > 0)
+						nations.Add(key);
+				}
+			}
+
+			string workLocale = NormalizeNationKey(pMain.pSettings.WorkLocale);
+			if (workLocale.Length > 0)
+				nations.Add(workLocale);
+
+			return nations.ToList();
+		}
+
+		private static string NormalizeNationKey(string? value)
+		{
+			if (string.IsNullOrWhiteSpace(value))
+				return string.Empty;
+
+			string normalized = value.Trim().ToUpperInvariant();
+			if (Defs.NationsCharsetsNPostfix.ContainsKey(normalized))
+				return normalized;
+
+			foreach (var nation in Defs.NationsCharsetsNPostfix)
+			{
+				if (nation.Value.Postfix.Equals(value.Trim(), StringComparison.OrdinalIgnoreCase))
+					return nation.Key;
+			}
+
+			return string.Empty;
+		}
+
+		private int ReadTitleHexColor(DataRow pRow, string strColumnName, int nTitleIndex, int nFallback)
+		{
+			string strValue = Convert.ToString(pRow[strColumnName], CultureInfo.InvariantCulture)?.Trim() ?? string.Empty;
+
+			if (strValue.StartsWith("#", StringComparison.Ordinal))
+				strValue = strValue[1..];
+
+			if (strValue.StartsWith("0x", StringComparison.OrdinalIgnoreCase))
+				strValue = strValue[2..];
+
+			if (strValue.Length == 0)
+			{
+				pMain.Logger(LogTypes.Warning, $"Exporter > titletool.lod: title {nTitleIndex} has empty {strColumnName}; using {nFallback:X8}.");
+				return nFallback;
+			}
+
+			if (int.TryParse(strValue, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out int nColor))
+				return nColor;
+
+			pMain.Logger(LogTypes.Warning, $"Exporter > titletool.lod: title {nTitleIndex} has invalid {strColumnName}='{strValue}'; using {nFallback:X8}.");
+			return nFallback;
 		}
 
 		private void Exporter_Load(object sender, EventArgs e)
@@ -245,6 +383,26 @@ namespace LastChaos_ToolBoxNG
 					Stream.Write(sTextLength);  // Write Text Length
 					Stream.Write(strBytes, 0, sTextLength); // Write Text
 				}
+			}
+		}
+		/****************************************/
+		private void ReplaceFileWithTemp(string strTempFilePath, string strFilePath)
+		{
+			if (File.Exists(strFilePath))
+			{
+				string strBackupFilePath = strFilePath + ".bak";
+
+				if (File.Exists(strBackupFilePath))
+					File.Delete(strBackupFilePath);
+
+				File.Replace(strTempFilePath, strFilePath, strBackupFilePath);
+
+				if (File.Exists(strBackupFilePath))
+					File.Delete(strBackupFilePath);
+			}
+			else
+			{
+				File.Move(strTempFilePath, strFilePath);
 			}
 		}
 		/****************************************/
@@ -502,11 +660,7 @@ namespace LastChaos_ToolBoxNG
 #if DEBUG
 				Stopwatch stopwatch = Stopwatch.StartNew();
 #endif
-#if USE_ORIGINAL_SQL_REQUEST_AND_ORIGINAL_FILE_SERIALIZATION
 				string strQuery = $"SELECT a_index, a_job_flag, a_weight, a_fame, a_level, a_flag, a_wearing, a_type_idx, a_subtype_idx, a_need_item0, a_need_item1, a_need_item2, a_need_item3, a_need_item4, a_need_item5, a_need_item6, a_need_item7, a_need_item8, a_need_item9, a_need_item_count0, a_need_item_count1, a_need_item_count2, a_need_item_count3, a_need_item_count4, a_need_item_count5, a_need_item_count6, a_need_item_count7, a_need_item_count8, a_need_item_count9, a_need_sskill, a_need_sskill_level, a_need_sskill2, a_need_sskill_level2, a_texture_id, a_texture_row, a_texture_col, a_num_0, a_num_1, a_num_2, a_num_3, a_price, a_set_0, a_set_1, a_set_2, a_set_3, a_set_4, a_file_smc, a_effect_name, a_attack_effect_name, a_damage_effect_name, a_rare_index_0, a_rare_prob_0, a_rare_index_0, a_rare_index_1, a_rare_index_2, a_rare_index_3, a_rare_index_4, a_rare_index_5, a_rare_index_6, a_rare_index_7, a_rare_index_8, a_rare_index_9, a_rare_prob_0, a_rare_prob_1, a_rare_prob_2, a_rare_prob_3, a_rare_prob_4, a_rare_prob_5, a_rare_prob_6, a_rare_prob_7, a_rare_prob_8, a_rare_prob_9, a_rvr_value, a_rvr_grade, a_castle_war FROM {pMain.pSettings.DBData}.t_item WHERE a_zone_flag=1023 AND a_enable=1 ORDER by a_index;";
-#else
-				string strQuery = $"SELECT a_index, a_job_flag, a_weight, a_fame, a_level, a_flag, a_wearing, a_type_idx, a_subtype_idx, a_need_item0, a_need_item1, a_need_item2, a_need_item3, a_need_item4, a_need_item5, a_need_item6, a_need_item7, a_need_item8, a_need_item9, a_need_item_count0, a_need_item_count1, a_need_item_count2, a_need_item_count3, a_need_item_count4, a_need_item_count5, a_need_item_count6, a_need_item_count7, a_need_item_count8, a_need_item_count9, a_need_sskill, a_need_sskill_level, a_texture_id, a_texture_row, a_texture_col, a_num_0, a_num_1, a_num_2, a_num_3, a_price, a_set_0, a_set_1, a_set_2, a_set_3, a_set_4, a_file_smc, a_effect_name, a_attack_effect_name, a_damage_effect_name, a_rare_index_0, a_rare_prob_0, a_rare_index_0, a_rare_index_1, a_rare_index_2, a_rare_index_3, a_rare_index_4, a_rare_index_5, a_rare_index_6, a_rare_index_7, a_rare_index_8, a_rare_index_9, a_rare_prob_0, a_rare_prob_1, a_rare_prob_2, a_rare_prob_3, a_rare_prob_4, a_rare_prob_5, a_rare_prob_6, a_rare_prob_7, a_rare_prob_8, a_rare_prob_9, a_rvr_value, a_rvr_grade, a_castle_war FROM {pMain.pSettings.DBData}.t_item WHERE a_enable=1 ORDER by a_index;";
-#endif
 				string strFilePath = pMain.pSettings.ClientPath + "\\Data";
 				byte sCastleWar;
 				int nItemID, nFortuneIndex;
@@ -549,10 +703,8 @@ namespace LastChaos_ToolBoxNG
 
 							Stream.Write(Convert.ToInt32(pRow["a_need_sskill"]));
 							Stream.Write(Convert.ToInt32(pRow["a_need_sskill_level"]));
-#if USE_ORIGINAL_SQL_REQUEST_AND_ORIGINAL_FILE_SERIALIZATION
 							Stream.Write(Convert.ToInt32(pRow["a_need_sskill2"]));
 							Stream.Write(Convert.ToInt32(pRow["a_need_sskill_level2"]));
-#endif
 							Stream.Write(Convert.ToInt32(pRow["a_texture_id"]));
 							Stream.Write(Convert.ToInt32(pRow["a_texture_row"]));
 							Stream.Write(Convert.ToInt32(pRow["a_texture_col"]));
@@ -2225,28 +2377,43 @@ namespace LastChaos_ToolBoxNG
 						Directory.CreateDirectory(strFilePath);
 
 					strFilePath += $"\\{strFileName}.lod";
+					string strTempFilePath = strFilePath + ".tmp";
 
-					using (BinaryWriter Stream = new(File.Create(strFilePath)))
+					try
 					{
-						Stream.Write(pTable.Rows.Count);
-
-						foreach (DataRow pRow in pTable.Rows)
+						using (BinaryWriter Stream = new(File.Create(strTempFilePath)))
 						{
-							Stream.Write(Convert.ToInt32(pRow["a_index"]));
-							Stream.Write(Convert.ToInt32(pRow["a_type"]));
+							Stream.Write(pTable.Rows.Count);
 
-							strValues = (pRow["a_level"].ToString() ?? string.Empty).Split(' ');
-
-							for (int i = 0; i < Defs.DEF_OPTION_MAX_LEVEL; i++)
+							foreach (DataRow pRow in pTable.Rows)
 							{
-								nValue = 0;
+								int nOptionIndex = Convert.ToInt32(pRow["a_index"]);
 
-								if (strValues.Length > i)
-									nValue = Convert.ToInt32(strValues[i]);
+								Stream.Write(nOptionIndex);
+								Stream.Write(Convert.ToInt32(pRow["a_type"]));
 
-								Stream.Write(nValue);
+								strValues = (pRow["a_level"].ToString() ?? string.Empty).Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+
+								for (int i = 0; i < Defs.DEF_OPTION_MAX_LEVEL; i++)
+								{
+									nValue = 0;
+
+									if (strValues.Length > i && !int.TryParse(strValues[i], out nValue))
+										throw new FormatException($"Option {nOptionIndex} has invalid a_level value '{strValues[i]}' at position {i + 1}.");
+
+									Stream.Write(nValue);
+								}
 							}
 						}
+
+						ReplaceFileWithTemp(strTempFilePath, strFilePath);
+					}
+					catch
+					{
+						if (File.Exists(strTempFilePath))
+							File.Delete(strTempFilePath);
+
+						throw;
 					}
 
 					pTable.Dispose();
@@ -2277,7 +2444,7 @@ namespace LastChaos_ToolBoxNG
 				if (rbExportToLocalFolder.Checked)
 					strFilePath = "Data";
 
-				DataTable? pTable = pMain.QuerySelect("utf8", $"SELECT a_index, a_enable, a_effect_name, a_attack, a_damage, a_color, a_bgcolor, a_option_index0, a_option_index1, a_option_index2, a_option_index3, a_option_index4 , a_option_level0, a_option_level1, a_option_level2, a_option_level3, a_option_level4, a_item_index FROM {pMain.pSettings.DBData}.t_title ORDER BY a_index");  // Hardcode!
+				DataTable? pTable = pMain.QuerySelect("utf8", $"SELECT a_index, a_enable, a_effect_name, a_attack, a_damage, a_color, a_bgcolor, a_option_index0, a_option_index1, a_option_index2, a_option_index3, a_option_index4, a_option_level0, a_option_level1, a_option_level2, a_option_level3, a_option_level4, a_option_value0, a_option_value1, a_option_value2, a_option_value3, a_option_value4, a_item_index FROM {pMain.pSettings.DBData}.t_title ORDER BY a_index");  // Hardcode!
 				if (pTable != null)
 				{
 					if (!Directory.Exists(strFilePath))
@@ -2291,21 +2458,26 @@ namespace LastChaos_ToolBoxNG
 
 						foreach (DataRow pRow in pTable.Rows)
 						{
-							Stream.Write(Convert.ToInt32(pRow["a_index"]));
+							int nTitleIndex = Convert.ToInt32(pRow["a_index"]);
+
+							Stream.Write(nTitleIndex);
 							Stream.Write(Convert.ToByte(pRow["a_enable"]));
 
 							WriteLengthNText(Stream, pRow["a_effect_name"].ToString() ?? string.Empty, Defs.MAX_TITLE_EFFECT_LENGTH, null);
 							WriteLengthNText(Stream, pRow["a_attack"].ToString() ?? string.Empty, Defs.MAX_TITLE_EFFECT_LENGTH, null);
 							WriteLengthNText(Stream, pRow["a_damage"].ToString() ?? string.Empty, Defs.MAX_TITLE_EFFECT_LENGTH, null);
 
-							Stream.Write(int.Parse(pRow["a_color"].ToString() ?? string.Empty, NumberStyles.HexNumber));
-							Stream.Write(int.Parse(pRow["a_bgcolor"].ToString() ?? string.Empty, NumberStyles.HexNumber));
+							Stream.Write(ReadTitleHexColor(pRow, "a_color", nTitleIndex, unchecked((int)0xFFFFFFFF)));
+							Stream.Write(ReadTitleHexColor(pRow, "a_bgcolor", nTitleIndex, 0x000000FF));
 
 							for (int i = 0; i < Defs.DEF_NICK_OPTION_MAX; i++)
 								Stream.Write(Convert.ToInt32(pRow["a_option_index" + i]));
 
 							for (int i = 0; i < Defs.DEF_NICK_OPTION_MAX; i++)
 								Stream.Write(Convert.ToByte(pRow["a_option_level" + i]));
+
+							for (int i = 0; i < Defs.DEF_NICK_OPTION_MAX; i++)
+								Stream.Write(Convert.ToInt32(pRow["a_option_value" + i]));
 
 							Stream.Write(Convert.ToInt32(pRow["a_item_index"]));
 						}

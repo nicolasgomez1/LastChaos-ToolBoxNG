@@ -17,7 +17,7 @@
 	{
 		private readonly Main pMain;
 		private Form pParentForm;
-		private double dX, dY, dIconSize;
+		private int nSelectedRow, nSelectedCol, nSheetRows, nSheetCols;
 		private string strBtnType;
 		public string[] ReturnValues = new string[3] { "0", "0", "0" };
 
@@ -25,8 +25,7 @@
 		{
 			InitializeComponent();
 
-			foreach (Control control in Controls)
-				control.MouseMove += IconPicker_MouseMove;
+			pbImageViewer.MouseMove += IconPicker_MouseMove;
 
 			pMain = mainForm;
 			pParentForm = ParentForm;
@@ -58,15 +57,10 @@
 
 			try
 			{
-				string[] strFilePaths = Directory.GetFiles("Resources", strBtnType + "*.png");
-
-				strFilePaths = strFilePaths.OrderBy(f => ExtractNumberFromFileName(f)).ToArray();
+				string[] strFilePaths = GetIconSheetPaths();
 
 				foreach (string strFilePath in strFilePaths)
-				{
-					if (Path.GetExtension(strFilePath) == ".png")
-						cbFileSelector.Items.Add(Path.GetFileNameWithoutExtension(strFilePath));
-				}
+					cbFileSelector.Items.Add(Path.GetFileNameWithoutExtension(strFilePath));
 			}
 			catch (Exception ex)
 			{
@@ -96,13 +90,10 @@
 
 		private void IconPicker_MouseMove(object? sender, MouseEventArgs e)
 		{
-			if (dIconSize <= 0)
+			if (!TryGetIconCell(e.Location, out int row, out int col))
 				return;
 
-			dX = Math.Floor(e.X / dIconSize);
-			dY = Math.Floor(e.Y / dIconSize);
-
-			lbLocation.Text = $"Row: {dY} Col: " + dX;
+			lbLocation.Text = $"Row: {row} Col: {col}";
 		}
 
 		private void btnSelect_Click(object sender, EventArgs e)
@@ -110,6 +101,30 @@
 			DialogResult = DialogResult.OK;
 
 			Close();
+		}
+
+		private string[] GetIconSheetPaths()
+		{
+			Dictionary<string, string> pPaths = new(StringComparer.OrdinalIgnoreCase);
+
+			if (Directory.Exists("Resources"))
+			{
+				foreach (string strFilePath in Directory.GetFiles("Resources", strBtnType + "*.png"))
+					pPaths[Path.GetFileNameWithoutExtension(strFilePath)] = strFilePath;
+			}
+
+			string strInterfacePath = Path.Combine(pMain.pSettings.ClientPath, "Data", "Interface");
+			if (Directory.Exists(strInterfacePath))
+			{
+				foreach (string strFilePath in Directory.GetFiles(strInterfacePath, strBtnType + "*.tex"))
+				{
+					string strName = Path.GetFileNameWithoutExtension(strFilePath);
+					if (!pPaths.ContainsKey(strName))
+						pPaths[strName] = strFilePath;
+				}
+			}
+
+			return pPaths.Values.OrderBy(ExtractNumberFromFileName).ToArray();
 		}
 
 		private int ExtractNumberFromFileName(string fileName)
@@ -133,47 +148,88 @@
 				string strSelectedFile = cbFileSelector.SelectedItem.ToString() ?? string.Empty;
 
 				ReturnValues[0] = strSelectedFile.Replace(strBtnType, "");
+				ReturnValues[1] = "0";
+				ReturnValues[2] = "0";
 
-				string strPathCompose = $"Resources\\{strSelectedFile}.png";
+				string strPathCompose = GetSelectedIconSheetPath(strSelectedFile);
 
-				Image pImage = Image.FromFile(strPathCompose);
+				Image? pImage = LoadIconSheet(strPathCompose);
 				if (pImage != null)
 				{
-					if (strBtnType == "ItemBtn")
-					{
-						if (pImage.Width == 512 && pImage.Height == 512)
-						{
-							dIconSize = 32.0;
-							pbImageViewer.SizeMode = PictureBoxSizeMode.Normal;
-						}
-						else
-						{
-							dIconSize = 16.0;
-							pbImageViewer.SizeMode = PictureBoxSizeMode.StretchImage;
-						}
-					}
-					else if (strBtnType == "ComboBtn")
-					{
-						dIconSize = 50.0;
-						pbImageViewer.SizeMode = PictureBoxSizeMode.Normal;
-					}
+					int nIconSize = GetIconSourceSize(pImage);
+					nSheetCols = Math.Max(1, pImage.Width / nIconSize);
+					nSheetRows = Math.Max(1, pImage.Height / nIconSize);
+					pbImageViewer.SizeMode = pImage.Width == pbImageViewer.Width && pImage.Height == pbImageViewer.Height ? PictureBoxSizeMode.Normal : PictureBoxSizeMode.StretchImage;
 
 					pbImageViewer.Image = pImage;
+					lbLocation.Text = "Row: 0 Col: 0";
+					pbIcon.Image = pMain.GetIcon(strBtnType, ReturnValues[0], 0, 0);
 				}
 				else
 				{
 					pMain.Logger(LogTypes.Error, $"Icon Picker > Something went wrong while try load: ({strPathCompose}).");
+					nSheetRows = 0;
+					nSheetCols = 0;
+					pbImageViewer.Image = null;
 				}
 			}
 		}
 
+		private string GetSelectedIconSheetPath(string strSelectedFile)
+		{
+			string strPngPath = Path.Combine("Resources", strSelectedFile + ".png");
+			if (File.Exists(strPngPath))
+				return strPngPath;
+
+			return Path.Combine(pMain.pSettings.ClientPath, "Data", "Interface", strSelectedFile + ".tex");
+		}
+
+		private Image? LoadIconSheet(string strPathCompose)
+		{
+			if (Path.GetExtension(strPathCompose).Equals(".tex", StringComparison.OrdinalIgnoreCase))
+				return TexImageLoader.Load(strPathCompose);
+
+			using Image pImage = Image.FromFile(strPathCompose);
+			return new Bitmap(pImage);
+		}
+
+		private int GetIconSourceSize(Image pImage)
+		{
+			if (strBtnType == "ComboBtn")
+				return 50;
+
+			if ((strBtnType == "ItemBtn" || strBtnType == "SkillBtn") && pImage.Width < 512)
+				return 16;
+
+			return 32;
+		}
+
+		private bool TryGetIconCell(Point pPoint, out int nRow, out int nCol)
+		{
+			nRow = 0;
+			nCol = 0;
+
+			if (pbImageViewer.Image == null || nSheetRows <= 0 || nSheetCols <= 0 || pPoint.X < 0 || pPoint.Y < 0 || pPoint.X >= pbImageViewer.Width || pPoint.Y >= pbImageViewer.Height)
+				return false;
+
+			double dCellWidth = pbImageViewer.Width / (double)nSheetCols;
+			double dCellHeight = pbImageViewer.Height / (double)nSheetRows;
+
+			nCol = Math.Min(nSheetCols - 1, (int)(pPoint.X / dCellWidth));
+			nRow = Math.Min(nSheetRows - 1, (int)(pPoint.Y / dCellHeight));
+
+			return true;
+		}
+
 		private void pbImageViewer_Click(object sender, EventArgs e)
 		{
-			if (dIconSize <= 0)
+			Point pPoint = pbImageViewer.PointToClient(Cursor.Position);
+
+			if (!TryGetIconCell(pPoint, out nSelectedRow, out nSelectedCol))
 				return;
 
-			ReturnValues[1] = dY.ToString();
-			ReturnValues[2] = dX.ToString();
+			ReturnValues[1] = nSelectedRow.ToString();
+			ReturnValues[2] = nSelectedCol.ToString();
 
 			btnSelect.Enabled = true;
 

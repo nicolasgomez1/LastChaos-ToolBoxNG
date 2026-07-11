@@ -39,6 +39,7 @@ namespace LastChaos_ToolBoxNG
 		private readonly CheckBox cbShowHidden = new();
 		private readonly CheckBox cbEquipmentPreview = new();
 		private readonly CheckBox cbShowTextureNames = new();
+		private readonly ComboBox cbDepthFilter = new();
 		private readonly NumericUpDown nudZoom = new();
 		private readonly TreeView tvElements = new();
 		private readonly UiCanvas canvas;
@@ -83,6 +84,7 @@ namespace LastChaos_ToolBoxNG
 		private string? currentFile;
 		private bool loadingControls;
 		private bool dirty;
+		private int canvasDepthFilter = -1;
 		private DateTime lastSavedAt = DateTime.MinValue;
 
 		public UiXmlEditor(Main mainForm)
@@ -168,6 +170,20 @@ namespace LastChaos_ToolBoxNG
 			cbShowTextureNames.CheckedChanged += (_, _) => RefreshCanvasOnly();
 			toolbar.Controls.Add(cbShowTextureNames);
 
+			toolbar.Controls.Add(new Label { Text = "Depth:", AutoSize = true, Margin = new Padding(2, 9, 4, 0) });
+			cbDepthFilter.DropDownStyle = ComboBoxStyle.DropDownList;
+			cbDepthFilter.Width = 112;
+			cbDepthFilter.Margin = new Padding(0, 5, 8, 0);
+			cbDepthFilter.SelectedIndexChanged += (_, _) =>
+			{
+				if (loadingControls)
+					return;
+
+				canvasDepthFilter = cbDepthFilter.SelectedItem is DepthFilterItem item ? item.Depth : -1;
+				RefreshCanvasOnly();
+			};
+			toolbar.Controls.Add(cbDepthFilter);
+
 			toolbar.Controls.Add(new Label { Text = "Zoom:", AutoSize = true, Margin = new Padding(4, 9, 4, 0) });
 			ConfigureNumeric(nudZoom, 25, 200, 100);
 			nudZoom.Width = 58;
@@ -196,7 +212,7 @@ namespace LastChaos_ToolBoxNG
 
 			canvasPanel.Controls.Add(new Label
 			{
-				Text = "Canvas: click a piece to edit it. Drag to move, drag the yellow corner to resize, arrow keys nudge by 1px, Shift+arrows nudge by 10px.",
+				Text = "Canvas: click a piece to edit it. Use Depth to isolate stacked pieces. Drag to move, drag the yellow corner to resize, arrow keys nudge by 1px, Shift+arrows nudge by 10px.",
 				Dock = DockStyle.Fill,
 				TextAlign = ContentAlignment.MiddleLeft
 			}, 0, 0);
@@ -663,6 +679,7 @@ namespace LastChaos_ToolBoxNG
 			}
 
 			canvas.RootNode = rootNode;
+			UpdateDepthFilterOptions();
 			SelectNode(selectedNode, false);
 		}
 
@@ -1153,10 +1170,49 @@ namespace LastChaos_ToolBoxNG
 			canvas.Invalidate();
 		}
 
+		private void UpdateDepthFilterOptions()
+		{
+			int previousDepth = canvasDepthFilter;
+
+			loadingControls = true;
+			try
+			{
+				cbDepthFilter.Items.Clear();
+				cbDepthFilter.Items.Add(new DepthFilterItem(-1, "All depths"));
+
+				if (rootNode != null)
+				{
+					foreach (var group in EnumerateNodes(rootNode).GroupBy(node => node.Depth).OrderBy(group => group.Key))
+						cbDepthFilter.Items.Add(new DepthFilterItem(group.Key, $"Depth {group.Key} ({group.Count()})"));
+				}
+
+				int selectedIndex = 0;
+				for (int i = 0; i < cbDepthFilter.Items.Count; i++)
+				{
+					if (cbDepthFilter.Items[i] is DepthFilterItem item && item.Depth == previousDepth)
+					{
+						selectedIndex = i;
+						break;
+					}
+				}
+
+				cbDepthFilter.SelectedIndex = selectedIndex;
+				canvasDepthFilter = cbDepthFilter.SelectedItem is DepthFilterItem selected ? selected.Depth : -1;
+				cbDepthFilter.Enabled = rootNode != null;
+			}
+			finally
+			{
+				loadingControls = false;
+			}
+		}
+
 		internal bool ShouldDraw(UiNode node)
 		{
 			if (node.Parent == null)
 				return true;
+
+			if (canvasDepthFilter >= 0 && node.Depth != canvasDepthFilter)
+				return false;
 
 			if (IsEquipmentPreviewActive())
 			{
@@ -1472,6 +1528,23 @@ namespace LastChaos_ToolBoxNG
 				return System.IO.Path.GetFileName(Path);
 			}
 		}
+
+		private sealed class DepthFilterItem
+		{
+			public DepthFilterItem(int depth, string label)
+			{
+				Depth = depth;
+				Label = label;
+			}
+
+			public int Depth { get; }
+			private string Label { get; }
+
+			public override string ToString()
+			{
+				return Label;
+			}
+		}
 	}
 
 	internal sealed class UiNode
@@ -1480,10 +1553,12 @@ namespace LastChaos_ToolBoxNG
 		{
 			Element = element;
 			Parent = parent;
+			Depth = parent == null ? 0 : parent.Depth + 1;
 		}
 
 		public XElement Element { get; }
 		public UiNode? Parent { get; }
+		public int Depth { get; }
 		public List<UiNode> Children { get; } = new();
 		public int X { get; set; }
 		public int Y { get; set; }
@@ -1655,7 +1730,7 @@ namespace LastChaos_ToolBoxNG
 
 		private void DrawSelection(Graphics graphics)
 		{
-			if (SelectedNode == null)
+			if (SelectedNode == null || !owner.ShouldDraw(SelectedNode))
 				return;
 
 			Rectangle rect = SelectedNode.Bounds;
@@ -1677,8 +1752,10 @@ namespace LastChaos_ToolBoxNG
 			UiNode? hit = HitTest(logical);
 			if (hit != null)
 				owner.SelectNode(hit, true);
+			else
+				return;
 
-			if (SelectedNode == null)
+			if (SelectedNode == null || !owner.ShouldDraw(SelectedNode))
 				return;
 
 			Rectangle handle = new(SelectedNode.Bounds.Right - HandleSize, SelectedNode.Bounds.Bottom - HandleSize, HandleSize + 3, HandleSize + 3);

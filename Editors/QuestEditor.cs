@@ -1,4 +1,7 @@
-﻿namespace LastChaos_ToolBoxNG
+using System.Data;
+using System.Text;
+
+namespace LastChaos_ToolBoxNG
 {
 	public partial class QuestEditor : Form
 	{
@@ -9,37 +12,198 @@
 		private Main.ListBoxItem? pLastSelected;
 		private DataRow? pTempQuestRow;
 
+		private static readonly (int Value, string Text)[] QuestKindOptions =
+		[
+			(-1, "None"),
+			(0, "Repeat"),
+			(1, "Collection"),
+			(2, "Delivery"),
+			(3, "Defeat"),
+			(4, "Save"),
+			(5, "Mining Experience"),
+			(6, "Gathering Experience"),
+			(7, "Charge Experience"),
+			(8, "Process Experience"),
+			(9, "Make Experience"),
+			(10, "Tutorial"),
+			(11, "PK"),
+			(12, "Search")
+		];
+
+		private static readonly (int Value, string Text)[] QuestRepeatOptions =
+		[
+			(-1, "None"),
+			(0, "Once"),
+			(1, "Unlimited"),
+			(2, "Daily")
+		];
+
+		private static readonly (int Value, string Text)[] QuestStartOptions =
+		[
+			(-1, "None"),
+			(0, "NPC"),
+			(1, "Item"),
+			(2, "Level"),
+			(3, "Area")
+		];
+
+		private static readonly (int Value, string Text)[] QuestJobOptions =
+		[
+			(-1, "Any"),
+			(0, "Titan"),
+			(1, "Knight"),
+			(2, "Healer"),
+			(3, "Mage"),
+			(4, "Rogue"),
+			(5, "Sorcerer"),
+			(6, "NightShadow")
+		];
+
 		public QuestEditor(Main mainForm)
 		{
 			InitializeComponent();
 
 			pMain = mainForm;
+			WireManualEvents();
 		}
 
-		private (bool bProceed, bool bDeleteActual) CheckUnsavedChanges()
+		private void WireManualEvents()
 		{
-			bool bProceed = true;
-			bool bDeleteActual = false;
+			cbEnable.CheckedChanged += (_, _) => SetIntColumnFromCheckBox("a_enable", cbEnable);
+			cbType1.SelectedIndexChanged += (_, _) => SetIntColumnFromComboBox("a_type2", cbType1);
+			cbType2.SelectedIndexChanged += (_, _) => SetIntColumnFromComboBox("a_start_type", cbType2);
+			cbJob.SelectedIndexChanged += (_, _) => SetIntColumnFromComboBox("a_need_job", cbJob);
+			tbMaxLevel.TextChanged += (_, _) => SetIntColumnFromTextBox("a_need_max_level", tbMaxLevel);
+			tbNeededExperience.TextChanged += (_, _) => SetIntColumnFromTextBox("a_need_exp", tbNeededExperience);
+			tbStartDescription.TextChanged += (_, _) => SetStringColumnFromTextBox(LocaleColumn("a_desc"), tbStartDescription);
+			tbRewardDescription.TextChanged += (_, _) => SetStringColumnFromTextBox(LocaleColumn("a_desc2"), tbRewardDescription);
+			tbConditionDescription.TextChanged += (_, _) => SetStringColumnFromTextBox(LocaleColumn("a_desc3"), tbConditionDescription);
+		}
 
-			if (bUnsavedChanges)
+		private void ConfigureControls()
+		{
+			label3.Text = "Type";
+			label5.Text = "Repeat";
+			label31.Text = "Start Type";
+			groupBox5.Text = "Routing";
+			label9.Text = "Start Data";
+			label10.Text = "Prize NPC";
+			label11.Text = "Prequest";
+
+			cbType0.ForeColor = Color.FromArgb(208, 203, 148);
+			cbType1.ForeColor = Color.FromArgb(208, 203, 148);
+			cbType2.ForeColor = Color.FromArgb(208, 203, 148);
+
+			cbJob.Visible = true;
+			label7.Visible = true;
+
+			PopulateComboBox(cbType0, QuestKindOptions);
+			PopulateComboBox(cbType1, QuestRepeatOptions);
+			PopulateComboBox(cbType2, QuestStartOptions);
+			PopulateComboBox(cbJob, QuestJobOptions);
+
+			(new ToolTip()).SetToolTip(btnReload, "Reload Quest data from Database");
+		}
+
+		private async Task LoadQuestDataAsync()
+		{
+			DataTable? pNewTable = await Task.Run(() =>
 			{
-				if (pMain.pTables.RareOptionTable.Select("a_index=" + pTempQuestRow["a_index"]).FirstOrDefault() != null)	// the current selected Quest, it is not temporary.
+				return pMain.QuerySelect(pMain.pSettings.DBCharset, $"SELECT * FROM {pMain.pSettings.DBData}.t_quest ORDER BY a_index;");
+			});
+
+			pMain.pTables.QuestTable?.Dispose();
+			pMain.pTables.QuestTable = pNewTable;
+		}
+
+		private async void RareOptionEditor_LoadAsync(object sender, EventArgs e)
+		{
+			MessageBox_Progress pProgressDialog = new(this, "Loading Data, Please Wait...");
+
+			try
+			{
+				bUserAction = false;
+				MainList.Enabled = false;
+				btnReload.Enabled = false;
+				btnAddNew.Enabled = false;
+				btnCopy.Enabled = false;
+				btnDelete.Enabled = false;
+				btnUpdate.Enabled = false;
+
+				SetupNationSelector();
+				ConfigureControls();
+
+				await LoadQuestDataAsync();
+
+				MainList.BeginUpdate();
+				MainList.Items.Clear();
+
+				if (pMain.pTables.QuestTable != null)
 				{
-					DialogResult pDialogReturn = MessageBox.Show("There are unsaved changes. If you proceed, your changes will be discarded.\nDo you want to continue?", "Quest Editor", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
-					if (pDialogReturn != DialogResult.Yes)
-						bProceed = false;
+					foreach (DataRow pRow in pMain.pTables.QuestTable.Rows)
+						AddToList(Convert.ToInt32(pRow["a_index"]), GetQuestName(pRow), false);
+
+					if (MainList.Items.Count > 0)
+						MainList.SelectedIndex = 0;
 				}
-				else	// the current selected Option is temporary.
-				{
-					DialogResult pDialogReturn = MessageBox.Show("The current Quest is temporary, if you don't press Update. Do you want to continue and lose all the information regarding it?", "Quest Editor", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
-					if (pDialogReturn != DialogResult.Yes)
-						bProceed = false;
-					else if (pDialogReturn == DialogResult.Yes)
-						bDeleteActual = true;
-				}
+
+				MainList.EndUpdate();
+
+				MainList.Enabled = true;
+				btnReload.Enabled = true;
+				btnAddNew.Enabled = true;
+
+				MainList.Focus();
+			}
+			catch (Exception ex)
+			{
+				string strError = $"Quest Editor > Loading failed: {ex.Message}";
+				pMain.Logger(LogTypes.Error, strError);
+				MessageBox.Show(strError, "Quest Editor", MessageBoxButtons.OK, MessageBoxIcon.Error);
+			}
+			finally
+			{
+				pProgressDialog.Close();
+			}
+		}
+
+		private void SetupNationSelector()
+		{
+			if (cbNationSelector.Items.Count > 0)
+				return;
+
+			cbNationSelector.BeginUpdate();
+
+			for (int i = 0; i < pMain.pSettings.NationSupported.Length; i++)
+			{
+				string strNation = pMain.pSettings.NationSupported[i];
+				cbNationSelector.Items.Add(strNation);
+
+				if (strNation.ToLower() == pMain.pSettings.WorkLocale)
+					cbNationSelector.SelectedIndex = i;
 			}
 
-			return (bProceed, bDeleteActual);
+			if (cbNationSelector.SelectedIndex < 0 && cbNationSelector.Items.Count > 0)
+				cbNationSelector.SelectedIndex = 0;
+
+			cbNationSelector.EndUpdate();
+		}
+
+		private void PopulateComboBox(ComboBox comboBox, IEnumerable<(int Value, string Text)> values)
+		{
+			comboBox.BeginUpdate();
+			comboBox.Items.Clear();
+
+			foreach ((int nValue, string strText) in values)
+			{
+				comboBox.Items.Add(new Main.ComboBoxItem
+				{
+					Value = nValue,
+					DisplayText = $"{nValue} - {strText}"
+				});
+			}
+
+			comboBox.EndUpdate();
 		}
 
 		private void AddToList(int nID, string strName, bool bIsTemp)
@@ -59,240 +223,145 @@
 				MainList.SelectedIndexChanged += MainList_SelectedIndexChanged;
 
 				pLastSelected = (Main.ListBoxItem?)MainList.SelectedItem;
-
 				bUnsavedChanges = true;
 			}
 		}
 
-		public async Task LoadQuestDataAsync()
+		private string LocaleColumn(string strBaseName)
 		{
-			bool bRequestNeeded = false;
-			List<string> listQueryCompose = ["a_need_min_level", "a_need_max_level", "a_name_" + pMain.pSettings.WorkLocale, "a_desc_" + pMain.pSettings.WorkLocale];
+			string strLocale = cbNationSelector.SelectedItem?.ToString()?.ToLower() ?? pMain.pSettings.WorkLocale;
+			string strColumnName = $"{strBaseName}_{strLocale}";
 
-			if (pMain.pTables.QuestTable == null)
-			{
-				bRequestNeeded = true;
-			}
-			else
-			{
-				foreach (string strColumnName in listQueryCompose.ToList())
-				{
-					if (!pMain.pTables.QuestTable.Columns.Contains(strColumnName))
-						bRequestNeeded = true;
-					else
-						listQueryCompose.Remove(strColumnName);
-				}
-			}
+			if (pTempQuestRow?.Table.Columns.Contains(strColumnName) == true)
+				return strColumnName;
 
-			if (bRequestNeeded)
-			{
-				DataTable? pNewTable = await Task.Run(() =>
-				{
-					return pMain.QuerySelect(pMain.pSettings.DBCharset, $"SELECT a_index, {string.Join(", ", listQueryCompose)} FROM {pMain.pSettings.DBData}.t_quest ORDER BY a_index;");
-				});
+			if (pTempQuestRow?.Table.Columns.Contains(strBaseName) == true)
+				return strBaseName;
 
-				if (pMain.pTables.QuestTable == null)
-					pMain.pTables.QuestTable = pNewTable;
-				else
-					pMain.MergeDataTables(pNewTable, "a_index", ref pMain.pTables.QuestTable);
-			}
+			return strColumnName;
 		}
 
-		private async void RareOptionEditor_LoadAsync(object sender, EventArgs e)
+		private string GetQuestName(DataRow pRow)
 		{
-			MessageBox_Progress pProgressDialog = new(this, "Loading Data, Please Wait...");
-			/****************************************/
-			cbNationSelector.BeginUpdate();
+			string strColumnName = "a_name_" + pMain.pSettings.WorkLocale;
+			if (!pRow.Table.Columns.Contains(strColumnName))
+				strColumnName = "a_name";
 
-			for (int i = 0; i < pMain.pSettings.NationSupported.Length; i++)
+			return pRow[strColumnName].ToString() ?? string.Empty;
+		}
+
+		private void LoadUIData(int nQuestID, bool bLoadFromQuestTable)
+		{
+			if (bLoadFromQuestTable && pMain.pTables.QuestTable != null)
 			{
-				string strNation = pMain.pSettings.NationSupported[i];
+				DataRow? pSourceRow = pMain.pTables.QuestTable.Select("a_index=" + nQuestID).FirstOrDefault();
+				if (pSourceRow == null)
+					return;
 
-				cbNationSelector.Items.Add(strNation);
-
-				if (strNation.ToLower() == pMain.pSettings.WorkLocale)
-					cbNationSelector.SelectedIndex = i;
+				pTempQuestRow = pMain.pTables.QuestTable.NewRow();
+				pTempQuestRow.ItemArray = (object[])pSourceRow.ItemArray.Clone();
 			}
 
-			cbNationSelector.EndUpdate();
-			/****************************************/
-			cbType0.BeginUpdate();
+			if (pTempQuestRow == null)
+				return;
 
-			int j = 0;
-			foreach (string strType in Defs.RareOptionItemGrades)
+			bUserAction = false;
+
+			tbID.Text = nQuestID.ToString();
+			cbEnable.Checked = GetInt("a_enable") != 0;
+			SelectComboValue(cbType0, GetInt("a_type1"));
+			SelectComboValue(cbType1, GetInt("a_type2"));
+			SelectComboValue(cbType2, GetInt("a_start_type"));
+			SelectComboValue(cbJob, GetInt("a_need_job"));
+			tbMinLevel.Text = GetString("a_need_min_level");
+			tbMaxLevel.Text = GetString("a_need_max_level");
+			tbNeededExperience.Text = GetString("a_need_exp");
+			tbDefense.Text = GetString("a_start_data");
+			tbMagicAttack.Text = GetString("a_prize_npc");
+			tbResistance.Text = GetString("a_prequest_num");
+			tbName.Text = GetString(LocaleColumn("a_name"));
+			tbStartDescription.Text = GetString(LocaleColumn("a_desc"));
+			tbRewardDescription.Text = GetString(LocaleColumn("a_desc2"));
+			tbConditionDescription.Text = GetString(LocaleColumn("a_desc3"));
+
+			bUserAction = true;
+
+			btnUpdate.Enabled = true;
+			btnCopy.Enabled = true;
+			btnDelete.Enabled = true;
+		}
+
+		private string GetString(string strColumnName)
+		{
+			if (pTempQuestRow?.Table.Columns.Contains(strColumnName) != true)
+				return string.Empty;
+
+			return pTempQuestRow[strColumnName].ToString() ?? string.Empty;
+		}
+
+		private int GetInt(string strColumnName)
+		{
+			if (pTempQuestRow?.Table.Columns.Contains(strColumnName) != true)
+				return 0;
+
+			return int.TryParse(pTempQuestRow[strColumnName].ToString(), out int nValue) ? nValue : 0;
+		}
+
+		private void SelectComboValue(ComboBox comboBox, int nValue)
+		{
+			for (int i = 0; i < comboBox.Items.Count; i++)
 			{
-				cbType0.Items.Add($"{j} - {strType}");
-
-				j++;
-			}
-
-			cbType0.EndUpdate();
-#if ENABLE_TYPE
-			label7.Visible = true;
-			cbTypeSelector.Visible = true;
-#endif
-#if DEBUG
-			Stopwatch stopwatch = Stopwatch.StartNew();
-#endif
-			await Task.WhenAll(
-				LoadQuestDataAsync(),
-				pMain.GenericLoadOptionDataAsync()
-			);
-#if DEBUG
-			stopwatch.Stop();
-			pMain.Logger(LogTypes.Message, $"Rare Options & Options Data load took: {stopwatch.ElapsedMilliseconds}ms.");
-#endif
-			/****************************************/
-			if (pMain.pTables.OptionTable != null)
-			{
-				ComboBox cbObj;
-				TextBox tbProb;
-
-				for (int i = 0; i < Defs.DEF_RAREOPTION_MAX; i++)
+				if (comboBox.Items[i] is Main.ComboBoxItem pItem && pItem.Value == nValue)
 				{
-					cbObj = (ComboBox)Controls.Find("cbOptionID" + i, true)[0];
-					cbObj.Enabled = false;
-
-					cbObj.BeginUpdate();
-
-					cbObj.Items.Add(new Main.ComboBoxItem
-					{
-						Value = -1,
-						DisplayText = "-1 - NONE"
-					});
-
-					foreach (DataRow pRow in pMain.pTables.OptionTable.Rows)
-					{
-						int nOptionID = Convert.ToInt32(pRow["a_type"]);
-
-						cbObj.Items.Add(new Main.ComboBoxItem
-						{
-							Value = nOptionID,
-							DisplayText = $"{nOptionID} - {pRow["a_name_" + pMain.pSettings.WorkLocale]}"
-						});
-					}
-
-					cbObj.EndUpdate();
-
-					cbObj = (ComboBox)Controls.Find("cbOptionLevel" + i, true)[0];
-					cbObj.Enabled = false;
-
-					tbProb = (TextBox)Controls.Find("tbOptionProb" + i, true)[0];
-					tbProb.Enabled = false;
+					comboBox.SelectedIndex = i;
+					return;
 				}
 			}
-			/****************************************/
-			if (pMain.pTables.RareOptionTable != null)
+
+			comboBox.Items.Add(new Main.ComboBoxItem
 			{
-				MainList.BeginUpdate();
+				Value = nValue,
+				DisplayText = $"{nValue} - Custom"
+			});
+			comboBox.SelectedIndex = comboBox.Items.Count - 1;
+		}
 
-				foreach (DataRow pRow in pMain.pTables.RareOptionTable.Rows)
-					AddToList(Convert.ToInt32(pRow["a_index"]), pRow["a_prefix_" + pMain.pSettings.WorkLocale].ToString() ?? string.Empty, false);
+		private (bool bProceed, bool bDeleteActual) CheckUnsavedChanges()
+		{
+			bool bProceed = true;
+			bool bDeleteActual = false;
 
-				MainList.SelectedIndex = 0;
-				MainList.EndUpdate();
+			if (bUnsavedChanges && pTempQuestRow != null)
+			{
+				DataRow? pQuestRow = pMain.pTables.QuestTable?.Select("a_index=" + pTempQuestRow["a_index"]).FirstOrDefault();
+
+				if (pQuestRow != null)
+				{
+					DialogResult pDialogReturn = MessageBox.Show("There are unsaved changes. If you proceed, your changes will be discarded.\nDo you want to continue?", "Quest Editor", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+					if (pDialogReturn != DialogResult.Yes)
+						bProceed = false;
+				}
+				else
+				{
+					DialogResult pDialogReturn = MessageBox.Show("The current Quest is temporary. If you do not press Update, it will be lost.\nDo you want to continue?", "Quest Editor", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+					if (pDialogReturn != DialogResult.Yes)
+						bProceed = false;
+					else
+						bDeleteActual = true;
+				}
 			}
-			/****************************************/
-			(new ToolTip()).SetToolTip(btnReload, "Reload Rare Options & Options Data from Database");
-			/****************************************/
-			MainList.Enabled = true;
 
-			btnReload.Enabled = true;
-			btnAddNew.Enabled = true;
-
-			pProgressDialog.Close();
-
-			MainList.Focus();
+			return (bProceed, bDeleteActual);
 		}
 
 		private void RareOptionEditor_FormClosing(object sender, FormClosingEventArgs e)
 		{
-			void Clear()
-			{
-				// Do nothing
-			}
-
 			if (bUnsavedChanges)
 			{
 				DialogResult pDialogReturn = MessageBox.Show("You have unsaved changes. Do you want to discard them and exit?", "Quest Editor", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
 				if (pDialogReturn == DialogResult.No)
 					e.Cancel = true;
-				else
-					Clear();
 			}
-			else
-			{
-				Clear();
-			}
-		}
-
-		private void LoadUIData(int nRareOptionID, bool bLoadFrompRareOptionTable)
-		{
-			bUserAction = false;
-			/****************************************/
-			// Reset Controls
-			cbType0.SelectedIndex = -1;
-#if ENABLE_TYPE
-			cbTypeSelector.SelectedIndex = -1;
-#endif
-			/****************************************/
-			if (bLoadFrompRareOptionTable && pMain.pTables.RareOptionTable != null)
-			{
-				pTempQuestRow = pMain.pTables.RareOptionTable.NewRow();
-				pTempQuestRow.ItemArray = (object[])pMain.pTables.RareOptionTable.Select("a_index=" + nRareOptionID)[0].ItemArray.Clone();
-			}
-			/****************************************/
-			// General
-			tbID.Text = nRareOptionID.ToString();
-			/****************************************/
-			int nTypeValue = Convert.ToInt32(pTempQuestRow["a_grade"]);
-
-			if (nTypeValue >= Defs.RareOptionItemGrades.Length)
-			{
-				pMain.Logger(LogTypes.Error, $"Quest Editor > Quest: {nRareOptionID} Error: a_grade out of range.");
-			}
-			else
-			{
-				cbType0.SelectedIndex = nTypeValue;
-			}
-			/****************************************/
-			tbMinLevel.Text = pTempQuestRow["a_attack"].ToString();
-			tbDefense.Text = pTempQuestRow["a_defense"].ToString();
-			tbMagicAttack.Text = pTempQuestRow["a_magic"].ToString();
-			tbResistance.Text = pTempQuestRow["a_resist"].ToString();
-			/****************************************/
-			tbName.Text = pTempQuestRow["a_prefix_" + cbNationSelector.SelectedItem.ToString().ToLower()].ToString();
-			/****************************************/
-			ComboBox cbObj;
-			TextBox tbProb;
-
-			for (int i = 0; i < Defs.DEF_RAREOPTION_MAX; i++)
-			{
-				cbObj = (ComboBox)Controls.Find("cbOptionID" + i, true)[0];
-				
-				cbObj.Enabled = true;
-
-				for (int j = 0; j < cbObj.Items.Count; j++)
-				{
-					if (((Main.ComboBoxItem)cbObj.Items[j]).Value.ToString() == pTempQuestRow["a_option_index" + i].ToString())
-					{
-						cbObj.SelectedIndex = j;
-
-						break;
-					}
-				}
-
-				tbProb = (TextBox)Controls.Find("tbOptionProb" + i, true)[0];
-
-				tbProb.Text = pTempQuestRow["a_option_prob" + i].ToString();
-			}
-			/****************************************/
-			bUserAction = true;
-
-			btnUpdate.Enabled = true;
-
-			btnCopy.Enabled = true;
-			btnDelete.Enabled = true;
 		}
 
 		private void tbSearch_TextChanged(object sender, EventArgs e) { nSearchPosition = 0; }
@@ -311,11 +380,12 @@
 				if (bDeleteActual)
 				{
 					int nPrevObjectID = MainList.SelectedIndex <= 0 ? 0 : MainList.SelectedIndex - 1;
-
 					MainList.Items.RemoveAt(MainList.Items.Count - 1);
 
-					object nSelected = MainList.Items[nPrevObjectID];
+					if (MainList.Items.Count == 0)
+						return;
 
+					object nSelected = MainList.Items[nPrevObjectID];
 					LoadUIData(((Main.ListBoxItem)nSelected).ID, true);
 
 					MainList.SelectedIndexChanged -= MainList_SelectedIndexChanged;
@@ -327,7 +397,6 @@
 				else
 				{
 					bUnsavedChanges = false;
-
 					LoadUIData(pSelectedItem.ID, true);
 				}
 			}
@@ -338,219 +407,88 @@
 				MainList.SelectedIndexChanged += MainList_SelectedIndexChanged;
 			}
 
-			pLastSelected = pSelectedItem;
+			pLastSelected = (Main.ListBoxItem?)MainList.SelectedItem;
 		}
 
 		private void btnReload_Click(object sender, EventArgs e)
 		{
-			void Reload()
-			{
-				MainList.Enabled = false;
-				btnReload.Enabled = false;
-
-				nSearchPosition = 0;
-
-				pMain.pTables.RareOptionTable?.Dispose();
-				pMain.pTables.RareOptionTable = null;
-
-				pMain.pTables.OptionTable?.Dispose();
-				pMain.pTables.OptionTable = null;
-
-				btnUpdate.Enabled = false;
-
-				btnAddNew.Enabled = false;
-				btnCopy.Enabled = false;
-				btnDelete.Enabled = false;
-
-				RareOptionEditor_LoadAsync(sender, e);
-			}
-
 			var (bProceed, _) = CheckUnsavedChanges();
+			if (!bProceed)
+				return;
 
-			if (bProceed)
-			{
-				bUnsavedChanges = false;
-
-				Reload();
-			}
+			bUnsavedChanges = false;
+			RareOptionEditor_LoadAsync(sender, e);
 		}
 
 		private void btnAddNew_Click(object sender, EventArgs e)
 		{
-			bool bSuccess = true;
 			var (bProceed, bDeleteActual) = CheckUnsavedChanges();
+			if (!bProceed || pMain.pTables.QuestTable == null)
+				return;
 
-			if (bProceed)
-			{
-				int i, nNewRareOptionID = 9999;
-				DataRow pNewRow;
+			int nNewQuestID = GetNextQuestID();
+			DataRow pNewRow = pMain.pTables.QuestTable.NewRow();
 
-				List<string> listTinyIntColumns =
-				[
-					"a_grade"
-#if ENABLE_TYPE
-					, "a_type"
-#endif
-				];
+			foreach (DataColumn pColumn in pMain.pTables.QuestTable.Columns)
+				pNewRow[pColumn.ColumnName] = GetDefaultValue(pColumn, nNewQuestID);
 
-				List<string> listIntColumns =
-				[
-					"a_index",
-					"a_attack",
-					"a_defense",
-					"a_magic",
-					"a_resist",
-					"a_option_index0",
-					"a_option_level0",
-					"a_option_prob0",
-					"a_option_index1",
-					"a_option_level1",
-					"a_option_prob1",
-					"a_option_index2",
-					"a_option_level2",
-					"a_option_prob2",
-					"a_option_index3",
-					"a_option_level3",
-					"a_option_prob3",
-					"a_option_index4",
-					"a_option_level4",
-					"a_option_prob4",
-					"a_option_index5",
-					"a_option_level5",
-					"a_option_prob5",
-					"a_option_index6",
-					"a_option_level6",
-					"a_option_prob6",
-					"a_option_index7",
-					"a_option_level7",
-					"a_option_prob7",
-					"a_option_index8",
-					"a_option_level8",
-					"a_option_prob8",
-					"a_option_index9",
-					"a_option_level9",
-					"a_option_prob9"
-				];
+			pTempQuestRow = pNewRow;
 
-				List<string> listVarcharColumns = new();	// Here add all varchar columns.
+			if (bDeleteActual && MainList.SelectedIndex >= 0)
+				MainList.Items.RemoveAt(MainList.SelectedIndex);
 
-				foreach (string strNation in pMain.pSettings.NationSupported)
-					listVarcharColumns.Add("a_prefix_" + strNation.ToLower());
+			AddToList(nNewQuestID, "New Quest", true);
+		}
 
-				if (pMain.pTables.RareOptionTable == null)
-				{
-					DataTable pRareOptionTableStruct = new();
+		private int GetNextQuestID()
+		{
+			if (pMain.pTables.QuestTable?.Rows.Count > 0)
+				return pMain.pTables.QuestTable.AsEnumerable().Max(row => Convert.ToInt32(row["a_index"])) + 1;
 
-					foreach (string strColumnName in listTinyIntColumns)
-						pRareOptionTableStruct.Columns.Add(strColumnName, typeof(sbyte));
+			DataTable? QueryReturn = pMain.QuerySelect(pMain.pSettings.DBCharset, $"SELECT a_index FROM {pMain.pSettings.DBData}.t_quest ORDER BY a_index DESC LIMIT 1;");
+			if (QueryReturn != null && QueryReturn.Rows.Count > 0)
+				return Convert.ToInt32(QueryReturn.Rows[0]["a_index"]) + 1;
 
-					foreach (string strColumnName in listIntColumns)
-						pRareOptionTableStruct.Columns.Add(strColumnName, typeof(int));
+			return 1;
+		}
 
-					foreach (string strColumnName in listVarcharColumns)
-						pRareOptionTableStruct.Columns.Add(strColumnName, typeof(string));
+		private object GetDefaultValue(DataColumn pColumn, int nNewQuestID)
+		{
+			string strColumnName = pColumn.ColumnName;
 
-					pNewRow = pRareOptionTableStruct.NewRow();
+			if (strColumnName == "a_index")
+				return nNewQuestID;
 
-					pRareOptionTableStruct.Dispose();
+			if (strColumnName.StartsWith("a_name"))
+				return "New Quest";
 
-					DataTable? QueryReturn = pMain.QuerySelect(pMain.pSettings.DBCharset, $"SELECT a_index FROM {pMain.pSettings.DBData}.t_rareoption ORDER BY a_index DESC LIMIT 1;");
-					if (QueryReturn != null && QueryReturn.Rows.Count > 0)
-					{
-						nNewRareOptionID = Convert.ToInt32(QueryReturn.Rows[0]["a_index"]) + 1;
-					}
-					else
-					{
-						if ((nNewRareOptionID = pMain.AskForIndex(this.Text, "a_index")) == -1)	// I don't test it...
-							return;
-					}
-				}
-				else
-				{
-					nNewRareOptionID = Convert.ToInt32(pMain.pTables.RareOptionTable.Select().LastOrDefault()["a_index"]) + 1;
+			if (strColumnName.StartsWith("a_desc") || strColumnName.StartsWith("a_start_give"))
+				return string.Empty;
 
-					pNewRow = pMain.pTables.RareOptionTable.NewRow();
-				}
+			if (pColumn.DataType == typeof(string))
+				return string.Empty;
 
-				List<object> listDefaultValue =
-				[
-					0,	// a_grade
-#if ENABLE_TYPE
-					0,	// a_type
-#endif
-					nNewRareOptionID,	// a_index
-					0,	// a_attack
-					0,	// a_defense
-					0,	// a_magic
-					0,	// a_resist
-					-1,	// a_option_index0
-					0,	// a_option_level0
-					0,	// a_option_prob0
-					-1,	// a_option_index1
-					0,	// a_option_level1
-					0,	// a_option_prob1
-					-1,	// a_option_index2
-					0,	// a_option_level2
-					0,	// a_option_prob2
-					-1,	// a_option_index3
-					0,	// a_option_level3
-					0,	// a_option_prob3
-					-1,	// a_option_index4
-					0,	// a_option_level4
-					0,	// a_option_prob4
-					-1,	// a_option_index5
-					0,	// a_option_level5
-					0,	// a_option_prob5
-					-1,	// a_option_index6
-					0,	// a_option_level6
-					0,	// a_option_prob6
-					-1,	// a_option_index7
-					0,	// a_option_level7
-					0,	// a_option_prob7
-					-1,	// a_option_index8
-					0,	// a_option_level8
-					0,	// a_option_prob8
-					-1,	// a_option_index9
-					0,	// a_option_level9
-					0	// a_option_prob9
-				];
+			if (strColumnName.Contains("type") || strColumnName.Contains("npc") || strColumnName.Contains("item") || strColumnName == "a_need_job" || strColumnName == "a_failvalue")
+				return CanStoreNegative(pColumn.DataType) ? -1 : 0;
 
-				foreach (string strNation in pMain.pSettings.NationSupported)
-					listDefaultValue.Add("New Quest");
+			if (strColumnName == "a_need_min_level")
+				return 1;
 
-				i = 0;
-				foreach (string strColumnName in listTinyIntColumns.Concat(listIntColumns).Concat(listVarcharColumns))
-				{
-					pNewRow[strColumnName] = listDefaultValue[i];
+			if (strColumnName == "a_need_max_level")
+				return 999;
 
-					i++;
-				}
+			return 0;
+		}
 
-				try
-				{
-					pTempQuestRow = pNewRow;
-				}
-				catch (Exception ex)
-				{
-					string strError = $"Quest Editor > Quest: {nNewRareOptionID} Something got wrong. Please restart the application ({ex.Message}).";
-
-					pMain.Logger(LogTypes.Error, strError);
-
-					MessageBox.Show(strError, "Quest Editor", MessageBoxButtons.OK, MessageBoxIcon.Error);
-
-					bSuccess = false;
-				}
-				finally
-				{
-					if (bSuccess)
-					{
-						if (bDeleteActual)
-							MainList.Items.RemoveAt(MainList.SelectedIndex);
-
-						AddToList(nNewRareOptionID, "New Quest", true);
-					}
-				}
-			}
+		private bool CanStoreNegative(Type pType)
+		{
+			return pType == typeof(sbyte)
+				|| pType == typeof(short)
+				|| pType == typeof(int)
+				|| pType == typeof(long)
+				|| pType == typeof(float)
+				|| pType == typeof(double)
+				|| pType == typeof(decimal);
 		}
 
 		private void btnCopy_Click(object sender, EventArgs e)
@@ -559,381 +497,241 @@
 
 			if (bDeleteActual)
 			{
-				MessageBox.Show("You cannot copy this Quest. Because it's temporary.", "Quest Editor", MessageBoxButtons.YesNo, MessageBoxIcon.Error);
+				MessageBox.Show("You cannot copy this Quest because it is temporary.", "Quest Editor", MessageBoxButtons.OK, MessageBoxIcon.Error);
 				return;
 			}
 
-			if (bProceed)
+			if (!bProceed || pTempQuestRow == null || pMain.pTables.QuestTable == null)
+				return;
+
+			int nNewQuestID = GetNextQuestID();
+			DataRow pNewRow = pMain.pTables.QuestTable.NewRow();
+			pNewRow.ItemArray = (object[])pTempQuestRow.ItemArray.Clone();
+			pNewRow["a_index"] = nNewQuestID;
+
+			foreach (string strNation in pMain.pSettings.NationSupported)
 			{
-				int nRareOptionIDToCopy = Convert.ToInt32(pTempQuestRow["a_index"]);
-				int nNewRareOptionID = Convert.ToInt32(pMain.pTables.RareOptionTable.Select().LastOrDefault()["a_index"]) + 1;
-
-				pTempQuestRow = pMain.pTables.RareOptionTable.NewRow();
-				pTempQuestRow.ItemArray = (object[])pMain.pTables.RareOptionTable.Select("a_index=" + nRareOptionIDToCopy)[0].ItemArray.Clone();
-
-				pTempQuestRow["a_index"] = nNewRareOptionID;
-
-				foreach (string strNation in pMain.pSettings.NationSupported)
-					pTempQuestRow["a_prefix_" + strNation.ToLower()] = pTempQuestRow["a_prefix_" + strNation.ToLower()] + " Copy";
-
-				AddToList(nNewRareOptionID, pTempQuestRow["a_prefix_" + pMain.pSettings.WorkLocale].ToString() ?? string.Empty, true);
+				string strColumnName = "a_name_" + strNation.ToLower();
+				if (pNewRow.Table.Columns.Contains(strColumnName))
+					pNewRow[strColumnName] = pNewRow[strColumnName] + " Copy";
 			}
+
+			if (pNewRow.Table.Columns.Contains("a_name"))
+				pNewRow["a_name"] = pNewRow["a_name"] + " Copy";
+
+			pTempQuestRow = pNewRow;
+			AddToList(nNewQuestID, GetQuestName(pNewRow), true);
 		}
 
 		private void btnDelete_Click(object sender, EventArgs e)
 		{
+			if (pTempQuestRow == null)
+				return;
+
+			int nQuestID = Convert.ToInt32(pTempQuestRow["a_index"]);
+			DataRow? pQuestTableRow = pMain.pTables.QuestTable?.Select("a_index=" + nQuestID).FirstOrDefault();
+
+			if (MessageBox.Show($"Delete quest {nQuestID}?", "Quest Editor", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) != DialogResult.Yes)
+				return;
+
 			bool bSuccess = true;
-			int nRareOptionID = Convert.ToInt32(pTempQuestRow["a_index"]);
-			DataRow? pRareOptionTableRow = pMain.pTables.RareOptionTable?.Select("a_index=" + nRareOptionID).FirstOrDefault();
-
-			if (pRareOptionTableRow != null)
+			if (pQuestTableRow != null)
 			{
-				if (!(bSuccess = pMain.QueryUpdateInsertDelete(pMain.pSettings.DBCharset, $"DELETE FROM {pMain.pSettings.DBData}.t_rareoption WHERE a_index={nRareOptionID};", out long _)))
+				bSuccess = pMain.QueryUpdateInsertDelete(pMain.pSettings.DBCharset, $"DELETE FROM {pMain.pSettings.DBData}.t_quest WHERE a_index={nQuestID};", out long _);
+				if (!bSuccess)
 				{
-					string strError = $"Quest Editor > Quest: {nRareOptionID} Something got wrong while trying to execute the MySQL Transaction. Changes not applied.";
-
+					string strError = $"Quest Editor > Quest: {nQuestID} Something went wrong while deleting from the database.";
 					pMain.Logger(LogTypes.Error, strError);
-
 					MessageBox.Show(strError, "Quest Editor", MessageBoxButtons.OK, MessageBoxIcon.Error);
 				}
 			}
 
-			if (bSuccess)
-			{
-				try
-				{
-					if (pRareOptionTableRow != null)
-						pMain.pTables.RareOptionTable?.Rows.Remove(pRareOptionTableRow);
-				}
-				catch (Exception ex)
-				{
-					string strError = $"Quest Editor > Quest: {nRareOptionID} Changes applied in DataBase, but something got wrong while transferring temp data to main table. Please restart the application ({ex.Message}).";
+			if (!bSuccess)
+				return;
 
-					pMain.Logger(LogTypes.Error, strError);
+			if (pQuestTableRow != null)
+				pMain.pTables.QuestTable?.Rows.Remove(pQuestTableRow);
 
-					MessageBox.Show(strError, "Quest Editor", MessageBoxButtons.OK, MessageBoxIcon.Error);
+			int nPrevObjectID = MainList.SelectedIndex <= 0 ? 0 : MainList.SelectedIndex - 1;
+			MainList.Items.Remove(MainList.SelectedItem);
 
-					bSuccess = false;
-				}
-				finally
-				{
-					if (bSuccess)
-					{
-						int nPrevObjectID = MainList.SelectedIndex <= 0 ? 0 : MainList.SelectedIndex - 1;
+			if (MainList.Items.Count > 0)
+				MainList.SelectedIndex = Math.Min(nPrevObjectID, MainList.Items.Count - 1);
 
-						MainList.Items.Remove(MainList.SelectedItem);
-
-						MessageBox.Show("Quest Deleted successfully!", "Quest Editor", MessageBoxButtons.OK);
-
-						MainList.SelectedIndex = nPrevObjectID;
-
-						bUnsavedChanges = false;
-					}
-				}
-			}
+			bUnsavedChanges = false;
+			MessageBox.Show("Quest deleted successfully.", "Quest Editor", MessageBoxButtons.OK);
 		}
-		/****************************************/
+
 		private void cbNationSelector_SelectedIndexChanged(object sender, EventArgs e)
 		{
-			if (bUserAction)
+			if (bUserAction && pTempQuestRow != null)
 			{
 				bUserAction = false;
-
-				tbName.Text = pTempQuestRow["a_prefix_" + cbNationSelector.SelectedItem.ToString().ToLower()].ToString();
-
+				tbName.Text = GetString(LocaleColumn("a_name"));
+				tbStartDescription.Text = GetString(LocaleColumn("a_desc"));
+				tbRewardDescription.Text = GetString(LocaleColumn("a_desc2"));
+				tbConditionDescription.Text = GetString(LocaleColumn("a_desc3"));
 				bUserAction = true;
 			}
 		}
 
 		private void tbName_TextChanged(object sender, EventArgs e)
 		{
-			if (bUserAction)
-			{
-				pTempQuestRow["a_prefix_" + cbNationSelector.SelectedItem.ToString().ToLower()] = tbName.Text;
-
-				bUnsavedChanges = true;
-			}
+			SetStringColumnFromTextBox(LocaleColumn("a_name"), tbName);
 		}
 
 		private void cbGradeSelector_SelectedIndexChanged(object sender, EventArgs e)
 		{
-			if (bUserAction)
-			{
-				int nType = cbType0.SelectedIndex;
-				if (nType != -1)
-				{
-					pTempQuestRow["a_grade"] = nType;
-
-
-					label3.Focus();
-
-					bUnsavedChanges = true;
-				}
-			}
+			SetIntColumnFromComboBox("a_type1", cbType0);
 		}
-		/****************************************/
+
 		private void tbAttack_TextChanged(object sender, EventArgs e)
 		{
-			if (bUserAction)
-			{
-				pTempQuestRow["a_attack"] = tbMinLevel.Text;
-
-				bUnsavedChanges = true;
-			}
+			SetIntColumnFromTextBox("a_need_min_level", tbMinLevel);
 		}
 
 		private void tbDefense_TextChanged(object sender, EventArgs e)
 		{
-			if (bUserAction)
-			{
-				pTempQuestRow["a_defense"] = tbDefense.Text;
-
-				bUnsavedChanges = true;
-			}
+			SetIntColumnFromTextBox("a_start_data", tbDefense);
 		}
 
 		private void tbMagicAttack_TextChanged(object sender, EventArgs e)
 		{
-			if (bUserAction)
-			{
-				pTempQuestRow["a_magic"] = tbMagicAttack.Text;
-
-				bUnsavedChanges = true;
-			}
+			SetIntColumnFromTextBox("a_prize_npc", tbMagicAttack);
 		}
 
 		private void tbResistance_TextChanged(object sender, EventArgs e)
 		{
-			if (bUserAction)
-			{
-				pTempQuestRow["a_resist"] = tbResistance.Text;
+			SetIntColumnFromTextBox("a_prequest_num", tbResistance);
+		}
 
+		private void SetIntColumnFromCheckBox(string strColumnName, CheckBox checkBox)
+		{
+			if (!bUserAction || pTempQuestRow?.Table.Columns.Contains(strColumnName) != true)
+				return;
+
+			pTempQuestRow[strColumnName] = checkBox.Checked ? 1 : 0;
+			bUnsavedChanges = true;
+		}
+
+		private void SetIntColumnFromComboBox(string strColumnName, ComboBox comboBox)
+		{
+			if (!bUserAction || pTempQuestRow?.Table.Columns.Contains(strColumnName) != true || comboBox.SelectedItem is not Main.ComboBoxItem pItem)
+				return;
+
+			pTempQuestRow[strColumnName] = pItem.Value;
+			bUnsavedChanges = true;
+		}
+
+		private void SetIntColumnFromTextBox(string strColumnName, TextBox textBox)
+		{
+			if (!bUserAction || pTempQuestRow?.Table.Columns.Contains(strColumnName) != true)
+				return;
+
+			if (int.TryParse(textBox.Text, out int nValue))
+			{
+				pTempQuestRow[strColumnName] = nValue;
 				bUnsavedChanges = true;
 			}
 		}
-		/****************************************/
-		private void OptionSelectAction(int nNumber)
+
+		private void SetStringColumnFromTextBox(string strColumnName, TextBox textBox)
 		{
-			ComboBox cbObj = (ComboBox)Controls.Find("cbOptionID" + nNumber, true)[0];
-			int nType = cbObj.SelectedIndex;
+			if (!bUserAction || pTempQuestRow?.Table.Columns.Contains(strColumnName) != true)
+				return;
 
-			if (nType != -1)
-			{
-				ComboBox cbLevel = (ComboBox)Controls.Find("cbOptionLevel" + nNumber, true)[0];
-				TextBox tbObj = (TextBox)Controls.Find("tbOptionProb" + nNumber, true)[0];
-				int nOptionID = Convert.ToInt32(((Main.ComboBoxItem)cbObj.SelectedItem).Value);
-
-				if (nType > 0)
-				{
-					DataRow pRow = pMain.pTables.OptionTable?.Select("a_type=" + nOptionID).FirstOrDefault();
-					string[] strProb = pRow["a_prob"].ToString().Split(' ');
-					int i = 0;
-
-					cbLevel.SelectedIndex = -1;
-					cbLevel.Enabled = true;
-
-					tbObj.Enabled = true;
-
-					cbLevel.Items.Clear();
-					cbLevel.BeginUpdate();
-
-					foreach (string strLevel in pRow["a_level"].ToString().Split(' '))
-					{
-						if (i < strProb.Length && strProb[i] != null)
-						{
-							cbLevel.Items.Add($"{(i + 1)} - Value: {strLevel} Prob: {strProb[i]}");
-
-							if ((i + 1) == Convert.ToInt32(pTempQuestRow["a_option_level" + nNumber]))
-								cbLevel.SelectedIndex = i;
-						}
-						else
-						{
-							pMain.Logger(LogTypes.Error, $"Rate Option Editor > Option: {nOptionID} Error: a_level & a_prob not match.");
-						}
-
-						i++;
-					}
-
-					cbLevel.EndUpdate();
-
-					if (cbLevel.SelectedIndex == -1)
-						cbLevel.SelectedIndex = 0;
-				}
-				else
-				{
-					cbLevel.SelectedIndex = -1;
-					cbLevel.Enabled = false;
-
-					tbObj.Enabled = false;
-				}
-
-				if (bUserAction)
-				{
-					pTempQuestRow["a_option_index" + nNumber] = nOptionID;
-
-					bUnsavedChanges = true;
-				}
-			}
+			pTempQuestRow[strColumnName] = textBox.Text;
+			bUnsavedChanges = true;
 		}
 
-		private void cbOptionID0_SelectedIndexChanged(object sender, EventArgs e) { OptionSelectAction(0); }
-		private void cbOptionID1_SelectedIndexChanged(object sender, EventArgs e) { OptionSelectAction(1); }
-		private void cbOptionID2_SelectedIndexChanged(object sender, EventArgs e) { OptionSelectAction(2); }
-		private void cbOptionID3_SelectedIndexChanged(object sender, EventArgs e) { OptionSelectAction(3); }
-		private void cbOptionID4_SelectedIndexChanged(object sender, EventArgs e) { OptionSelectAction(4); }
-		private void cbOptionID5_SelectedIndexChanged(object sender, EventArgs e) { OptionSelectAction(5); }
-		private void cbOptionID6_SelectedIndexChanged(object sender, EventArgs e) { OptionSelectAction(6); }
-		private void cbOptionID7_SelectedIndexChanged(object sender, EventArgs e) { OptionSelectAction(7); }
-		private void cbOptionID8_SelectedIndexChanged(object sender, EventArgs e) { OptionSelectAction(8); }
-		private void cbOptionID9_SelectedIndexChanged(object sender, EventArgs e) { OptionSelectAction(9); }
-		/****************************************/
-		private void OptionLevelAction(int nNumber)
-		{
-			if (bUserAction)
-			{
-				ComboBox cbObj = (ComboBox)Controls.Find("cbOptionLevel" + nNumber, true)[0];
-				int nLevel = cbObj.SelectedIndex;
-
-				if (nLevel != -1)
-				{
-					pTempQuestRow["a_option_level" + nNumber] = nLevel + 1;
-
-					bUnsavedChanges = true;
-				}
-			}
-		}
-		
-		private void cbOptionLevel0_SelectedIndexChanged(object sender, EventArgs e) { OptionLevelAction(0); }
-		private void cbOptionLevel1_SelectedIndexChanged(object sender, EventArgs e) { OptionLevelAction(1); }
-		private void cbOptionLevel2_SelectedIndexChanged(object sender, EventArgs e) { OptionLevelAction(2); }
-		private void cbOptionLevel3_SelectedIndexChanged(object sender, EventArgs e) { OptionLevelAction(3); }
-		private void cbOptionLevel4_SelectedIndexChanged(object sender, EventArgs e) { OptionLevelAction(4); }
-		private void cbOptionLevel5_SelectedIndexChanged(object sender, EventArgs e) { OptionLevelAction(5); }
-		private void cbOptionLevel6_SelectedIndexChanged(object sender, EventArgs e) { OptionLevelAction(6); }
-		private void cbOptionLevel7_SelectedIndexChanged(object sender, EventArgs e) { OptionLevelAction(7); }
-		private void cbOptionLevel8_SelectedIndexChanged(object sender, EventArgs e) { OptionLevelAction(8); }
-		private void cbOptionLevel9_SelectedIndexChanged(object sender, EventArgs e) { OptionLevelAction(9); }
-		/****************************************/
-		private void OptionProbAction(int nNumber)
-		{
-			TextBox cbObj = (TextBox)Controls.Find("tbOptionProb" + nNumber, true)[0];
-			int nValue;
-
-			if (cbObj.Text != null && int.TryParse(cbObj.Text, out nValue))
-			{
-				if (bUserAction)
-				{
-					pTempQuestRow["a_option_prob" + nNumber] = nValue;
-
-					bUnsavedChanges = true;
-				}
-
-				((Label)Controls.Find("lOptionProbPercentage" + nNumber, true)[0]).Text = ((nValue * 100.0f) / 10000.0f) + "%";
-			}
-		}
-
-		private void tbOptionProb0_TextChanged(object sender, EventArgs e) { OptionProbAction(0); }
-		private void tbOptionProb1_TextChanged(object sender, EventArgs e) { OptionProbAction(1); }
-		private void tbOptionProb2_TextChanged(object sender, EventArgs e) { OptionProbAction(2); }
-		private void tbOptionProb3_TextChanged(object sender, EventArgs e) { OptionProbAction(3); }
-		private void tbOptionProb4_TextChanged(object sender, EventArgs e) { OptionProbAction(4); }
-		private void tbOptionProb5_TextChanged(object sender, EventArgs e) { OptionProbAction(5); }
-		private void tbOptionProb6_TextChanged(object sender, EventArgs e) { OptionProbAction(6); }
-		private void tbOptionProb7_TextChanged(object sender, EventArgs e) { OptionProbAction(7); }
-		private void tbOptionProb8_TextChanged(object sender, EventArgs e) { OptionProbAction(8); }
-		private void tbOptionProb9_TextChanged(object sender, EventArgs e) { OptionProbAction(9); }
-		/****************************************/
 		private void btnUpdate_Click(object sender, EventArgs e)
 		{
+			if (pTempQuestRow == null)
+				return;
+
 			bool bSuccess = true;
-			int nItemID = Convert.ToInt32(pTempQuestRow["a_index"]);
+			int nQuestID = Convert.ToInt32(pTempQuestRow["a_index"]);
 			StringBuilder strbuilderQuery = new();
 
-			// Check if RareOtion exist in Global Table, if exist, do a UPDATE. If not, do a INSERT.
-			DataRow? pRareOptionTableRow = pMain.pTables.RareOptionTable?.Select("a_index=" + nItemID).FirstOrDefault();
-			if (pRareOptionTableRow != null)	// UPDATE
+			DataRow? pQuestTableRow = pMain.pTables.QuestTable?.Select("a_index=" + nQuestID).FirstOrDefault();
+			if (pQuestTableRow != null)
 			{
-				// Compose UPDATE Query.
-				strbuilderQuery.Append($"UPDATE {pMain.pSettings.DBData}.t_rareoption SET");
+				strbuilderQuery.Append($"UPDATE {pMain.pSettings.DBData}.t_quest SET");
 
 				foreach (DataColumn pCol in pTempQuestRow.Table.Columns)
+				{
+					if (pCol.ColumnName == "a_index")
+						continue;
+
 					strbuilderQuery.Append($" {pCol.ColumnName}='{pMain.EscapeChars(pTempQuestRow[pCol].ToString() ?? string.Empty)}',");
+				}
 
 				strbuilderQuery.Length -= 1;
-
-				strbuilderQuery.Append($" WHERE a_index={nItemID};");
+				strbuilderQuery.Append($" WHERE a_index={nQuestID};");
 			}
-			else	// INSERT
+			else
 			{
-				// Compose INSERT Query.
 				StringBuilder strColumnsNames = new();
 				StringBuilder strColumnsValues = new();
 
 				foreach (DataColumn pCol in pTempQuestRow.Table.Columns)
 				{
 					strColumnsNames.Append(pCol.ColumnName + ", ");
-
-					strColumnsValues.Append($"'{pMain.EscapeChars(pTempQuestRow[pCol].ToString())}', ");
+					strColumnsValues.Append($"'{pMain.EscapeChars(pTempQuestRow[pCol].ToString() ?? string.Empty)}', ");
 				}
 
 				strColumnsNames.Length -= 2;
 				strColumnsValues.Length -= 2;
 
-				strbuilderQuery.Append($"INSERT INTO {pMain.pSettings.DBData}.t_rareoption ({strColumnsNames}) VALUES ({strColumnsValues});");
+				strbuilderQuery.Append($"INSERT INTO {pMain.pSettings.DBData}.t_quest ({strColumnsNames}) VALUES ({strColumnsValues});");
 			}
 
-			if (pMain.QueryUpdateInsertDelete(pMain.pSettings.DBCharset, strbuilderQuery.ToString(), out long _))
+			if (!pMain.QueryUpdateInsertDelete(pMain.pSettings.DBCharset, strbuilderQuery.ToString(), out long _))
 			{
-				try
-				{
-					if (pRareOptionTableRow != null)    // Row exist in Global Table, update it.
-					{
-						pRareOptionTableRow.ItemArray = (object[])pTempQuestRow.ItemArray.Clone();
-					}
-					else    // Row not exist in Global Table, insert it.
-					{
-						pRareOptionTableRow = pMain.pTables.RareOptionTable.NewRow();
-						pRareOptionTableRow.ItemArray = (object[])pTempQuestRow.ItemArray.Clone();
-						pMain.pTables.RareOptionTable.Rows.Add(pRareOptionTableRow);
-					}
-				}
-				catch (Exception ex)
-				{
-					string strError = $"Quest Editor > Quest: {nItemID} Changes applied in DataBase, but something got wrong while transferring temp data to main table. Please restart the application ({ex.Message}).";
-
-					pMain.Logger(LogTypes.Error, strError);
-
-					MessageBox.Show(strError, "Quest Editor", MessageBoxButtons.OK, MessageBoxIcon.Error);
-
-					bSuccess = false;
-				}
-				finally
-				{
-					if (bSuccess)
-					{
-						int nSelectedIndex = MainList.SelectedIndex;
-						Main.ListBoxItem pSelectedItem = (Main.ListBoxItem)MainList.Items[nSelectedIndex];
-						pSelectedItem.ID = nItemID;
-						pSelectedItem.Text = nItemID + " - " + tbName.Text.ToString();
-
-						MainList.SelectedIndexChanged -= MainList_SelectedIndexChanged;
-						MainList.Items[nSelectedIndex] = pSelectedItem;
-						MainList.SelectedIndexChanged += MainList_SelectedIndexChanged;
-
-						MessageBox.Show("Changes applied successfully!", "Quest Editor", MessageBoxButtons.OK);
-
-						bUnsavedChanges = false;
-					}
-				}
-			}
-			else
-			{
-				string strError = $"Quest Editor > Quest: {nItemID} Something got wrong while trying to execute the MySQL Transaction. Changes not applied.";
-
+				string strError = $"Quest Editor > Quest: {nQuestID} Something went wrong while updating the database.";
 				pMain.Logger(LogTypes.Error, strError);
-
 				MessageBox.Show(strError, "Quest Editor", MessageBoxButtons.OK, MessageBoxIcon.Error);
+				return;
 			}
+
+			try
+			{
+				if (pQuestTableRow != null)
+				{
+					pQuestTableRow.ItemArray = (object[])pTempQuestRow.ItemArray.Clone();
+				}
+				else if (pMain.pTables.QuestTable != null)
+				{
+					pQuestTableRow = pMain.pTables.QuestTable.NewRow();
+					pQuestTableRow.ItemArray = (object[])pTempQuestRow.ItemArray.Clone();
+					pMain.pTables.QuestTable.Rows.Add(pQuestTableRow);
+				}
+			}
+			catch (Exception ex)
+			{
+				string strError = $"Quest Editor > Quest: {nQuestID} Changes applied in database, but updating the local table failed. Please restart the application ({ex.Message}).";
+				pMain.Logger(LogTypes.Error, strError);
+				MessageBox.Show(strError, "Quest Editor", MessageBoxButtons.OK, MessageBoxIcon.Error);
+				bSuccess = false;
+			}
+
+			if (!bSuccess)
+				return;
+
+			int nSelectedIndex = MainList.SelectedIndex;
+			if (nSelectedIndex >= 0)
+			{
+				Main.ListBoxItem pSelectedItem = (Main.ListBoxItem)MainList.Items[nSelectedIndex];
+				pSelectedItem.ID = nQuestID;
+				pSelectedItem.Text = nQuestID + " - " + tbName.Text;
+
+				MainList.SelectedIndexChanged -= MainList_SelectedIndexChanged;
+				MainList.Items[nSelectedIndex] = pSelectedItem;
+				MainList.SelectedIndexChanged += MainList_SelectedIndexChanged;
+			}
+
+			bUnsavedChanges = false;
+			MessageBox.Show("Changes applied successfully.", "Quest Editor", MessageBoxButtons.OK);
 		}
 	}
 }
