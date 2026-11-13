@@ -34,49 +34,59 @@ namespace LastChaos_ToolBoxNG
 			btnAddNew = new Button();
 			MainList = new ListBox();
 			groupBox1 = new GroupBox();
+			cbStartFrom = new ComboBox();
+			label4 = new Label();
+			tbNeededExperience = new TextBox();
+			label39 = new Label();
+			tbMaxLevel = new TextBox();
+			label35 = new Label();
+			tbMinLevel = new TextBox();
+			cbType2 = new ComboBox();
+			label31 = new Label();
+			label8 = new Label();
+			cbType1 = new ComboBox();
+			label5 = new Label();
 			cbEnable = new CheckBox();
 			cbJob = new ComboBox();
 			label7 = new Label();
 			groupBox5 = new GroupBox();
-			tbMinLevel = new TextBox();
-			tbResistance = new TextBox();
-			label8 = new Label();
-			label11 = new Label();
-			label9 = new Label();
-			tbMagicAttack = new TextBox();
-			tbDefense = new TextBox();
-			label10 = new Label();
 			btnUpdate = new Button();
 			cbType0 = new ComboBox();
 			label1 = new Label();
 			label3 = new Label();
 			groupBox2 = new GroupBox();
+			tbConditionDescription = new TextBox();
+			label27 = new Label();
+			tbRewardDescription = new TextBox();
+			label23 = new Label();
 			cbNationSelector = new ComboBox();
 			tbName = new TextBox();
 			label2 = new Label();
+			tbStartDescription = new TextBox();
+			label19 = new Label();
 			tbID = new TextBox();
 			btnCopy = new Button();
 			btnDelete = new Button();
 			tbSearch = new TextBox();
-			tbStartDescription = new TextBox();
-			label19 = new Label();
-			tbRewardDescription = new TextBox();
-			label23 = new Label();
-			tbConditionDescription = new TextBox();
-			label27 = new Label();
-			cbType1 = new ComboBox();
-			label5 = new Label();
-			cbType2 = new ComboBox();
-			label31 = new Label();
-			tbMaxLevel = new TextBox();
-			label35 = new Label();
-			tbNeededExperience = new TextBox();
-			label39 = new Label();
-			cbStartFrom = new ComboBox();
-			label4 = new Label();
+			groupBox6 = new GroupBox();
+			cbRvRGradeSelector = new ComboBox();
+			label36 = new Label();
+			cbRvRValueSelector = new ComboBox();
+			label37 = new Label();
+			lRequiredQuest = new Label();
+			btnPreviousQuestNeeded = new Button();
+			btnNPCID = new Button();
+			lbStartFrom = new Label();
+			cbZoneNumSelector = new ComboBox();
+			label12 = new Label();
+			comboBox1 = new ComboBox();
+			button1 = new Button();
+			label13 = new Label();
+			label14 = new Label();
 			groupBox1.SuspendLayout();
 			groupBox5.SuspendLayout();
 			groupBox2.SuspendLayout();
+			groupBox6.SuspendLayout();
 			SuspendLayout();
 			// 
 			// btnReload
@@ -135,8 +145,9 @@ namespace LastChaos_ToolBoxNG
 			// groupBox1
 			// 
 			groupBox1.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-			groupBox1.Controls.Add(cbStartFrom);
-			groupBox1.Controls.Add(label4);
+			groupBox1.Controls.Add(lRequiredQuest);
+			groupBox1.Controls.Add(btnPreviousQuestNeeded);
+			groupBox1.Controls.Add(groupBox6);
 			groupBox1.Controls.Add(tbNeededExperience);
 			groupBox1.Controls.Add(label39);
 			groupBox1.Controls.Add(tbMaxLevel);
@@ -164,10 +175,161 @@ namespace LastChaos_ToolBoxNG
 			groupBox1.Margin = new Padding(4, 3, 4, 3);
 			groupBox1.Name = "groupBox1";
 			groupBox1.Padding = new Padding(4, 3, 4, 3);
-			groupBox1.Size = new Size(1056, 537);
+			groupBox1.Size = new Size(1171, 537);
 			groupBox1.TabIndex = 0;
 			groupBox1.TabStop = false;
 			groupBox1.Text = "Quest Data";
+			// 
+			// cbStartFrom
+			// 
+			cbStartFrom.AllowDrop = true;
+			cbStartFrom.BackColor = Color.FromArgb(28, 30, 31);
+			cbStartFrom.DropDownStyle = ComboBoxStyle.DropDownList;
+			cbStartFrom.FlatStyle = FlatStyle.Flat;
+			cbStartFrom.ForeColor = Color.FromArgb(208, 203, 148);
+			cbStartFrom.FormattingEnabled = true;
+			cbStartFrom.Location = new Point(78, 22);
+			cbStartFrom.Margin = new Padding(4, 3, 4, 3);
+			cbStartFrom.Name = "cbStartFrom";
+			cbStartFrom.Size = new Size(80, 23);
+			cbStartFrom.TabIndex = 1059;
+			cbStartFrom.Visible = false;
+			// 
+			// label4
+			// 
+			label4.AutoSize = true;
+			label4.ForeColor = Color.FromArgb(208, 203, 148);
+			label4.Location = new Point(8, 26);
+			label4.Margin = new Padding(4, 0, 4, 0);
+			label4.Name = "label4";
+			label4.Size = new Size(62, 15);
+			label4.TabIndex = 1060;
+			label4.Text = "Start From";
+			label4.TextAlign = ContentAlignment.MiddleRight;
+			label4.Visible = false;
+			// 
+			// tbNeededExperience
+			// 
+			tbNeededExperience.BackColor = Color.FromArgb(28, 30, 31);
+			tbNeededExperience.BorderStyle = BorderStyle.FixedSingle;
+			tbNeededExperience.ForeColor = Color.FromArgb(208, 203, 148);
+			tbNeededExperience.Location = new Point(687, 55);
+			tbNeededExperience.Margin = new Padding(4, 3, 4, 3);
+			tbNeededExperience.Name = "tbNeededExperience";
+			tbNeededExperience.Size = new Size(80, 23);
+			tbNeededExperience.TabIndex = 1057;
+			tbNeededExperience.TextAlign = HorizontalAlignment.Center;
+			// 
+			// label39
+			// 
+			label39.AutoSize = true;
+			label39.ForeColor = Color.FromArgb(208, 203, 148);
+			label39.Location = new Point(572, 59);
+			label39.Margin = new Padding(4, 0, 4, 0);
+			label39.Name = "label39";
+			label39.Size = new Size(107, 15);
+			label39.TabIndex = 1058;
+			label39.Text = "Needed Experience";
+			label39.TextAlign = ContentAlignment.MiddleRight;
+			// 
+			// tbMaxLevel
+			// 
+			tbMaxLevel.BackColor = Color.FromArgb(28, 30, 31);
+			tbMaxLevel.BorderStyle = BorderStyle.FixedSingle;
+			tbMaxLevel.ForeColor = Color.FromArgb(208, 203, 148);
+			tbMaxLevel.Location = new Point(366, 55);
+			tbMaxLevel.Margin = new Padding(4, 3, 4, 3);
+			tbMaxLevel.Name = "tbMaxLevel";
+			tbMaxLevel.Size = new Size(57, 23);
+			tbMaxLevel.TabIndex = 1055;
+			tbMaxLevel.TextAlign = HorizontalAlignment.Center;
+			// 
+			// label35
+			// 
+			label35.AutoSize = true;
+			label35.ForeColor = Color.FromArgb(208, 203, 148);
+			label35.Location = new Point(299, 59);
+			label35.Margin = new Padding(4, 0, 4, 0);
+			label35.Name = "label35";
+			label35.Size = new Size(59, 15);
+			label35.TabIndex = 1056;
+			label35.Text = "Max Level";
+			label35.TextAlign = ContentAlignment.MiddleRight;
+			// 
+			// tbMinLevel
+			// 
+			tbMinLevel.BackColor = Color.FromArgb(28, 30, 31);
+			tbMinLevel.BorderStyle = BorderStyle.FixedSingle;
+			tbMinLevel.ForeColor = Color.FromArgb(208, 203, 148);
+			tbMinLevel.Location = new Point(234, 55);
+			tbMinLevel.Margin = new Padding(4, 3, 4, 3);
+			tbMinLevel.Name = "tbMinLevel";
+			tbMinLevel.Size = new Size(57, 23);
+			tbMinLevel.TabIndex = 1040;
+			tbMinLevel.TextAlign = HorizontalAlignment.Center;
+			tbMinLevel.TextChanged += tbAttack_TextChanged;
+			// 
+			// cbType2
+			// 
+			cbType2.BackColor = Color.FromArgb(28, 30, 31);
+			cbType2.DropDownStyle = ComboBoxStyle.DropDownList;
+			cbType2.FlatStyle = FlatStyle.Flat;
+			cbType2.ForeColor = Color.Black;
+			cbType2.FormattingEnabled = true;
+			cbType2.Location = new Point(347, 142);
+			cbType2.Margin = new Padding(4, 3, 4, 3);
+			cbType2.Name = "cbType2";
+			cbType2.Size = new Size(190, 23);
+			cbType2.TabIndex = 1053;
+			// 
+			// label31
+			// 
+			label31.AutoSize = true;
+			label31.ForeColor = Color.FromArgb(208, 203, 148);
+			label31.Location = new Point(298, 146);
+			label31.Margin = new Padding(4, 0, 4, 0);
+			label31.Name = "label31";
+			label31.Size = new Size(41, 15);
+			label31.TabIndex = 1054;
+			label31.Text = "Type 2";
+			label31.TextAlign = ContentAlignment.MiddleRight;
+			// 
+			// label8
+			// 
+			label8.AutoSize = true;
+			label8.ForeColor = Color.FromArgb(208, 203, 148);
+			label8.Location = new Point(168, 59);
+			label8.Margin = new Padding(4, 0, 4, 0);
+			label8.Name = "label8";
+			label8.Size = new Size(58, 15);
+			label8.TabIndex = 1041;
+			label8.Text = "Min Level";
+			label8.TextAlign = ContentAlignment.MiddleRight;
+			// 
+			// cbType1
+			// 
+			cbType1.BackColor = Color.FromArgb(28, 30, 31);
+			cbType1.DropDownStyle = ComboBoxStyle.DropDownList;
+			cbType1.FlatStyle = FlatStyle.Flat;
+			cbType1.ForeColor = Color.Black;
+			cbType1.FormattingEnabled = true;
+			cbType1.Location = new Point(347, 113);
+			cbType1.Margin = new Padding(4, 3, 4, 3);
+			cbType1.Name = "cbType1";
+			cbType1.Size = new Size(190, 23);
+			cbType1.TabIndex = 1051;
+			// 
+			// label5
+			// 
+			label5.AutoSize = true;
+			label5.ForeColor = Color.FromArgb(208, 203, 148);
+			label5.Location = new Point(298, 117);
+			label5.Margin = new Padding(4, 0, 4, 0);
+			label5.Name = "label5";
+			label5.Size = new Size(41, 15);
+			label5.TabIndex = 1052;
+			label5.Text = "Type 1";
+			label5.TextAlign = ContentAlignment.MiddleRight;
 			// 
 			// cbEnable
 			// 
@@ -211,121 +373,24 @@ namespace LastChaos_ToolBoxNG
 			// 
 			// groupBox5
 			// 
-			groupBox5.Controls.Add(tbResistance);
-			groupBox5.Controls.Add(label11);
-			groupBox5.Controls.Add(label9);
-			groupBox5.Controls.Add(tbMagicAttack);
-			groupBox5.Controls.Add(tbDefense);
-			groupBox5.Controls.Add(label10);
+			groupBox5.Controls.Add(comboBox1);
+			groupBox5.Controls.Add(button1);
+			groupBox5.Controls.Add(label13);
+			groupBox5.Controls.Add(label14);
+			groupBox5.Controls.Add(cbZoneNumSelector);
+			groupBox5.Controls.Add(btnNPCID);
+			groupBox5.Controls.Add(label12);
+			groupBox5.Controls.Add(lbStartFrom);
+			groupBox5.Controls.Add(cbStartFrom);
+			groupBox5.Controls.Add(label4);
 			groupBox5.ForeColor = Color.FromArgb(208, 203, 148);
-			groupBox5.Location = new Point(785, 335);
+			groupBox5.Location = new Point(545, 86);
 			groupBox5.Margin = new Padding(4, 3, 4, 3);
 			groupBox5.Name = "groupBox5";
 			groupBox5.Padding = new Padding(4, 3, 4, 3);
-			groupBox5.Size = new Size(172, 138);
+			groupBox5.Size = new Size(582, 115);
 			groupBox5.TabIndex = 1048;
 			groupBox5.TabStop = false;
-			groupBox5.Text = "Statistics";
-			// 
-			// tbMinLevel
-			// 
-			tbMinLevel.BackColor = Color.FromArgb(28, 30, 31);
-			tbMinLevel.BorderStyle = BorderStyle.FixedSingle;
-			tbMinLevel.ForeColor = Color.FromArgb(208, 203, 148);
-			tbMinLevel.Location = new Point(234, 55);
-			tbMinLevel.Margin = new Padding(4, 3, 4, 3);
-			tbMinLevel.Name = "tbMinLevel";
-			tbMinLevel.Size = new Size(57, 23);
-			tbMinLevel.TabIndex = 1040;
-			tbMinLevel.TextAlign = HorizontalAlignment.Center;
-			tbMinLevel.TextChanged += tbAttack_TextChanged;
-			// 
-			// tbResistance
-			// 
-			tbResistance.BackColor = Color.FromArgb(28, 30, 31);
-			tbResistance.BorderStyle = BorderStyle.FixedSingle;
-			tbResistance.ForeColor = Color.FromArgb(208, 203, 148);
-			tbResistance.Location = new Point(94, 109);
-			tbResistance.Margin = new Padding(4, 3, 4, 3);
-			tbResistance.Name = "tbResistance";
-			tbResistance.Size = new Size(70, 23);
-			tbResistance.TabIndex = 1046;
-			tbResistance.TextAlign = HorizontalAlignment.Center;
-			tbResistance.TextChanged += tbResistance_TextChanged;
-			// 
-			// label8
-			// 
-			label8.AutoSize = true;
-			label8.ForeColor = Color.FromArgb(208, 203, 148);
-			label8.Location = new Point(168, 59);
-			label8.Margin = new Padding(4, 0, 4, 0);
-			label8.Name = "label8";
-			label8.Size = new Size(58, 15);
-			label8.TabIndex = 1041;
-			label8.Text = "Min Level";
-			label8.TextAlign = ContentAlignment.MiddleRight;
-			// 
-			// label11
-			// 
-			label11.AutoSize = true;
-			label11.ForeColor = Color.FromArgb(208, 203, 148);
-			label11.Location = new Point(24, 113);
-			label11.Margin = new Padding(4, 0, 4, 0);
-			label11.Name = "label11";
-			label11.Size = new Size(62, 15);
-			label11.TabIndex = 1047;
-			label11.Text = "Resistance";
-			label11.TextAlign = ContentAlignment.MiddleRight;
-			// 
-			// label9
-			// 
-			label9.AutoSize = true;
-			label9.ForeColor = Color.FromArgb(208, 203, 148);
-			label9.Location = new Point(37, 55);
-			label9.Margin = new Padding(4, 0, 4, 0);
-			label9.Name = "label9";
-			label9.Size = new Size(49, 15);
-			label9.TabIndex = 1043;
-			label9.Text = "Defense";
-			label9.TextAlign = ContentAlignment.MiddleRight;
-			// 
-			// tbMagicAttack
-			// 
-			tbMagicAttack.BackColor = Color.FromArgb(28, 30, 31);
-			tbMagicAttack.BorderStyle = BorderStyle.FixedSingle;
-			tbMagicAttack.ForeColor = Color.FromArgb(208, 203, 148);
-			tbMagicAttack.Location = new Point(94, 80);
-			tbMagicAttack.Margin = new Padding(4, 3, 4, 3);
-			tbMagicAttack.Name = "tbMagicAttack";
-			tbMagicAttack.Size = new Size(70, 23);
-			tbMagicAttack.TabIndex = 1044;
-			tbMagicAttack.TextAlign = HorizontalAlignment.Center;
-			tbMagicAttack.TextChanged += tbMagicAttack_TextChanged;
-			// 
-			// tbDefense
-			// 
-			tbDefense.BackColor = Color.FromArgb(28, 30, 31);
-			tbDefense.BorderStyle = BorderStyle.FixedSingle;
-			tbDefense.ForeColor = Color.FromArgb(208, 203, 148);
-			tbDefense.Location = new Point(94, 51);
-			tbDefense.Margin = new Padding(4, 3, 4, 3);
-			tbDefense.Name = "tbDefense";
-			tbDefense.Size = new Size(70, 23);
-			tbDefense.TabIndex = 1042;
-			tbDefense.TextAlign = HorizontalAlignment.Center;
-			tbDefense.TextChanged += tbDefense_TextChanged;
-			// 
-			// label10
-			// 
-			label10.AutoSize = true;
-			label10.ForeColor = Color.FromArgb(208, 203, 148);
-			label10.Location = new Point(9, 84);
-			label10.Margin = new Padding(4, 0, 4, 0);
-			label10.Name = "label10";
-			label10.Size = new Size(77, 15);
-			label10.TabIndex = 1045;
-			label10.Text = "Magic Attack";
-			label10.TextAlign = ContentAlignment.MiddleRight;
 			// 
 			// btnUpdate
 			// 
@@ -339,7 +404,7 @@ namespace LastChaos_ToolBoxNG
 			btnUpdate.Location = new Point(7, 22);
 			btnUpdate.Margin = new Padding(4, 3, 4, 3);
 			btnUpdate.Name = "btnUpdate";
-			btnUpdate.Size = new Size(1041, 27);
+			btnUpdate.Size = new Size(1156, 27);
 			btnUpdate.TabIndex = 999;
 			btnUpdate.Text = "Update";
 			btnUpdate.UseVisualStyleBackColor = false;
@@ -355,7 +420,7 @@ namespace LastChaos_ToolBoxNG
 			cbType0.Location = new Point(347, 84);
 			cbType0.Margin = new Padding(4, 3, 4, 3);
 			cbType0.Name = "cbType0";
-			cbType0.Size = new Size(208, 23);
+			cbType0.Size = new Size(190, 23);
 			cbType0.TabIndex = 16;
 			cbType0.SelectedIndexChanged += cbGradeSelector_SelectedIndexChanged;
 			// 
@@ -403,6 +468,56 @@ namespace LastChaos_ToolBoxNG
 			groupBox2.TabIndex = 1000;
 			groupBox2.TabStop = false;
 			// 
+			// tbConditionDescription
+			// 
+			tbConditionDescription.BackColor = Color.FromArgb(28, 30, 31);
+			tbConditionDescription.BorderStyle = BorderStyle.FixedSingle;
+			tbConditionDescription.ForeColor = Color.FromArgb(208, 203, 148);
+			tbConditionDescription.Location = new Point(8, 269);
+			tbConditionDescription.Margin = new Padding(4, 3, 4, 3);
+			tbConditionDescription.Multiline = true;
+			tbConditionDescription.Name = "tbConditionDescription";
+			tbConditionDescription.ScrollBars = ScrollBars.Vertical;
+			tbConditionDescription.Size = new Size(266, 66);
+			tbConditionDescription.TabIndex = 18;
+			// 
+			// label27
+			// 
+			label27.AutoSize = true;
+			label27.ForeColor = Color.FromArgb(208, 203, 148);
+			label27.Location = new Point(8, 251);
+			label27.Margin = new Padding(4, 0, 4, 0);
+			label27.Name = "label27";
+			label27.Size = new Size(123, 15);
+			label27.TabIndex = 19;
+			label27.Text = "Condition Description";
+			label27.TextAlign = ContentAlignment.MiddleRight;
+			// 
+			// tbRewardDescription
+			// 
+			tbRewardDescription.BackColor = Color.FromArgb(28, 30, 31);
+			tbRewardDescription.BorderStyle = BorderStyle.FixedSingle;
+			tbRewardDescription.ForeColor = Color.FromArgb(208, 203, 148);
+			tbRewardDescription.Location = new Point(8, 182);
+			tbRewardDescription.Margin = new Padding(4, 3, 4, 3);
+			tbRewardDescription.Multiline = true;
+			tbRewardDescription.Name = "tbRewardDescription";
+			tbRewardDescription.ScrollBars = ScrollBars.Vertical;
+			tbRewardDescription.Size = new Size(266, 66);
+			tbRewardDescription.TabIndex = 16;
+			// 
+			// label23
+			// 
+			label23.AutoSize = true;
+			label23.ForeColor = Color.FromArgb(208, 203, 148);
+			label23.Location = new Point(8, 164);
+			label23.Margin = new Padding(4, 0, 4, 0);
+			label23.Name = "label23";
+			label23.Size = new Size(109, 15);
+			label23.TabIndex = 17;
+			label23.Text = "Reward Description";
+			label23.TextAlign = ContentAlignment.MiddleRight;
+			// 
 			// cbNationSelector
 			// 
 			cbNationSelector.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
@@ -441,6 +556,31 @@ namespace LastChaos_ToolBoxNG
 			label2.TabIndex = 14;
 			label2.Text = "Name";
 			label2.TextAlign = ContentAlignment.MiddleRight;
+			// 
+			// tbStartDescription
+			// 
+			tbStartDescription.BackColor = Color.FromArgb(28, 30, 31);
+			tbStartDescription.BorderStyle = BorderStyle.FixedSingle;
+			tbStartDescription.ForeColor = Color.FromArgb(208, 203, 148);
+			tbStartDescription.Location = new Point(8, 95);
+			tbStartDescription.Margin = new Padding(4, 3, 4, 3);
+			tbStartDescription.Multiline = true;
+			tbStartDescription.Name = "tbStartDescription";
+			tbStartDescription.ScrollBars = ScrollBars.Vertical;
+			tbStartDescription.Size = new Size(266, 66);
+			tbStartDescription.TabIndex = 13;
+			// 
+			// label19
+			// 
+			label19.AutoSize = true;
+			label19.ForeColor = Color.FromArgb(208, 203, 148);
+			label19.Location = new Point(8, 77);
+			label19.Margin = new Padding(4, 0, 4, 0);
+			label19.Name = "label19";
+			label19.Size = new Size(94, 15);
+			label19.TabIndex = 15;
+			label19.Text = "Start Description";
+			label19.TextAlign = ContentAlignment.MiddleRight;
 			// 
 			// tbID
 			// 
@@ -506,213 +646,211 @@ namespace LastChaos_ToolBoxNG
 			tbSearch.TextChanged += tbSearch_TextChanged;
 			tbSearch.KeyDown += tbSearch_KeyDown;
 			// 
-			// tbStartDescription
+			// groupBox6
 			// 
-			tbStartDescription.BackColor = Color.FromArgb(28, 30, 31);
-			tbStartDescription.BorderStyle = BorderStyle.FixedSingle;
-			tbStartDescription.ForeColor = Color.FromArgb(208, 203, 148);
-			tbStartDescription.Location = new Point(8, 95);
-			tbStartDescription.Margin = new Padding(4, 3, 4, 3);
-			tbStartDescription.Multiline = true;
-			tbStartDescription.Name = "tbStartDescription";
-			tbStartDescription.ScrollBars = ScrollBars.Vertical;
-			tbStartDescription.Size = new Size(266, 66);
-			tbStartDescription.TabIndex = 13;
+			groupBox6.Controls.Add(cbRvRGradeSelector);
+			groupBox6.Controls.Add(label36);
+			groupBox6.Controls.Add(cbRvRValueSelector);
+			groupBox6.Controls.Add(label37);
+			groupBox6.ForeColor = Color.FromArgb(208, 203, 148);
+			groupBox6.Location = new Point(298, 171);
+			groupBox6.Margin = new Padding(4, 3, 4, 3);
+			groupBox6.Name = "groupBox6";
+			groupBox6.Padding = new Padding(4, 3, 4, 3);
+			groupBox6.Size = new Size(151, 80);
+			groupBox6.TabIndex = 1061;
+			groupBox6.TabStop = false;
+			groupBox6.Text = "RvR Data";
 			// 
-			// label19
+			// cbRvRGradeSelector
 			// 
-			label19.AutoSize = true;
-			label19.ForeColor = Color.FromArgb(208, 203, 148);
-			label19.Location = new Point(8, 77);
-			label19.Margin = new Padding(4, 0, 4, 0);
-			label19.Name = "label19";
-			label19.Size = new Size(94, 15);
-			label19.TabIndex = 15;
-			label19.Text = "Start Description";
-			label19.TextAlign = ContentAlignment.MiddleRight;
+			cbRvRGradeSelector.BackColor = Color.FromArgb(28, 30, 31);
+			cbRvRGradeSelector.DropDownStyle = ComboBoxStyle.DropDownList;
+			cbRvRGradeSelector.Enabled = false;
+			cbRvRGradeSelector.ForeColor = Color.FromArgb(208, 203, 148);
+			cbRvRGradeSelector.FormattingEnabled = true;
+			cbRvRGradeSelector.Location = new Point(54, 51);
+			cbRvRGradeSelector.Margin = new Padding(4, 3, 4, 3);
+			cbRvRGradeSelector.Name = "cbRvRGradeSelector";
+			cbRvRGradeSelector.Size = new Size(89, 23);
+			cbRvRGradeSelector.TabIndex = 1007;
 			// 
-			// tbRewardDescription
+			// label36
 			// 
-			tbRewardDescription.BackColor = Color.FromArgb(28, 30, 31);
-			tbRewardDescription.BorderStyle = BorderStyle.FixedSingle;
-			tbRewardDescription.ForeColor = Color.FromArgb(208, 203, 148);
-			tbRewardDescription.Location = new Point(8, 182);
-			tbRewardDescription.Margin = new Padding(4, 3, 4, 3);
-			tbRewardDescription.Multiline = true;
-			tbRewardDescription.Name = "tbRewardDescription";
-			tbRewardDescription.ScrollBars = ScrollBars.Vertical;
-			tbRewardDescription.Size = new Size(266, 66);
-			tbRewardDescription.TabIndex = 16;
+			label36.AutoSize = true;
+			label36.ForeColor = Color.FromArgb(208, 203, 148);
+			label36.Location = new Point(9, 55);
+			label36.Margin = new Padding(4, 0, 4, 0);
+			label36.Name = "label36";
+			label36.Size = new Size(38, 15);
+			label36.TabIndex = 1008;
+			label36.Text = "Grade";
+			label36.TextAlign = ContentAlignment.MiddleRight;
 			// 
-			// label23
+			// cbRvRValueSelector
 			// 
-			label23.AutoSize = true;
-			label23.ForeColor = Color.FromArgb(208, 203, 148);
-			label23.Location = new Point(8, 164);
-			label23.Margin = new Padding(4, 0, 4, 0);
-			label23.Name = "label23";
-			label23.Size = new Size(109, 15);
-			label23.TabIndex = 17;
-			label23.Text = "Reward Description";
-			label23.TextAlign = ContentAlignment.MiddleRight;
+			cbRvRValueSelector.BackColor = Color.FromArgb(28, 30, 31);
+			cbRvRValueSelector.DropDownStyle = ComboBoxStyle.DropDownList;
+			cbRvRValueSelector.ForeColor = Color.FromArgb(208, 203, 148);
+			cbRvRValueSelector.FormattingEnabled = true;
+			cbRvRValueSelector.Location = new Point(54, 22);
+			cbRvRValueSelector.Margin = new Padding(4, 3, 4, 3);
+			cbRvRValueSelector.Name = "cbRvRValueSelector";
+			cbRvRValueSelector.Size = new Size(89, 23);
+			cbRvRValueSelector.TabIndex = 16;
 			// 
-			// tbConditionDescription
+			// label37
 			// 
-			tbConditionDescription.BackColor = Color.FromArgb(28, 30, 31);
-			tbConditionDescription.BorderStyle = BorderStyle.FixedSingle;
-			tbConditionDescription.ForeColor = Color.FromArgb(208, 203, 148);
-			tbConditionDescription.Location = new Point(8, 269);
-			tbConditionDescription.Margin = new Padding(4, 3, 4, 3);
-			tbConditionDescription.Multiline = true;
-			tbConditionDescription.Name = "tbConditionDescription";
-			tbConditionDescription.ScrollBars = ScrollBars.Vertical;
-			tbConditionDescription.Size = new Size(266, 66);
-			tbConditionDescription.TabIndex = 18;
+			label37.AutoSize = true;
+			label37.ForeColor = Color.FromArgb(208, 203, 148);
+			label37.Location = new Point(12, 26);
+			label37.Margin = new Padding(4, 0, 4, 0);
+			label37.Name = "label37";
+			label37.Size = new Size(35, 15);
+			label37.TabIndex = 1006;
+			label37.Text = "Value";
+			label37.TextAlign = ContentAlignment.MiddleRight;
 			// 
-			// label27
+			// lRequiredQuest
 			// 
-			label27.AutoSize = true;
-			label27.ForeColor = Color.FromArgb(208, 203, 148);
-			label27.Location = new Point(8, 251);
-			label27.Margin = new Padding(4, 0, 4, 0);
-			label27.Name = "label27";
-			label27.Size = new Size(123, 15);
-			label27.TabIndex = 19;
-			label27.Text = "Condition Description";
-			label27.TextAlign = ContentAlignment.MiddleRight;
+			lRequiredQuest.AutoSize = true;
+			lRequiredQuest.ForeColor = Color.FromArgb(208, 203, 148);
+			lRequiredQuest.Location = new Point(775, 59);
+			lRequiredQuest.Margin = new Padding(4, 0, 4, 0);
+			lRequiredQuest.Name = "lRequiredQuest";
+			lRequiredQuest.Size = new Size(130, 15);
+			lRequiredQuest.TabIndex = 1063;
+			lRequiredQuest.Text = "Previous Quest Needed";
+			lRequiredQuest.TextAlign = ContentAlignment.MiddleRight;
+			lRequiredQuest.Visible = false;
 			// 
-			// cbType1
+			// btnPreviousQuestNeeded
 			// 
-			cbType1.BackColor = Color.FromArgb(28, 30, 31);
-			cbType1.DropDownStyle = ComboBoxStyle.DropDownList;
-			cbType1.FlatStyle = FlatStyle.Flat;
-			cbType1.ForeColor = Color.Black;
-			cbType1.FormattingEnabled = true;
-			cbType1.Location = new Point(347, 113);
-			cbType1.Margin = new Padding(4, 3, 4, 3);
-			cbType1.Name = "cbType1";
-			cbType1.Size = new Size(208, 23);
-			cbType1.TabIndex = 1051;
+			btnPreviousQuestNeeded.BackColor = Color.FromArgb(40, 40, 40);
+			btnPreviousQuestNeeded.FlatAppearance.BorderColor = Color.FromArgb(91, 85, 76);
+			btnPreviousQuestNeeded.FlatAppearance.MouseDownBackColor = Color.FromArgb(40, 40, 40);
+			btnPreviousQuestNeeded.FlatAppearance.MouseOverBackColor = Color.FromArgb(60, 56, 54);
+			btnPreviousQuestNeeded.FlatStyle = FlatStyle.Flat;
+			btnPreviousQuestNeeded.ForeColor = Color.FromArgb(208, 203, 148);
+			btnPreviousQuestNeeded.ImageAlign = ContentAlignment.MiddleLeft;
+			btnPreviousQuestNeeded.Location = new Point(913, 53);
+			btnPreviousQuestNeeded.Margin = new Padding(4, 3, 4, 3);
+			btnPreviousQuestNeeded.Name = "btnPreviousQuestNeeded";
+			btnPreviousQuestNeeded.Size = new Size(250, 27);
+			btnPreviousQuestNeeded.TabIndex = 1062;
+			btnPreviousQuestNeeded.UseVisualStyleBackColor = false;
+			btnPreviousQuestNeeded.Visible = false;
 			// 
-			// label5
+			// btnNPCID
 			// 
-			label5.AutoSize = true;
-			label5.ForeColor = Color.FromArgb(208, 203, 148);
-			label5.Location = new Point(298, 117);
-			label5.Margin = new Padding(4, 0, 4, 0);
-			label5.Name = "label5";
-			label5.Size = new Size(41, 15);
-			label5.TabIndex = 1052;
-			label5.Text = "Type 1";
-			label5.TextAlign = ContentAlignment.MiddleRight;
+			btnNPCID.BackColor = Color.FromArgb(40, 40, 40);
+			btnNPCID.FlatAppearance.BorderColor = Color.FromArgb(91, 85, 76);
+			btnNPCID.FlatAppearance.MouseDownBackColor = Color.FromArgb(40, 40, 40);
+			btnNPCID.FlatAppearance.MouseOverBackColor = Color.FromArgb(60, 56, 54);
+			btnNPCID.FlatStyle = FlatStyle.Flat;
+			btnNPCID.ForeColor = Color.FromArgb(208, 203, 148);
+			btnNPCID.ImageAlign = ContentAlignment.MiddleLeft;
+			btnNPCID.Location = new Point(74, 51);
+			btnNPCID.Margin = new Padding(4, 3, 4, 3);
+			btnNPCID.Name = "btnNPCID";
+			btnNPCID.Size = new Size(250, 27);
+			btnNPCID.TabIndex = 1065;
+			btnNPCID.UseVisualStyleBackColor = false;
 			// 
-			// cbType2
+			// lbStartFrom
 			// 
-			cbType2.BackColor = Color.FromArgb(28, 30, 31);
-			cbType2.DropDownStyle = ComboBoxStyle.DropDownList;
-			cbType2.FlatStyle = FlatStyle.Flat;
-			cbType2.ForeColor = Color.Black;
-			cbType2.FormattingEnabled = true;
-			cbType2.Location = new Point(347, 142);
-			cbType2.Margin = new Padding(4, 3, 4, 3);
-			cbType2.Name = "cbType2";
-			cbType2.Size = new Size(208, 23);
-			cbType2.TabIndex = 1053;
+			lbStartFrom.AutoSize = true;
+			lbStartFrom.ForeColor = Color.FromArgb(208, 203, 148);
+			lbStartFrom.Location = new Point(8, 57);
+			lbStartFrom.Margin = new Padding(4, 0, 4, 0);
+			lbStartFrom.Name = "lbStartFrom";
+			lbStartFrom.Size = new Size(58, 15);
+			lbStartFrom.TabIndex = 1064;
+			lbStartFrom.Text = "Start NPC";
+			lbStartFrom.TextAlign = ContentAlignment.MiddleRight;
 			// 
-			// label31
+			// cbZoneNumSelector
 			// 
-			label31.AutoSize = true;
-			label31.ForeColor = Color.FromArgb(208, 203, 148);
-			label31.Location = new Point(298, 146);
-			label31.Margin = new Padding(4, 0, 4, 0);
-			label31.Name = "label31";
-			label31.Size = new Size(41, 15);
-			label31.TabIndex = 1054;
-			label31.Text = "Type 2";
-			label31.TextAlign = ContentAlignment.MiddleRight;
+			cbZoneNumSelector.BackColor = Color.FromArgb(28, 30, 31);
+			cbZoneNumSelector.DropDownStyle = ComboBoxStyle.DropDownList;
+			cbZoneNumSelector.ForeColor = Color.FromArgb(208, 203, 148);
+			cbZoneNumSelector.FormattingEnabled = true;
+			cbZoneNumSelector.Location = new Point(374, 53);
+			cbZoneNumSelector.Margin = new Padding(4, 3, 4, 3);
+			cbZoneNumSelector.Name = "cbZoneNumSelector";
+			cbZoneNumSelector.Size = new Size(200, 23);
+			cbZoneNumSelector.TabIndex = 1064;
 			// 
-			// tbMaxLevel
+			// label12
 			// 
-			tbMaxLevel.BackColor = Color.FromArgb(28, 30, 31);
-			tbMaxLevel.BorderStyle = BorderStyle.FixedSingle;
-			tbMaxLevel.ForeColor = Color.FromArgb(208, 203, 148);
-			tbMaxLevel.Location = new Point(366, 55);
-			tbMaxLevel.Margin = new Padding(4, 3, 4, 3);
-			tbMaxLevel.Name = "tbMaxLevel";
-			tbMaxLevel.Size = new Size(57, 23);
-			tbMaxLevel.TabIndex = 1055;
-			tbMaxLevel.TextAlign = HorizontalAlignment.Center;
+			label12.AutoSize = true;
+			label12.ForeColor = Color.FromArgb(208, 203, 148);
+			label12.Location = new Point(332, 57);
+			label12.Margin = new Padding(4, 0, 4, 0);
+			label12.Name = "label12";
+			label12.Size = new Size(34, 15);
+			label12.TabIndex = 1065;
+			label12.Text = "Zone";
+			label12.TextAlign = ContentAlignment.MiddleRight;
 			// 
-			// label35
+			// comboBox1
 			// 
-			label35.AutoSize = true;
-			label35.ForeColor = Color.FromArgb(208, 203, 148);
-			label35.Location = new Point(299, 59);
-			label35.Margin = new Padding(4, 0, 4, 0);
-			label35.Name = "label35";
-			label35.Size = new Size(59, 15);
-			label35.TabIndex = 1056;
-			label35.Text = "Max Level";
-			label35.TextAlign = ContentAlignment.MiddleRight;
+			comboBox1.BackColor = Color.FromArgb(28, 30, 31);
+			comboBox1.DropDownStyle = ComboBoxStyle.DropDownList;
+			comboBox1.ForeColor = Color.FromArgb(208, 203, 148);
+			comboBox1.FormattingEnabled = true;
+			comboBox1.Location = new Point(374, 86);
+			comboBox1.Margin = new Padding(4, 3, 4, 3);
+			comboBox1.Name = "comboBox1";
+			comboBox1.Size = new Size(200, 23);
+			comboBox1.TabIndex = 1066;
 			// 
-			// tbNeededExperience
+			// button1
 			// 
-			tbNeededExperience.BackColor = Color.FromArgb(28, 30, 31);
-			tbNeededExperience.BorderStyle = BorderStyle.FixedSingle;
-			tbNeededExperience.ForeColor = Color.FromArgb(208, 203, 148);
-			tbNeededExperience.Location = new Point(687, 55);
-			tbNeededExperience.Margin = new Padding(4, 3, 4, 3);
-			tbNeededExperience.Name = "tbNeededExperience";
-			tbNeededExperience.Size = new Size(80, 23);
-			tbNeededExperience.TabIndex = 1057;
-			tbNeededExperience.TextAlign = HorizontalAlignment.Center;
+			button1.BackColor = Color.FromArgb(40, 40, 40);
+			button1.FlatAppearance.BorderColor = Color.FromArgb(91, 85, 76);
+			button1.FlatAppearance.MouseDownBackColor = Color.FromArgb(40, 40, 40);
+			button1.FlatAppearance.MouseOverBackColor = Color.FromArgb(60, 56, 54);
+			button1.FlatStyle = FlatStyle.Flat;
+			button1.ForeColor = Color.FromArgb(208, 203, 148);
+			button1.ImageAlign = ContentAlignment.MiddleLeft;
+			button1.Location = new Point(74, 84);
+			button1.Margin = new Padding(4, 3, 4, 3);
+			button1.Name = "button1";
+			button1.Size = new Size(250, 27);
+			button1.TabIndex = 1068;
+			button1.UseVisualStyleBackColor = false;
 			// 
-			// label39
+			// label13
 			// 
-			label39.AutoSize = true;
-			label39.ForeColor = Color.FromArgb(208, 203, 148);
-			label39.Location = new Point(572, 59);
-			label39.Margin = new Padding(4, 0, 4, 0);
-			label39.Name = "label39";
-			label39.Size = new Size(107, 15);
-			label39.TabIndex = 1058;
-			label39.Text = "Needed Experience";
-			label39.TextAlign = ContentAlignment.MiddleRight;
+			label13.AutoSize = true;
+			label13.ForeColor = Color.FromArgb(208, 203, 148);
+			label13.Location = new Point(332, 90);
+			label13.Margin = new Padding(4, 0, 4, 0);
+			label13.Name = "label13";
+			label13.Size = new Size(34, 15);
+			label13.TabIndex = 1069;
+			label13.Text = "Zone";
+			label13.TextAlign = ContentAlignment.MiddleRight;
 			// 
-			// cbStartFrom
+			// label14
 			// 
-			cbStartFrom.AllowDrop = true;
-			cbStartFrom.BackColor = Color.FromArgb(28, 30, 31);
-			cbStartFrom.DropDownStyle = ComboBoxStyle.DropDownList;
-			cbStartFrom.FlatStyle = FlatStyle.Flat;
-			cbStartFrom.ForeColor = Color.FromArgb(208, 203, 148);
-			cbStartFrom.FormattingEnabled = true;
-			cbStartFrom.Location = new Point(366, 171);
-			cbStartFrom.Margin = new Padding(4, 3, 4, 3);
-			cbStartFrom.Name = "cbStartFrom";
-			cbStartFrom.Size = new Size(80, 23);
-			cbStartFrom.TabIndex = 1059;
-			cbStartFrom.Visible = false;
-			// 
-			// label4
-			// 
-			label4.AutoSize = true;
-			label4.ForeColor = Color.FromArgb(208, 203, 148);
-			label4.Location = new Point(298, 175);
-			label4.Margin = new Padding(4, 0, 4, 0);
-			label4.Name = "label4";
-			label4.Size = new Size(62, 15);
-			label4.TabIndex = 1060;
-			label4.Text = "Start From";
-			label4.TextAlign = ContentAlignment.MiddleRight;
-			label4.Visible = false;
+			label14.AutoSize = true;
+			label14.ForeColor = Color.FromArgb(208, 203, 148);
+			label14.Location = new Point(8, 90);
+			label14.Margin = new Padding(4, 0, 4, 0);
+			label14.Name = "label14";
+			label14.Size = new Size(54, 15);
+			label14.TabIndex = 1067;
+			label14.Text = "End NPC";
+			label14.TextAlign = ContentAlignment.MiddleRight;
 			// 
 			// QuestEditor
 			// 
 			AutoScaleDimensions = new SizeF(7F, 15F);
 			AutoScaleMode = AutoScaleMode.Font;
 			BackColor = Color.FromArgb(40, 40, 40);
-			ClientSize = new Size(1394, 561);
+			ClientSize = new Size(1509, 561);
 			Controls.Add(tbSearch);
 			Controls.Add(btnDelete);
 			Controls.Add(btnCopy);
@@ -737,6 +875,8 @@ namespace LastChaos_ToolBoxNG
 			groupBox5.PerformLayout();
 			groupBox2.ResumeLayout(false);
 			groupBox2.PerformLayout();
+			groupBox6.ResumeLayout(false);
+			groupBox6.PerformLayout();
 			ResumeLayout(false);
 			PerformLayout();
 
@@ -764,12 +904,6 @@ namespace LastChaos_ToolBoxNG
 		private Label label7;
 		private TextBox tbMinLevel;
 		private Label label8;
-		private TextBox tbDefense;
-		private Label label9;
-		private TextBox tbMagicAttack;
-		private Label label10;
-		private TextBox tbResistance;
-		private Label label11;
 		private GroupBox groupBox5;
 		private CheckBox cbEnable;
 		private TextBox tbStartDescription;
@@ -788,5 +922,20 @@ namespace LastChaos_ToolBoxNG
 		private Label label39;
 		private ComboBox cbStartFrom;
 		private Label label4;
+		private GroupBox groupBox6;
+		private ComboBox cbRvRGradeSelector;
+		private Label label36;
+		private ComboBox cbRvRValueSelector;
+		private Label label37;
+		private Label lRequiredQuest;
+		private Button btnPreviousQuestNeeded;
+		private Button btnNPCID;
+		private Label lbStartFrom;
+		private ComboBox cbZoneNumSelector;
+		private Label label12;
+		private ComboBox comboBox1;
+		private Button button1;
+		private Label label13;
+		private Label label14;
 	}
 }

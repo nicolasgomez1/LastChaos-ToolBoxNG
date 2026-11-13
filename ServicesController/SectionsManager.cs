@@ -14,6 +14,7 @@
 		private void PopulateList()
 		{
 			MainList.BeginUpdate();
+			MainList.Items.Clear();
 
 			IniData pData = (new FileIniDataParser()).ReadFile(pMain.pSettings.SettingsFile);
 

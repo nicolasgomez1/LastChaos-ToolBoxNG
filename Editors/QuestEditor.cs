@@ -257,9 +257,9 @@
 			}
 			/****************************************/
 			tbMinLevel.Text = pTempQuestRow["a_attack"].ToString();
-			tbDefense.Text = pTempQuestRow["a_defense"].ToString();
+			/*tbDefense.Text = pTempQuestRow["a_defense"].ToString();
 			tbMagicAttack.Text = pTempQuestRow["a_magic"].ToString();
-			tbResistance.Text = pTempQuestRow["a_resist"].ToString();
+			tbResistance.Text = pTempQuestRow["a_resist"].ToString();*/
 			/****************************************/
 			tbName.Text = pTempQuestRow["a_prefix_" + cbNationSelector.SelectedItem.ToString().ToLower()].ToString();
 			/****************************************/
@@ -677,36 +677,6 @@
 			if (bUserAction)
 			{
 				pTempQuestRow["a_attack"] = tbMinLevel.Text;
-
-				bUnsavedChanges = true;
-			}
-		}
-
-		private void tbDefense_TextChanged(object sender, EventArgs e)
-		{
-			if (bUserAction)
-			{
-				pTempQuestRow["a_defense"] = tbDefense.Text;
-
-				bUnsavedChanges = true;
-			}
-		}
-
-		private void tbMagicAttack_TextChanged(object sender, EventArgs e)
-		{
-			if (bUserAction)
-			{
-				pTempQuestRow["a_magic"] = tbMagicAttack.Text;
-
-				bUnsavedChanges = true;
-			}
-		}
-
-		private void tbResistance_TextChanged(object sender, EventArgs e)
-		{
-			if (bUserAction)
-			{
-				pTempQuestRow["a_resist"] = tbResistance.Text;
 
 				bUnsavedChanges = true;
 			}

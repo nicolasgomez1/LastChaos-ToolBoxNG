@@ -7,7 +7,7 @@
     <Nullable>enable</Nullable>
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
-    <AssemblyVersion>2.0.0.10356</AssemblyVersion>
+    <AssemblyVersion>2.0.0.10382</AssemblyVersion>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <ApplicationIcon>Resources\NG.ico</ApplicationIcon>
     <NuGetAuditMode>direct</NuGetAuditMode>
@@ -54,9 +54,10 @@
     <PackageReference Include="Crc32.NET" Version="1.2.0" />
     <PackageReference Include="FluentFTP" Version="53.0.2" />
     <PackageReference Include="INIFileParserDotNetCore" Version="2.5.2" />
-    <PackageReference Include="MySqlConnector" Version="2.5.0" />
+    <PackageReference Include="MySqlConnector" Version="2.6.2" />
     <PackageReference Include="SlimDX" Version="4.0.13.44" />
     <PackageReference Include="System.Data.Common" Version="4.3.0" />
+    <PackageReference Include="System.Text.RegularExpressions" Version="4.3.1" />
   </ItemGroup>
 
   <ItemGroup>

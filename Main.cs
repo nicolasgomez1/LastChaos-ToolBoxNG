@@ -973,6 +973,7 @@ namespace LastChaos_ToolBoxNG
 			return strInput;
 		}
 		/****************************************/
+		
 		public Bitmap? GetIcon(string strBtnType, string strImage, int nRow, int nCol)
 		{
 			int nSize = 32;

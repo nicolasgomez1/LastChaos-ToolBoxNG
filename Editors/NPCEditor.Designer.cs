@@ -44,6 +44,7 @@ namespace LastChaos_ToolBoxNG
 			btnUpdate = new Button();
 			GeneralPanel = new Panel();
 			groupBox9 = new GroupBox();
+			label187 = new Label();
 			gridRegenSpots = new CustomDataGridView();
 			posX = new DataGridViewTextBoxColumn();
 			posZ = new DataGridViewTextBoxColumn();
@@ -871,6 +872,7 @@ namespace LastChaos_ToolBoxNG
 			// groupBox9
 			// 
 			groupBox9.Anchor = (AnchorStyles)((AnchorStyles.Top) | (AnchorStyles.Left)) | (AnchorStyles.Right);
+			groupBox9.Controls.Add(label187);
 			groupBox9.Controls.Add(gridRegenSpots);
 			groupBox9.Controls.Add(label191);
 			groupBox9.Controls.Add(cbWorldRatioSelector);
@@ -884,6 +886,19 @@ namespace LastChaos_ToolBoxNG
 			groupBox9.TabIndex = 1223;
 			groupBox9.TabStop = false;
 			groupBox9.Text = "Regen Spots Data";
+			// 
+			// label187
+			// 
+			label187.AutoSize = true;
+			label187.BackColor = Color.Black;
+			label187.ForeColor = Color.FromArgb((int)(byte)208, (int)(byte)203, (int)(byte)148);
+			label187.Location = new Point(288, 519);
+			label187.Margin = new Padding(4, 0, 4, 0);
+			label187.Name = "label187";
+			label187.Size = new Size(478, 15);
+			label187.TabIndex = 1075;
+			label187.Text = "Wheel Zoom|P Add spot|Drag + P Add spots to Area|Drag + Del to Delete spots from Area";
+			label187.TextAlign = ContentAlignment.MiddleRight;
 			// 
 			// gridRegenSpots
 			// 
@@ -6716,7 +6731,6 @@ namespace LastChaos_ToolBoxNG
 			// 
 			// cbRvRGradeSelector
 			// 
-			cbRvRGradeSelector.Anchor = (AnchorStyles)((AnchorStyles.Top) | (AnchorStyles.Left)) | (AnchorStyles.Right);
 			cbRvRGradeSelector.BackColor = Color.FromArgb((int)(byte)28, (int)(byte)30, (int)(byte)31);
 			cbRvRGradeSelector.DropDownStyle = ComboBoxStyle.DropDownList;
 			cbRvRGradeSelector.Enabled = false;
@@ -6743,7 +6757,6 @@ namespace LastChaos_ToolBoxNG
 			// 
 			// cbRvRValueSelector
 			// 
-			cbRvRValueSelector.Anchor = (AnchorStyles)((AnchorStyles.Top) | (AnchorStyles.Left)) | (AnchorStyles.Right);
 			cbRvRValueSelector.BackColor = Color.FromArgb((int)(byte)28, (int)(byte)30, (int)(byte)31);
 			cbRvRValueSelector.DropDownStyle = ComboBoxStyle.DropDownList;
 			cbRvRValueSelector.ForeColor = Color.FromArgb((int)(byte)208, (int)(byte)203, (int)(byte)148);
@@ -10183,5 +10196,6 @@ namespace LastChaos_ToolBoxNG
 		private DataGridViewTextBoxColumn yLayer;
 		private DataGridViewTextBoxColumn regenSec;
 		private DataGridViewComboBoxColumn totalNum;
+		private Label label187;
 	}
 }

@@ -257,57 +257,41 @@ namespace LastChaos_ToolBoxNG
 				return (int)lcTex.Header.Bits == 0 || (int)lcTex.Header.Bits == 2 ? texFormat.RGB : texFormat.ARGB;
 			}
 
-			public static Bitmap makeRGB(byte[] data2, int width, int height)
+			public static Bitmap MakeArgb(byte[] imageData, int width, int height)
 			{
-				List<byte> source = new();
-				int index = 0;
-				while (index < data2.Length)
+				byte[] destination = new byte[width * height * 4];
+
+				for (int sourceIndex = 0, destinationIndex = 0; sourceIndex + 3 < imageData.Length; sourceIndex += 4, destinationIndex += 4)
 				{
-					source.Add(data2[index + 2]);
-					source.Add(data2[index + 1]);
-					source.Add(data2[index]);
-					source.Add(byte.MaxValue);
-					index += 4;
+					destination[destinationIndex] = imageData[sourceIndex + 2];
+					destination[destinationIndex + 1] = imageData[sourceIndex + 1];
+					destination[destinationIndex + 2] = imageData[sourceIndex];
+					destination[destinationIndex + 3] = imageData[sourceIndex + 3];
 				}
 
-				try
-				{
-					Bitmap bitmap = new(width, height, PixelFormat.Format32bppArgb);
-					BitmapData bitmapdata = bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height), ImageLockMode.WriteOnly, bitmap.PixelFormat);
-					Marshal.Copy(source.ToArray(), 0, bitmapdata.Scan0, source.Count());
-					bitmap.UnlockBits(bitmapdata);
-					return bitmap;
-				}
-				catch
-				{
-					return new Bitmap(width, height);
-				}
+				Bitmap bitmap = new(width, height, PixelFormat.Format32bppArgb);
+				BitmapData bitmapData = bitmap.LockBits(new Rectangle(0, 0, width, height), ImageLockMode.WriteOnly, bitmap.PixelFormat);
+				Marshal.Copy(destination, 0, bitmapData.Scan0, destination.Length);
+				bitmap.UnlockBits(bitmapData);
+				return bitmap;
 			}
 
-			public static Bitmap makeRGB8(byte[] data2, int width, int height)
+			public static Bitmap MakeRgb(byte[] imageData, int width, int height)
 			{
-				List<byte> source = new();
-				int index = 0;
-				while (index < data2.Length)
+				byte[] destination = new byte[width * height * 3];
+
+				for (int sourceIndex = 0, destinationIndex = 0; sourceIndex + 2 < imageData.Length; sourceIndex += 3, destinationIndex += 3)
 				{
-					source.Add(data2[index + 1]);
-					source.Add(data2[index]);
-					source.Add(data2[index + 2]);
-					index += 3;
+					destination[destinationIndex] = imageData[sourceIndex + 2];
+					destination[destinationIndex + 1] = imageData[sourceIndex + 1];
+					destination[destinationIndex + 2] = imageData[sourceIndex];
 				}
 
-				try
-				{
-					Bitmap bitmap = new(width, height, PixelFormat.Format24bppRgb);
-					BitmapData bitmapdata = bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height), ImageLockMode.WriteOnly, bitmap.PixelFormat);
-					Marshal.Copy(source.ToArray(), 0, bitmapdata.Scan0, source.Count());
-					bitmap.UnlockBits(bitmapdata);
-					return bitmap;
-				}
-				catch
-				{
-					return new Bitmap(width, height);
-				}
+				Bitmap bitmap = new(width, height, PixelFormat.Format24bppRgb);
+				BitmapData bitmapData = bitmap.LockBits(new Rectangle(0, 0, width, height), ImageLockMode.WriteOnly, bitmap.PixelFormat);
+				Marshal.Copy(destination, 0, bitmapData.Scan0, destination.Length);
+				bitmap.UnlockBits(bitmapData);
+				return bitmap;
 			}
 
 			public static void ReadFile(string FileName)
@@ -1007,8 +991,7 @@ namespace LastChaos_ToolBoxNG
 			{
 				using (MemoryStream memoryStream = new MemoryStream())
 				{
-					Tex.makeRGB8(imageData, width, height).Save(memoryStream, ImageFormat.Bmp);
-					memoryStream.Write(imageData, 0, imageData.Length);
+					Tex.MakeRgb(imageData, width, height).Save(memoryStream, ImageFormat.Bmp);
 					memoryStream.Position = 0L;
 
 					return Texture.FromStream(pDevice, memoryStream, width, height, 0, Usage.SoftwareProcessing, Format.A8B8G8R8, Pool.Default, Filter.None, Filter.None, 0);
@@ -1018,8 +1001,7 @@ namespace LastChaos_ToolBoxNG
 			{
 				using (MemoryStream memoryStream = new())
 				{
-					Tex.makeRGB(imageData, width, height).Save(memoryStream, ImageFormat.Bmp);
-					memoryStream.Write(imageData, 0, imageData.Length);
+					Tex.MakeArgb(imageData, width, height).Save(memoryStream, ImageFormat.Bmp);
 					memoryStream.Position = 0L;
 
 					return Texture.FromStream(pDevice, memoryStream, width, height, 0, Usage.SoftwareProcessing, Format.A8B8G8R8, Pool.Default, Filter.None, Filter.None, 0);
