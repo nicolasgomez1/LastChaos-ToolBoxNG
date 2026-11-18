@@ -70,7 +70,7 @@
 						pProcess.StartInfo.FileName = pMain.pSettings.ServicesData[strService].BinaryPath;
 						pProcess.StartInfo.WorkingDirectory = Path.GetDirectoryName(pMain.pSettings.ServicesData[strService].BinaryPath);
 						pProcess.StartInfo.UseShellExecute = false;
-						pProcess.StartInfo.CreateNoWindow = true;	// Show or hide Window on startup
+						pProcess.StartInfo.CreateNoWindow = true;   // Show or hide Window on startup
 						pProcess.Start();
 					}
 					else
@@ -223,6 +223,30 @@
 			}
 		}
 
+		private void RunExecutable(string strPath)
+		{
+			Process pProcess = new();
+			string strFileName = Path.GetFileName(strPath);
+
+			if (File.Exists(strPath))
+			{
+				pMain.Logger(LogTypes.Message, $"Control Panel > Executing: {strFileName}...");
+
+				pProcess.StartInfo.FileName = strPath;
+				
+				if (strFileName.Contains("Nksp"))
+					pProcess.StartInfo.Arguments = pMain.pSettings.NkspLaunchArgument;
+
+				pProcess.StartInfo.WorkingDirectory = Path.GetDirectoryName(Path.GetFullPath(strPath));
+
+				pProcess.Start();
+			}
+			else
+			{
+				pMain.Logger(LogTypes.Error, $"Control Panel > {strFileName} not found.");
+			}
+		}
+
 		private void ServicesControlPanel_Load(object sender, EventArgs e)
 		{
 			Screen? pScreen = Screen.PrimaryScreen;
@@ -233,7 +257,7 @@
 			this.Location = new Point(recScreenBounds.Right - this.Width, recScreenBounds.Bottom - this.Height);
 
 			ToolTip pToolTip = new();
-			pToolTip.SetToolTip(btnLaunchGame, "Right Click to Launch LC.exe");
+			pToolTip.SetToolTip(btnLaunchGame, "Right Click for more Options");
 			pToolTip.SetToolTip(btnStartStopAll, "Right Click to Enable/Disable Start CashServer when Start All");
 			pToolTip.SetToolTip(tbMessengerSubHelperPort, "SubHelper Port inside of Messenger Service it self");
 
@@ -523,32 +547,7 @@
 			btnStartStopAll.Text = pMain.pSettings.Services.Any(strCheckService => pMain.pSettings.ServicesData[strCheckService].ProcessID != -1) ? "Stop All" : "Start All";
 		}
 
-		private void btnLaunchGame_MouseDown(object sender, MouseEventArgs e)
-		{
-			Process pProcess = new();
-			string strPath = pMain.pSettings.ClientPath;
-
-			if (e.Button == MouseButtons.Left)
-				strPath += "\\Bin\\Nksp.exe";
-			else
-				strPath += "\\LC.exe";
-
-			string strFileName = Path.GetFileName(strPath);
-
-			if (File.Exists(strPath))
-			{
-				pMain.Logger(LogTypes.Message, $"Control Panel > Executing: {strFileName}...");
-
-				pProcess.StartInfo.FileName = strPath;
-				pProcess.StartInfo.Arguments = pMain.pSettings.NkspLaunchArgument;
-				pProcess.StartInfo.WorkingDirectory = Path.GetDirectoryName(pMain.pSettings.ClientPath + "\\Bin");
-				pProcess.Start();
-			}
-			else
-			{
-				pMain.Logger(LogTypes.Error, $"Control Panel > {strFileName} not found.");
-			}
-		}
+		private void btnLaunchGame_Click(object sender, EventArgs e) { RunExecutable(pMain.pSettings.ClientPath + "\\Bin\\Nksp.exe"); }
 
 		private void btnPanelSettings_Click(object sender, EventArgs e)
 		{
@@ -648,6 +647,35 @@
 					};
 
 					pContextMenu.Items.Add(menuStartStopAll);
+				}
+				else if (cControl.Name == "btnLaunchGame")
+				{
+					ToolStripMenuItem menuStartNkspD = new("Open NkspD");
+					menuStartNkspD.Click += (_, _) => { RunExecutable(pMain.pSettings.ClientPath + "\\Bin\\NkspD.exe"); };
+
+					ToolStripMenuItem menuStartSeriousEditor = new("Open SeriousEditor");
+					menuStartSeriousEditor.Click += (_, _) => { RunExecutable(pMain.pSettings.ClientPath + "\\Bin\\WorldEditor\\SeriousEditor.exe"); };
+
+					ToolStripMenuItem menuStartSeriousSkaStudio = new("Open SeriousSkaStudio");
+					menuStartSeriousSkaStudio.Click += (_, _) => { RunExecutable(pMain.pSettings.ClientPath + "\\Bin\\SkaStudio\\SeriousSkaStudio.exe"); };
+
+					ToolStripMenuItem menuStartUITool = new("Open UITool");
+					menuStartUITool.Click += (_, _) => { RunExecutable(pMain.pSettings.ClientPath + "\\Bin\\UITool\\UITool.exe"); };
+
+					ToolStripMenuItem menuStartLC = new("Open LC");
+					menuStartLC.Click += (_, _) => { RunExecutable(pMain.pSettings.ClientPath + "\\LC.exe"); };
+
+					pContextMenu.Items.AddRange(
+						menuStartNkspD,
+						new ToolStripSeparator(),
+						menuStartSeriousEditor,
+						new ToolStripSeparator(),
+						menuStartSeriousSkaStudio,
+						new ToolStripSeparator(),
+						menuStartUITool,
+						new ToolStripSeparator(),
+						menuStartLC
+					);
 				}
 				else
 				{

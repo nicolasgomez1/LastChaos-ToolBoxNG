@@ -1983,6 +1983,7 @@ namespace LastChaos_ToolBoxNG
 			// btnLaunchGame
 			// 
 			btnLaunchGame.BackColor = Color.FromArgb(40, 40, 40);
+			btnLaunchGame.ContextMenuStrip = contextMenuStrip1;
 			btnLaunchGame.FlatAppearance.BorderColor = Color.FromArgb(91, 85, 76);
 			btnLaunchGame.FlatAppearance.MouseDownBackColor = Color.FromArgb(40, 40, 40);
 			btnLaunchGame.FlatAppearance.MouseOverBackColor = Color.FromArgb(60, 56, 54);
@@ -1995,7 +1996,7 @@ namespace LastChaos_ToolBoxNG
 			btnLaunchGame.TabIndex = 1;
 			btnLaunchGame.Text = "Launch Nksp";
 			btnLaunchGame.UseVisualStyleBackColor = false;
-			btnLaunchGame.MouseDown += btnLaunchGame_MouseDown;
+			btnLaunchGame.Click += btnLaunchGame_Click;
 			// 
 			// btnOpenServerFolder
 			// 
