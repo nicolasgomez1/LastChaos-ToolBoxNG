@@ -792,7 +792,7 @@ namespace LastChaos_ToolBoxNG
 					if (!Directory.Exists(strFilePath))
 						Directory.CreateDirectory(strFilePath);
 
-					strFilePath += $"\\{strFileName} _{strNation.ToLower()}.lod";
+					strFilePath += $"\\{strFileName}_{strNation.ToLower()}.lod";
 
 					using (BinaryWriter Stream = new(File.Create(strFilePath)))
 					{
