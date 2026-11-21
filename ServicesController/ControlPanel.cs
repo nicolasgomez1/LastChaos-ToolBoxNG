@@ -662,6 +662,9 @@
 					ToolStripMenuItem menuStartUITool = new("Open UITool");
 					menuStartUITool.Click += (_, _) => { RunExecutable(pMain.pSettings.ClientPath + "\\Bin\\UITool\\UITool.exe"); };
 
+					ToolStripMenuItem menuStartPersistentSymbolTool = new("Open PersistentSymbolTool");
+					menuStartPersistentSymbolTool.Click += (_, _) => { RunExecutable(pMain.pSettings.ClientPath + "\\Bin\\PersistentSymbolTool.exe"); };
+
 					ToolStripMenuItem menuStartLC = new("Open LC");
 					menuStartLC.Click += (_, _) => { RunExecutable(pMain.pSettings.ClientPath + "\\LC.exe"); };
 
@@ -673,6 +676,8 @@
 						menuStartSeriousSkaStudio,
 						new ToolStripSeparator(),
 						menuStartUITool,
+						new ToolStripSeparator(),
+						menuStartPersistentSymbolTool,
 						new ToolStripSeparator(),
 						menuStartLC
 					);
